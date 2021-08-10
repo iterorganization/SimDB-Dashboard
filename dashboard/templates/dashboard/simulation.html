@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<body>
+<header class="container-fluid pt-3 pb-3" style="background: CornflowerBlue;">
+    <h1 style="text-align: center"><a style="color: black; text-decoration: none" href="/">SimDB Dashboard</a></h1>
+</header>
+
+<div class="container mt-3">
+<h1 class="h2">Simulation: b3fc50ee-c832-11eb-9924-00155d189c02</h1>
+<h1 class="h2">Alias: 100001/1</h1>
+
+<table class="table table-borderless">
+    <tr>
+        <td>Shot</td>
+        <td>100501</td>
+    </tr>
+    <tr>
+        <td>Run</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>Responsible Name</td>
+        <td>M. Schneider</td>
+    </tr>
+    <tr>
+        <td>Workflow Name</td>
+        <td>METIS</td>
+    </tr>
+    <tr>
+        <td>Workflow Type</td>
+        <td>predictive</td>
+    </tr>
+    <tr>
+        <td>Output</td>
+        <td>imas:?database=ITER&user=public&shot=100501&run=1</td>
+    </tr>
+    <tr>
+        <td>Summary Global Quantities IP Value</td>
+        <td><img src="{{ url_for('static', filename='dashboard/img/ip.png') }}"></td>
+    </tr>
+</table>
+    </div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='dashboard/js/simulation.js') }}"></script>
+</body>
+{% endblock %}

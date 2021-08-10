@@ -1,0 +1,7 @@
+body * {
+    font-family: 'Source Sans Pro', 'Roboto', sans-serif !important;
+}
+
+.v-autocomplete {
+    font-size: 0.8em;
+}

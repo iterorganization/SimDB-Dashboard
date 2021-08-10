@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div id="app">
+  <v-app>
+    <!--    <v-navigation-drawer app clipped flat>-->
+    <!--      <ul>-->
+    <!--        <li>-->
+    <!--          Foo-->
+    <!--        </li>-->
+    <!--      </ul>-->
+    <!--    </v-navigation-drawer>-->
+
+    <v-app-bar app dark shrink-on-scroll dense color="indigo darken-2">
+      <v-spacer></v-spacer>
+      <v-toolbar-title>SimDB Dashboard</v-toolbar-title>
+      <v-spacer></v-spacer>
+    </v-app-bar>
+
+    <v-main>
+      <v-container fluid>
+        <v-row>
+          <v-col cols="3">
+            <v-row>
+              <v-subheader>Search</v-subheader>
+            </v-row>
+            <v-divider></v-divider>
+            <v-row dense v-for="(item, index) in searchFields" :key="item.name">
+              <v-col cols="6">
+                <v-subheader :for="item.name"><[ item.display ]></v-subheader>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field :id="item.name" v-model="searchModels[index]" dense filled></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row dense v-for="(item, index) in wild_search" :key="index">
+              <v-col cols="6">
+                <v-autocomplete
+                    auto-select-first
+                    clearable
+                    v-model="value"
+                    :items="items"
+                    dense
+                    filled
+                ></v-autocomplete>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field :id="item.id" dense filled></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row dense>
+              <v-col offset="8" cols="4">
+                <v-btn @click="doSearch" block :disabled="getQuery().length == 0">
+                  Search
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-col>
+          <v-col cols="9">
+            <v-row>
+              <v-subheader>Search Results</v-subheader>
+            </v-row>
+            <router-view></router-view>
+            <v-divider></v-divider>
+            <v-expansion-panels multiple accordion>
+              <v-expansion-panel
+                  v-for="(item,i) in 50"
+                  :key="i"
+              >
+                <v-expansion-panel-header>Item</v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                  labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='dashboard/js/config.js') }}"></script>
+<script>
+Vue.component('search-output', {
+  delimiters: ['<[', ']>'],
+  data: function () {
+    return {
+      loading: false,
+      count: 0,
+      items: [],
+      url: null,
+    }
+  },
+  template: '<div><div v-if="loading">http://0.0.0.0:5000/api/v1.0<[ url ]></div><div><[ items ]></div><div v-else><[ count ]></div></div>',
+  mounted () {
+    this.fetchData()
+  },
+  methods: {
+    fetchData () {
+      this.loading = true;
+      const path = this.$route.fullPath.replace('search', 'simulations');git@github.com:jholloc/simdb.git
+      this.url = path;
+      axios
+        .get('http://0.0.0.0:5000/api/v1.0' + path, { auth: { username: 'admin', password: 'admin' } })
+        .then(response => {
+          //this.items = response.data.map(el => { return { value: el.name, text: to_label(el.name) } });
+          this.items = response.data;
+          this.loading = false;
+        })
+    }
+  }
+})
+
+const Foo = { template: '<search-output>foo</search-output>' }
+
+const routes = [
+  { path: '/search', component: Foo },
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  routes: routes
+})
+
+const process_array_key = function( word ) {
+    return word.replace(/(.*)#(\d+)/, '$1[$2]')
+}
+
+const capitalize = function( word ) {
+    return word[0].toUpperCase() + word.slice(1);
+}
+
+const to_label = function( name ) {
+    return name.split(/[\._]/).map(process_array_key).map(capitalize).join(' ');
+}
+
+const app = new Vue({
+  el: '#app',
+  router: router,
+  vuetify: new Vuetify(),
+  delimiters: ['<[', ']>'],
+  data () {
+    return {
+      items: [],
+      value: null,
+      wild_search: [{ id: 'search-1' }],
+      searchModels: [],
+      searchFields: searchFields.map(el => { return { name: el, display: to_label(el) }; }),
+    }
+  },
+  mounted () {
+    axios
+      .get('http://0.0.0.0:5000/api/v1.0/metadata')
+      .then(response => {
+        this.items = response.data.map(el => { return { value: el.name, text: to_label(el.name) } })
+      })
+  },
+  methods: {
+    addSearch: function () {
+      this.search.push({});
+    },
+    deleteSearch: function (index) {
+      this.search.splice(index, 1);
+    },
+    getQuery: function() {
+      const len = this.searchModels.length;
+      var query = "";
+      for (var i = 0; i < len; i++) {
+        const el = this.searchModels[i];
+        if (el) {
+          query += this.searchFields[i].name + "=" + el + "&";
+        }
+      }
+      return query;
+    },
+    doSearch: function(evt) {
+      const query = this.getQuery();
+      this.$router.push("/search?" + query);
+    },
+  },
+})
+</script>
+{% endblock %}
