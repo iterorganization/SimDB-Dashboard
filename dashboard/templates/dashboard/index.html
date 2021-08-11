@@ -60,21 +60,8 @@
             <v-row>
               <v-subheader>Search Results</v-subheader>
             </v-row>
-            <router-view></router-view>
             <v-divider></v-divider>
-            <v-expansion-panels multiple accordion>
-              <v-expansion-panel
-                  v-for="(item,i) in 50"
-                  :key="i"
-              >
-                <v-expansion-panel-header>Item</v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                  labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                  laboris nisi ut aliquip ex ea commodo consequat.
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panels>
+            <router-view></router-view>
           </v-col>
         </v-row>
       </v-container>
@@ -94,32 +81,57 @@ Vue.component('search-output', {
       count: 0,
       items: [],
       url: null,
+      page: 1,
+      page_count: 0,
     }
   },
-  template: '<div><div v-if="loading">http://0.0.0.0:5000/api/v1.0<[ url ]></div><div><[ items ]></div><div v-else><[ count ]></div></div>',
+  template: `
+    <div>
+    <v-expansion-panels multiple accordion>
+      <v-expansion-panel
+          v-for="(item,i) in items"
+          :key="i"
+      >
+        <v-expansion-panel-header><[ item.alias ]></v-expansion-panel-header>
+        <v-expansion-panel-content>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+          labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+          laboris nisi ut aliquip ex ea commodo consequat.
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <v-pagination v-model="page" :length="page_count" @input="fetchData"></v-pagination>
+    </div>
+  `,
   mounted () {
     this.fetchData()
   },
   methods: {
-    fetchData () {
+    fetchData (page = 1) {
       this.loading = true;
-      const path = this.$route.fullPath.replace('search', 'simulations');git@github.com:jholloc/simdb.git
+      const path = this.$route.fullPath.replace('search', 'simulations');
       this.url = path;
       axios
-        .get('http://0.0.0.0:5000/api/v1.0' + path, { auth: { username: 'admin', password: 'admin' } })
+        .get('http://0.0.0.0:5000/api/v1.0' + path, {
+          auth: { username: 'admin', password: 'admin' },
+          headers: { 'SimDB-Result-Limit': 20, 'SimDB-Page': page }
+        })
         .then(response => {
           //this.items = response.data.map(el => { return { value: el.name, text: to_label(el.name) } });
-          this.items = response.data;
+          this.items = response.data.results;
+          this.count = response.data.count;
+          this.page = response.data.page;
+          this.page_count = parseInt(response.data.count / 20);
           this.loading = false;
         })
-    }
+    },
   }
 })
 
-const Foo = { template: '<search-output>foo</search-output>' }
+const SearchOutput = { template: '<search-output></search-output>' }
 
 const routes = [
-  { path: '/search', component: Foo },
+  { path: '/search', component: SearchOutput },
 ]
 
 const router = new VueRouter({
