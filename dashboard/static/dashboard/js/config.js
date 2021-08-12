@@ -3,3 +3,9 @@ const searchFields = [
     'shot',
     'run',
 ];
+
+const displayFields = [
+    'shot',
+    'run',
+    'workflow.name',
+];
