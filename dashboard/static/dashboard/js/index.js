@@ -17,7 +17,11 @@ Vue.component('search-output', {
           v-for="(item,i) in items"
           :key="i"
       >
-        <v-expansion-panel-header><v-btn :href="'simulation/uuid/' + item.uuid.hex" @click.stop="" text fixed><[ item.alias ]></v-btn></v-expansion-panel-header>
+        <v-expansion-panel-header>
+          <v-btn :href="'simulation/uuid/' + item.uuid.hex" @click.stop="" text><[ item.alias ]></v-btn>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+        </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-simple-table>
             <thead><tr><th>Key</th><th>Value</th></tr></thead>

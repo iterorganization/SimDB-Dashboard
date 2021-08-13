@@ -13,7 +13,7 @@
 
     <v-main>
       <v-container fluid>
-                <v-row>
+        <v-row>
           <div class="text-h4">Server: <[ server ]></div>
         </v-row>
         <v-row>
@@ -28,7 +28,20 @@
               <thead><tr><th>Key</th><th>Value</th></tr></thead>
               <tbody>
               <tr v-for="(item, index) in metadata" :key="index">
-                <td><[ toLabel(item.element) ]></td><td><[ item.value ]></td>
+                <td><[ toLabel(item.element) ]></td>
+                <td>
+                  <div v-if="isXML(item.value)">
+                    <pre>
+<[ item.value ]>
+                    </pre>
+                  </div>
+                  <div v-else-if="isArray(item.value)">
+                    <plotly-container :id="'plot' + index" :data="processData(item.value)"></plotly-container>
+                  </div>
+                  <div v-else>
+                    <[ processData(item.value) ]>
+                  </div>
+                </td>
               </tr>
               </tbody>
             </template>
@@ -39,6 +52,14 @@
 
   </v-app>
 </div>
+
+<style lang="css">
+.SkeletonBox {
+	 display: inline-block;
+	 vertical-align: middle;
+	 background-color: #dddbdd;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
