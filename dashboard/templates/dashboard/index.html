@@ -60,9 +60,10 @@
               </v-col>
             </v-row>
             <v-row dense>
-              <v-col offset="8" cols="4">
+              <v-col offset="7" cols="5">
                 <v-btn @click="doSearch" block :disabled="getQuery().length == 0">
                   Search
+                  <v-icon>mdi-database-search</v-icon>
                 </v-btn>
               </v-col>
             </v-row>
@@ -72,7 +73,7 @@
               <v-subheader>Search Results</v-subheader>
             </v-row>
             <v-divider></v-divider>
-            <router-view></router-view>
+            <search-output :query="searchQuery"></search-output>
           </v-col>
         </v-row>
       </v-container>

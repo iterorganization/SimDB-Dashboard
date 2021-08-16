@@ -5,22 +5,30 @@ Vue.component('search-output', {
       loading: false,
       count: 0,
       items: [],
-      url: null,
       page: 1,
       page_count: 0,
     }
   },
+  props: {
+    query: null,
+  },
+  watch: {
+    query: function (newVal, oldVal) {
+      this.fetchData();
+    }
+  },
   template: `
     <div>
+    <div v-if="items.length > 0">
     <v-expansion-panels multiple accordion>
       <v-expansion-panel
           v-for="(item,i) in items"
           :key="i"
       >
         <v-expansion-panel-header>
-          <v-btn :href="'simulation/uuid/' + item.uuid.hex" @click.stop="" text><[ item.alias ]></v-btn>
-          <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
+          <span>
+          <a :href="'simulation/uuid/' + item.uuid.hex" @click.stop=""><[ item.alias ]></a>
+          </span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <v-simple-table>
@@ -35,6 +43,10 @@ Vue.component('search-output', {
       </v-expansion-panel>
     </v-expansion-panels>
     <v-pagination v-model="page" :length="page_count" @input="fetchData"></v-pagination>
+    </div>
+    <div v-else>
+      <span>No search results</span>
+    </div>
     <v-overlay :value="loading">
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
@@ -45,17 +57,16 @@ Vue.component('search-output', {
   },
   methods: {
     fetchData (page = 1) {
+      if (!this.query) {
+        return;
+      }
       this.loading = true;
-      const path = this.$route.fullPath.replace('search', 'simulations');
-      this.url = path;
-      //console.log(this.server);
       axios
-        .get('http://0.0.0.0:5000/api/v1.0' + path, {
+        .get('http://0.0.0.0:5000/api/v1.0/simulations' + this.query, {
           auth: { username: 'admin', password: 'admin' },
           headers: { 'SimDB-Result-Limit': 10, 'SimDB-Page': page }
         })
         .then(response => {
-          //this.items = response.data.map(el => { return { value: el.name, text: to_label(el.name) } });
           this.items = response.data.results;
           this.count = response.data.count;
           this.page = response.data.page;
@@ -66,16 +77,16 @@ Vue.component('search-output', {
   }
 })
 
-const SearchOutput = { template: '<search-output></search-output>' }
-
-const routes = [
-  { path: '/search', component: SearchOutput },
-]
-
-const router = new VueRouter({
-  mode: 'history',
-  routes: routes
-})
+//const SearchOutput = { template: '<search-output></search-output>' }
+//
+//const routes = [
+//  { path: '/search', component: SearchOutput },
+//]
+//
+//const router = new VueRouter({
+//  mode: 'history',
+//  routes: routes
+//})
 
 const process_array_key = function( word ) {
     return word.replace(/(.*)#(\d+)/, '$1[$2]')
@@ -91,7 +102,6 @@ const to_label = function( name ) {
 
 const app = new Vue({
   el: '#app',
-  router: router,
   vuetify: new Vuetify(),
   delimiters: ['<[', ']>'],
   data () {
@@ -111,10 +121,13 @@ const app = new Vue({
         text: null,
         type: 'error',
       },
+      searchQuery: null,
     }
   },
   mounted () {
     this.setItems();
+    var url = new URL(location.href);
+    this.searchQuery = url.search;
   },
   methods: {
     addSearch: function () {
@@ -132,11 +145,17 @@ const app = new Vue({
           query += this.searchFields[i].name + "=" + el + "&";
         }
       }
-      return query + "&index&description&status";
+      if (query) {
+        query += "description&status";
+      }
+      return "?" + query;
     },
     doSearch: function (evt) {
       const query = this.getQuery();
-      this.$router.push("/search?" + query);
+      if (query) {
+        window.history.pushState({}, 'search', query);
+        this.searchQuery = query;
+      }
     },
     toLabel: function (name) {
       return name.split(/[\._]/).map(process_array_key).map(capitalize).join(' ');
