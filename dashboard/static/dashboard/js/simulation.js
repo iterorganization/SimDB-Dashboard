@@ -31,7 +31,7 @@ Vue.component('SkeletonBox', {
 Vue.component('Plotly', {
   delimiters: ['<[', ']>'],
   template: `
-  <div :id="id" style="width:600px;height:250px;"></div>
+  <div :id="id" style="width:600px;height:400px;"></div>
   `,
   props: {
     data: {
@@ -68,7 +68,7 @@ Vue.component('PlotlyContainer', {
   template: `
     <div>
       <plotly v-if="isVisible" :id="id" :data="data"></plotly>
-      <skeleton-box height="250px" v-else>Loading</skeleton-box>
+      <skeleton-box height="400px" v-else>Loading</skeleton-box>
     </div>
   `,
   mounted () {

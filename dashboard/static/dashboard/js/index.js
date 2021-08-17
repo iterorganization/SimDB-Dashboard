@@ -6,7 +6,11 @@ Vue.component('search-output', {
       count: 0,
       items: [],
       page: 1,
-      page_count: 0,
+      pageCount: 0,
+      dialog: false,
+      server: 'http://0.0.0.0:5000/api/v1.0',
+      token: null,
+      error: null,
     }
   },
   props: {
@@ -14,11 +18,49 @@ Vue.component('search-output', {
   },
   watch: {
     query: function (newVal, oldVal) {
-      this.fetchData();
+      if (this.query) {
+        if (!this.token) {
+          this.dialog = true;
+        } else {
+          this.fetchData("", "", page);
+        }
+      }
     }
   },
   template: `
     <div>
+    <v-dialog v-model="dialog" persistent max-width="400px">
+      <v-card>
+        <v-card-title class="text-h5">
+          Authentication Credentials
+        </v-card-title>
+        <v-card-text>
+          Please enter your credentials for server <[ server ]>.
+        <v-container>
+          <v-row>
+            <v-col cols="12" sm="6" md="6">
+              <v-text-field id="username" label="Username"></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6" md="6">
+              <v-text-field id="password" type="password" label="Password"></v-text-field>
+            </v-col>
+          </v-row>
+        </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="dialog = false">
+            Cancel
+          </v-btn>
+          <v-btn color="green darken-1" text @click="submit">
+            Submit
+          </v-btn>
+          <v-btn color="green darken-1" text @click="storeToken">
+            Generate Token
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <div v-if="items.length > 0">
     <v-expansion-panels multiple accordion>
       <v-expansion-panel
@@ -42,7 +84,7 @@ Vue.component('search-output', {
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-pagination v-model="page" :length="page_count" @input="fetchData"></v-pagination>
+    <v-pagination v-model="page" :length="pageCount" @input="updatePage"></v-pagination>
     </div>
     <div v-else>
       <span>No search results</span>
@@ -53,26 +95,73 @@ Vue.component('search-output', {
     </div>
   `,
   mounted () {
-    this.fetchData()
+//    this.fetchData()
   },
   methods: {
-    fetchData (page = 1) {
+    submit (evt) {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      this.dialog = false;
+      this.fetchData(username, password, this.page);
+    },
+    storeToken (evt) {
+      var username = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      var comp = this;
+      axios
+        .get(this.server + '/token', {
+          auth: { username: username, password: password },
+        })
+        .then(response => {
+          this.token = response.data.token;
+          this.fetchData("", "", this.page);
+        })
+        .catch(function (error) {
+          app.status.show = true;
+          app.status.text = error;
+          app.status.type = 'error';
+        })
+        .finally(function () {
+          comp.dialog = false;
+        })
+    },
+    updatePage (page) {
+       if (!this.token) {
+         this.dialog = true;
+       } else {
+         this.fetchData("", "", page);
+       }
+    },
+    fetchData (username, password, page = 1) {
       if (!this.query) {
         return;
       }
       this.loading = true;
+      var comp = this;
+      var args = {
+        headers: { 'simdb-result-limit': 10, 'simdb-page': page },
+      };
+      if (this.token) {
+        args.headers['Authorization'] = 'JWT-Token ' + this.token;
+      } else {
+        args['auth'] = { username: username, password: password };
+      }
       axios
-        .get('http://0.0.0.0:5000/api/v1.0/simulations' + this.query, {
-          auth: { username: 'admin', password: 'admin' },
-          headers: { 'SimDB-Result-Limit': 10, 'SimDB-Page': page }
-        })
+        .get(this.server + '/simulations' + this.query, args)
         .then(response => {
           this.items = response.data.results;
           this.count = response.data.count;
           this.page = response.data.page;
-          this.page_count = parseInt(response.data.count / 10);
-          this.loading = false;
+          this.pageCount = Math.ceil(response.data.count / 10);
         })
+        .catch(function (error) {
+          app.status.show = true;
+          app.status.text = error;
+          app.status.type = 'error';
+        })
+        .finally(function () {
+          comp.loading = false;
+        });
     },
   }
 })

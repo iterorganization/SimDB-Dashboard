@@ -14,32 +14,42 @@
     <v-main>
       <v-container fluid>
         <v-row>
-          <div class="text-h4">Server: <[ server ]></div>
+          <v-col cols="2" class="text-h5">Server</v-col>
+          <v-col cols="10" class="text-h5"><[ server ]></v-col>
         </v-row>
         <v-row>
-          <div class="text-h4">Simulation: <[ uuid ]></div>
+          <v-col cols="2" class="text-h5">Simulation</v-col>
+          <v-col cols="10" class="text-h5"><[ uuid ]></v-col>
         </v-row>
         <v-row>
-          <div class="text-h4">Alias: <[ alias ]></div>
+          <v-col cols="2" class="text-h5">Alias</v-col>
+          <v-col cols="10" class="text-h5"><[ alias ]></v-col>
         </v-row>
+        <v-divider></v-divider>
         <v-row>
           <v-simple-table>
             <template>
-              <thead><tr><th>Key</th><th>Value</th></tr></thead>
+<!--              <thead><tr><th>Key</th><th>Value</th></tr></thead>-->
               <tbody>
               <tr v-for="(item, index) in metadata" :key="index">
                 <td><[ toLabel(item.element) ]></td>
                 <td>
                   <div v-if="isXML(item.value)">
-                    <pre>
+                    <v-container style="width: 70%;">
+                    <pre style="max-height: 400px">
 <[ item.value ]>
                     </pre>
+                    </v-container>
                   </div>
                   <div v-else-if="isArray(item.value)">
+                    <v-container style="width: 70%">
                     <plotly-container :id="'plot' + index" :data="processData(item.value)"></plotly-container>
+                    </v-container>
                   </div>
                   <div v-else>
+                    <v-container style="width: 70%">
                     <[ processData(item.value) ]>
+                    </v-container>
                   </div>
                 </td>
               </tr>
