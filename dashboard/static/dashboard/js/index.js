@@ -34,38 +34,7 @@ Vue.component('search-output', {
   },
   template: `
     <div>
-    <v-dialog v-model="dialog" persistent max-width="400px">
-      <v-card>
-        <v-card-title class="text-h5">
-          Authentication Credentials
-        </v-card-title>
-        <v-card-text>
-          Please enter your credentials for server <[ server ]>.
-        <v-container>
-          <v-row>
-            <v-col cols="12" sm="6" md="6">
-              <v-text-field id="username" label="Username"></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6" md="6">
-              <v-text-field id="password" type="password" label="Password"></v-text-field>
-            </v-col>
-          </v-row>
-        </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="green darken-1" text @click="dialog = false">
-            Cancel
-          </v-btn>
-          <v-btn color="green darken-1" text @click="submit">
-            Submit
-          </v-btn>
-          <v-btn color="green darken-1" text @click="storeToken">
-            Generate Token
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
     <div v-if="items.length > 0">
     <v-expansion-panels multiple accordion>
       <v-expansion-panel
@@ -74,7 +43,7 @@ Vue.component('search-output', {
       >
         <v-expansion-panel-header>
           <span>
-          <a :href="'simulation/uuid/' + item.uuid.hex" @click.stop=""><[ item.alias ]></a>
+          <a :href="'simulation/uuid/' + item.uuid.hex + '?server=' + server" @click.stop=""><[ item.alias ]></a>
           </span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
@@ -107,55 +76,27 @@ Vue.component('search-output', {
       }
       return this.token;
     },
-    submit(evt) {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      this.dialog = false;
-      this.fetchData(username, password, this.page);
-    },
-    storeToken(evt) {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const comp = this;
-      const url = 'http://' + decodeURIComponent(this.server) + '/api/v1.0';
-      axios
-        .get(url + '/token', {
-          auth: { username: username, password: password },
-        })
-        .then(response => {
-          this.token = response.data.token;
-          window.sessionStorage.setItem('simdb-token-' + this.server, this.token);
-          this.fetchData("", "", this.page);
-        })
-        .catch(function (error) {
-          app.status.show = true;
-          app.status.text = error;
-          app.status.type = 'error';
-        })
-        .finally(function () {
-          comp.dialog = false;
-        })
-    },
     updatePage(page) {
-      if (!this.token) {
+      if (!this.getToken()) {
         this.dialog = true;
       } else {
         this.fetchData("", "", page);
       }
     },
-    fetchData(username, password, page = 1) {
+    fetchData(username, password) {
+      this.dialog = false;
       if (!this.query) {
         return;
       }
       this.loading = true;
       const comp = this;
       const args = {
-        headers: {'simdb-result-limit': 10, 'simdb-page': page},
+        headers: {'simdb-result-limit': 10, 'simdb-page': this.page},
       };
-      if (this.token) {
+      if (this.getToken()) {
         args.headers['Authorization'] = 'JWT-Token ' + this.token;
       } else {
-        args['auth'] = {username: username, password: password};
+        args['auth'] = { username: username, password: password };
       }
       const params = new URLSearchParams(this.query);
       params.delete('__server');

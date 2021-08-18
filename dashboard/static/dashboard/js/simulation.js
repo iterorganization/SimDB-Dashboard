@@ -4,12 +4,14 @@ const app = new Vue({
   delimiters: ['<[', ']>'],
   data() {
     return {
-      server: 'http://0.0.0.0:5000/api/v1.0',
+      server: null,
       uuid: null,
       alias: null,
       inputs: [],
       outputs: [],
       metadata: [],
+      token: null,
+      dialog: true,
       status: {
         show: false,
         text: null,
@@ -18,17 +20,31 @@ const app = new Vue({
     }
   },
   mounted() {
-    const tokens = window.location.href.split('/');
+    const tokens = window.location.pathname.split('/');
+    const params = new URLSearchParams(window.location.search);
     this.uuid = tokens[tokens.length - 1];
-    this.setItems();
+    this.server = params.get('server') || '0.0.0.0:5000';
+    if (this.getToken()) {
+      this.setItems("", "");
+    } else {
+      this.dialog = true;
+    }
   },
   methods: {
-    setItems: function () {
+    getToken() {
+      return this.token || window.sessionStorage.getItem('simdb-token-' + this.server);
+    },
+    setItems: function (username, password) {
       this.status.show = false;
+      this.dialog = false;
+      const args = { headers: {} };
+      if (this.getToken()) {
+        args.headers['Authorization'] = 'JWT-Token ' + this.getToken();
+      } else {
+        args['auth'] = { username: username, password: password };
+      }
       axios
-        .get(this.server + '/simulation/' + this.uuid, {
-          auth: {username: 'admin', password: 'admin'}
-        })
+        .get('http://' + this.server + '/api/v1.0/simulation/' + this.uuid, args)
         .then(response => {
           this.alias = response.data.alias;
           this.uuid = response.data.uuid.hex;
