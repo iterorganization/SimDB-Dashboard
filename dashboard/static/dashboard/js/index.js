@@ -24,10 +24,10 @@ Vue.component('search-output', {
         this.server = server;
       }
       if (this.query) {
-        if (!this.token) {
+        if (!this.getToken()) {
           this.dialog = true;
         } else {
-          this.fetchData("", "", page);
+          this.fetchData("", "", this.page);
         }
       }
     }
@@ -101,6 +101,12 @@ Vue.component('search-output', {
 //    this.fetchData()
   },
   methods: {
+    getToken() {
+      if (!this.token) {
+        this.token = window.sessionStorage.getItem('simdb-token-' + this.server);
+      }
+      return this.token;
+    },
     submit(evt) {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
@@ -114,10 +120,11 @@ Vue.component('search-output', {
       const url = 'http://' + decodeURIComponent(this.server) + '/api/v1.0';
       axios
         .get(url + '/token', {
-          auth: {username: username, password: password},
+          auth: { username: username, password: password },
         })
         .then(response => {
           this.token = response.data.token;
+          window.sessionStorage.setItem('simdb-token-' + this.server, this.token);
           this.fetchData("", "", this.page);
         })
         .catch(function (error) {
