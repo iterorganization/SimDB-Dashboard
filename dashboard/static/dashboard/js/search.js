@@ -13,13 +13,13 @@ $( function() {
         return word.replace(/(.*)#(\d+)/, '$1[$2]')
     }
 
-    var capitalize = function( word ) {
+    const capitalize = function (word) {
         return word[0].toUpperCase() + word.slice(1);
-    }
+    };
 
-    var to_label = function( name ) {
+    const to_label = function (name) {
         return name.split(/[\._]/).map(process_array_key).map(capitalize).join(' ');
-    }
+    };
 
     $.ajax({
         url: "http://127.0.0.1:5000/api/v1.0/metadata",

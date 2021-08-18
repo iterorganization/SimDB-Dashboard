@@ -31,28 +31,7 @@
             <template>
 <!--              <thead><tr><th>Key</th><th>Value</th></tr></thead>-->
               <tbody>
-              <tr v-for="(item, index) in metadata" :key="index">
-                <td><[ toLabel(item.element) ]></td>
-                <td>
-                  <div v-if="isXML(item.value)">
-                    <v-container style="width: 70%;">
-                    <pre style="max-height: 400px">
-<[ item.value ]>
-                    </pre>
-                    </v-container>
-                  </div>
-                  <div v-else-if="isArray(item.value)">
-                    <v-container style="width: 70%">
-                    <plotly-container :id="'plot' + index" :data="processData(item.value)"></plotly-container>
-                    </v-container>
-                  </div>
-                  <div v-else>
-                    <v-container style="width: 70%">
-                    <[ processData(item.value) ]>
-                    </v-container>
-                  </div>
-                </td>
-              </tr>
+                <data-row v-for="(item, index) in metadata" :key="index" :label="item.element" :value="item.value" :index="index"></data-row>
               </tbody>
             </template>
           </v-simple-table>
@@ -74,5 +53,6 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='dashboard/js/config.js') }}"></script>
+<script src="{{ url_for('static', filename='dashboard/js/data-row.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/simulation.js') }}"></script>
 {% endblock %}

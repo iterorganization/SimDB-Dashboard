@@ -73,7 +73,7 @@
               <v-subheader>Search Results</v-subheader>
             </v-row>
             <v-divider></v-divider>
-            <search-output :query="searchQuery"></search-output>
+            <search-output :query="searchQuery" :server="selectedServer"></search-output>
           </v-col>
         </v-row>
       </v-container>
@@ -84,5 +84,6 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='dashboard/js/config.js') }}"></script>
+<script src="{{ url_for('static', filename='dashboard/js/data-row.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/index.js') }}"></script>
 {% endblock %}

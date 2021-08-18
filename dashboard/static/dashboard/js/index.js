@@ -8,16 +8,21 @@ Vue.component('search-output', {
       page: 1,
       pageCount: 0,
       dialog: false,
-      server: 'http://0.0.0.0:5000/api/v1.0',
       token: null,
       error: null,
     }
   },
   props: {
     query: null,
+    server: null,
   },
   watch: {
     query: function (newVal, oldVal) {
+      const params = new URLSearchParams(newVal);
+      const server = params.get('__server');
+      if (server) {
+        this.server = server;
+      }
       if (this.query) {
         if (!this.token) {
           this.dialog = true;
@@ -76,9 +81,7 @@ Vue.component('search-output', {
           <v-simple-table>
             <thead><tr><th>Key</th><th>Value</th></tr></thead>
             <tbody>
-              <tr v-for="field in item.metadata">
-                <td><[ field.element ]></td><td><[ field.value ]></td>
-              </tr>
+              <data-row v-for="(field, index) in item.metadata" :key="index" :label="field.element" :value="field.value" :index="index"></data-row>
             </tbody>
           </v-simple-table>
         </v-expansion-panel-content>
@@ -94,23 +97,24 @@ Vue.component('search-output', {
     </v-overlay>
     </div>
   `,
-  mounted () {
+  mounted() {
 //    this.fetchData()
   },
   methods: {
-    submit (evt) {
-      var username = document.getElementById('username').value;
-      var password = document.getElementById('password').value;
+    submit(evt) {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
       this.dialog = false;
       this.fetchData(username, password, this.page);
     },
-    storeToken (evt) {
-      var username = document.getElementById('username').value;
-      var password = document.getElementById('password').value;
-      var comp = this;
+    storeToken(evt) {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const comp = this;
+      const url = 'http://' + decodeURIComponent(this.server) + '/api/v1.0';
       axios
-        .get(this.server + '/token', {
-          auth: { username: username, password: password },
+        .get(url + '/token', {
+          auth: {username: username, password: password},
         })
         .then(response => {
           this.token = response.data.token;
@@ -125,29 +129,33 @@ Vue.component('search-output', {
           comp.dialog = false;
         })
     },
-    updatePage (page) {
-       if (!this.token) {
-         this.dialog = true;
-       } else {
-         this.fetchData("", "", page);
-       }
+    updatePage(page) {
+      if (!this.token) {
+        this.dialog = true;
+      } else {
+        this.fetchData("", "", page);
+      }
     },
-    fetchData (username, password, page = 1) {
+    fetchData(username, password, page = 1) {
       if (!this.query) {
         return;
       }
       this.loading = true;
-      var comp = this;
-      var args = {
-        headers: { 'simdb-result-limit': 10, 'simdb-page': page },
+      const comp = this;
+      const args = {
+        headers: {'simdb-result-limit': 10, 'simdb-page': page},
       };
       if (this.token) {
         args.headers['Authorization'] = 'JWT-Token ' + this.token;
       } else {
-        args['auth'] = { username: username, password: password };
+        args['auth'] = {username: username, password: password};
       }
+      const params = new URLSearchParams(this.query);
+      params.delete('__server');
+      const query = params.toString();
+      const url = 'http://' + decodeURIComponent(this.server) + '/api/v1.0';
       axios
-        .get(this.server + '/simulations' + this.query, args)
+        .get(url + '/simulations?' + query, args)
         .then(response => {
           this.items = response.data.results;
           this.count = response.data.count;
@@ -166,45 +174,25 @@ Vue.component('search-output', {
   }
 })
 
-//const SearchOutput = { template: '<search-output></search-output>' }
-//
-//const routes = [
-//  { path: '/search', component: SearchOutput },
-//]
-//
-//const router = new VueRouter({
-//  mode: 'history',
-//  routes: routes
-//})
-
-const process_array_key = function( word ) {
-    return word.replace(/(.*)#(\d+)/, '$1[$2]')
-}
-
-const capitalize = function( word ) {
-    return word[0].toUpperCase() + word.slice(1);
-}
-
-const to_label = function( name ) {
-    return name.split(/[\._]/).map(process_array_key).map(capitalize).join(' ');
-}
-
 const app = new Vue({
   el: '#app',
   vuetify: new Vuetify(),
   delimiters: ['<[', ']>'],
-  data () {
+  data() {
     return {
       items: [],
       value: null,
-      wild_search: [{ id: 'search-1' }],
+      wild_search: [{id: 'search-1'}],
       searchModels: [],
-      searchFields: searchFields.map(el => { return { name: el, display: to_label(el) }; }),
+      searchFields: searchFields.map(el => {
+        return {name: el, display: to_label(el)};
+      }),
       servers: [
-        'http://0.0.0.0:5000/api/v1.0',
-        'http://0.0.0.0:4000/api/v1.0',
+        '0.0.0.0:5000',
+        '0.0.0.0:4000',
       ],
-      selectedServer: 'http://0.0.0.0:5000/api/v1.0',
+//      selectedServer: 'http://0.0.0.0:5000/api/v1.0',
+      selectedServer: '0.0.0.0:5000',
       status: {
         show: false,
         text: null,
@@ -213,9 +201,9 @@ const app = new Vue({
       searchQuery: null,
     }
   },
-  mounted () {
+  mounted() {
     this.setItems();
-    var url = new URL(location.href);
+    const url = new URL(location.href);
     this.searchQuery = url.search;
   },
   methods: {
@@ -225,19 +213,16 @@ const app = new Vue({
     deleteSearch: function (index) {
       this.search.splice(index, 1);
     },
-    getQuery: function() {
+    getQuery: function () {
       const len = this.searchModels.length;
-      var query = "";
-      for (var i = 0; i < len; i++) {
+      let query = "";
+      for (let i = 0; i < len; i++) {
         const el = this.searchModels[i];
         if (el) {
           query += this.searchFields[i].name + "=" + el + "&";
         }
       }
-      if (query) {
-        query += "description&status";
-      }
-      return "?" + query;
+      return "?__server=" + encodeURIComponent(this.selectedServer) + "&description&status&summary.fusion.neutron_fluxes.thermal.value&" + query;
     },
     doSearch: function (evt) {
       const query = this.getQuery();
@@ -251,10 +236,13 @@ const app = new Vue({
     },
     setItems: function () {
       this.status.show = false;
+      const url = 'http://' + decodeURIComponent(this.selectedServer) + '/api/v1.0';
       axios
-        .get(this.selectedServer + '/metadata')
+        .get(url + '/metadata')
         .then(response => {
-          this.items = response.data.map(el => { return { value: el.name, text: to_label(el.name) } })
+          this.items = response.data.map(el => {
+            return {value: el.name, text: to_label(el.name)}
+          })
         })
         .catch(function (error) {
           app.status.show = true;
