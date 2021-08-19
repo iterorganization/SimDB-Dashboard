@@ -44,23 +44,43 @@
                 <v-text-field :id="item.name" v-model="searchModels[index]" dense filled hide-details></v-text-field>
               </v-col>
             </v-row>
-            <v-row dense v-for="(item, index) in wild_search" :key="index">
-              <v-col cols="6">
+            <v-row dense v-for="(item, index) in wildSearch" :key="index" align="center">
+              <v-col cols="1">
+                <v-btn @click="deleteSearch(index)" block style="padding: 0" small text>
+                  <v-icon color="blue-grey">mdi-minus-box</v-icon>
+                </v-btn>
+              </v-col>
+              <v-col cols="5">
                 <v-autocomplete
                     auto-select-first
                     clearable
-                    v-model="value"
+                    v-model="item.name"
                     :items="items"
                     dense
                     filled
+                    hide-details
+                    no-data-text="loading..."
                 ></v-autocomplete>
               </v-col>
               <v-col cols="6">
-                <v-text-field :id="item.id" dense filled></v-text-field>
+                <v-text-field :id="item.id" v-model="item.value" dense filled hide-details></v-text-field>
               </v-col>
             </v-row>
             <v-row dense>
-              <v-col offset="7" cols="5">
+              <v-col offset="10" cols="2">
+                <v-btn @click="addSearch" block style="padding: 0" small text>
+                  <v-icon color="blue-grey">mdi-plus</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+            <v-divider></v-divider>
+            <v-row dense>
+              <v-col offset="3" cols="4">
+                <v-btn @click="doSearch" block :disabled="getQuery().length == 0">
+                  Clear
+                </v-btn>
+              </v-col>
+              <v-col cols="5">
                 <v-btn @click="doSearch" block :disabled="getQuery().length == 0">
                   Search
                   <v-icon>mdi-database-search</v-icon>
@@ -86,5 +106,6 @@
 <script src="{{ url_for('static', filename='dashboard/js/config.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/data-row.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/auth-dialog.js') }}"></script>
+<script src="{{ url_for('static', filename='dashboard/js/search-output.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/index.js') }}"></script>
 {% endblock %}

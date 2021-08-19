@@ -27,7 +27,7 @@
         <v-row>
           <v-simple-table>
             <template>
-<!--              <thead><tr><th>Key</th><th>Value</th></tr></thead>-->
+              <thead><tr><th>Key</th><th>Value</th></tr></thead>
               <tbody>
                 <data-row v-for="(item, index) in metadata" :key="index" :label="item.element" :value="item.value" :index="index"></data-row>
               </tbody>
