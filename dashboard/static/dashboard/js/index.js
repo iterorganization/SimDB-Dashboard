@@ -25,10 +25,16 @@ const app = new Vue({
   },
   mounted() {
     this.setItems();
-    const url = new URL(location.href);
-    this.searchQuery = url.search;
+    this.searchQuery = window.location.search;
+    window.onpopstate = this.handleStateChange;
+  },
+  beforeDestroy () {
+    window.onpopstate = null;
   },
   methods: {
+    handleStateChange: function() {
+      app.searchQuery = window.location.search;
+    },
     addSearch: function () {
       this.wildSearch.push({ value: null });
     },

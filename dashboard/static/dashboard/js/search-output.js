@@ -30,6 +30,11 @@ Vue.component('search-output', {
         } else {
           this.fetchData("", "", this.page);
         }
+      } else {
+          this.items = [];
+          this.count = 0;
+          this.page = 1;
+          this.pageCount = 0;
       }
     }
   },
@@ -37,6 +42,11 @@ Vue.component('search-output', {
     <div>
     <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
     <div v-if="items.length > 0">
+    <v-card flat tile dense class="d-flex flex-row-reverse mb-3">
+       <v-btn dense text :disabled="selectedSimulations.length == 0" @click="doCompare">
+        Compare
+      </v-btn>
+    </v-card>
     <v-expansion-panels multiple accordion>
       <v-expansion-panel
           v-for="(item,i) in items"
@@ -45,7 +55,7 @@ Vue.component('search-output', {
         <v-expansion-panel-header>
           <v-checkbox v-model="selectedSimulations" :value="item.uuid.hex" @click.stop="" dense hide-details style="max-width: 50px"></v-checkbox>
           <span>
-          <a :href="'simulation/uuid/' + item.uuid.hex + '?server=' + server" @click.stop=""><[ getLabel(item) ]></a>
+          <a :href="'uuid/' + item.uuid.hex + '?server=' + server" @click.stop=""><[ getLabel(item) ]></a>
           </span>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
@@ -68,10 +78,10 @@ Vue.component('search-output', {
     </v-overlay>
     </div>
   `,
-  mounted() {
-//    this.fetchData()
-  },
   methods: {
+    doCompare() {
+      window.location.href = 'compare/?uuid=' + this.selectedSimulations.join('&uuid=');
+    },
     getLabel(item) {
       return `${item.alias}`;
     },

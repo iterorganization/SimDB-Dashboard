@@ -36,17 +36,17 @@
               </v-col>
             </v-row>
             <v-divider></v-divider>
-            <v-row dense v-for="(item, index) in searchFields" :key="item.name">
+            <v-row dense v-for="(item, index) in searchFields" :key="item.name" align="center">
               <v-col cols="6">
                 <v-subheader :for="item.name"><[ item.display ]></v-subheader>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="6" class="p-0">
                 <v-text-field :id="item.name" v-model="searchModels[index]" dense filled hide-details></v-text-field>
               </v-col>
             </v-row>
             <v-row dense v-for="(item, index) in wildSearch" :key="index" align="center">
               <v-col cols="1">
-                <v-btn @click="deleteSearch(index)" block style="padding: 0" small text>
+                <v-btn @click="deleteSearch(index)" block class="p-0" small text>
                   <v-icon color="blue-grey">mdi-minus-box</v-icon>
                 </v-btn>
               </v-col>
@@ -62,30 +62,33 @@
                     no-data-text="loading..."
                 ></v-autocomplete>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="6" class="p-0">
                 <v-text-field :id="item.id" v-model="item.value" dense filled hide-details></v-text-field>
               </v-col>
             </v-row>
             <v-row dense>
-              <v-col offset="10" cols="2">
-                <v-btn @click="addSearch" block style="padding: 0" small text>
+              <v-card tile flat dense class="d-flex flex-row-reverse p-0 mt-2">
+                <v-btn @click="addSearch" class="p-0" small text dense>
                   <v-icon color="blue-grey">mdi-plus</v-icon>
                 </v-btn>
-              </v-col>
+              </v-card>
             </v-row>
             <v-divider></v-divider>
             <v-row dense>
-              <v-col offset="3" cols="4">
-                <v-btn @click="doSearch" block :disabled="getQuery().length == 0">
+              <v-card tile flat dense class="d-flex flex-row-reverse p-0 mt-1">
+                <v-btn @click="doSearch">
+                  <template v-if="getQuery().length == 0">
+                    Show All
+                  </template>
+                  <template v-else>
+                    Search
+                    <v-icon>mdi-database-search</v-icon>
+                  </template>
+                </v-btn>
+                <v-btn @click="doSearch" class="mr-1" :disabled="getQuery().length == 0">
                   Clear
                 </v-btn>
-              </v-col>
-              <v-col cols="5">
-                <v-btn @click="doSearch" block :disabled="getQuery().length == 0">
-                  Search
-                  <v-icon>mdi-database-search</v-icon>
-                </v-btn>
-              </v-col>
+              </v-card>
             </v-row>
           </v-col>
           <v-col cols="9">

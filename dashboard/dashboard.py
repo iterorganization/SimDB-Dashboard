@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, render_template
 )
 
 bp = Blueprint('dashboard', __name__, url_prefix='/')
@@ -15,16 +15,22 @@ def index():
     return render_template('dashboard/index.html', search_fields=search_fields)
 
 
-@bp.route('/simulation/uuid/<uuid>', methods=('GET',))
-def simulation(uuid):
+@bp.route('/uuid/<uuid>', methods=('GET',))
+def simulation_by_uuid(uuid):
     return render_template('dashboard/simulation.html')
+
+
+@bp.route('/alias/<path:alias>', methods=('GET',))
+def simulation_by_alias(alias):
+    return render_template('dashboard/simulation.html')
+
+
+@bp.route('/compare', methods=('GET',))
+def compare():
+    return render_template('dashboard/compare.html')
 
 
 @bp.route('/404')
 def not_found():
     return render_template('404.html')
 
-
-@bp.route('/<path:dummy>')
-def fallback(dummy):
-    return index()
