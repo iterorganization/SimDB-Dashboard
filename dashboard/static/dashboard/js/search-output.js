@@ -40,42 +40,46 @@ Vue.component('search-output', {
   },
   template: `
     <div>
-    <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
-    <div v-if="items.length > 0">
-    <v-card flat tile dense class="d-flex flex-row-reverse mb-3">
-       <v-btn dense text :disabled="selectedSimulations.length == 0" @click="doCompare">
-        Compare
-      </v-btn>
-    </v-card>
-    <v-expansion-panels multiple accordion>
-      <v-expansion-panel
-          v-for="(item,i) in items"
-          :key="i"
-      >
-        <v-expansion-panel-header>
-          <v-checkbox v-model="selectedSimulations" :value="item.uuid.hex" @click.stop="" dense hide-details style="max-width: 50px"></v-checkbox>
-          <span>
-          <a :href="'uuid/' + item.uuid.hex + '?server=' + server" @click.stop=""><[ getLabel(item) ]></a>
-          </span>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <v-simple-table>
-            <thead><tr><th>Key</th><th>Value</th></tr></thead>
-            <tbody>
-              <data-row v-for="(field, index) in item.metadata" :key="index" :label="field.element" :value="field.value" :index="index"></data-row>
-            </tbody>
-          </v-simple-table>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
-    <v-pagination v-model="page" :length="pageCount" @input="updatePage"></v-pagination>
-    </div>
-    <div v-else>
-      <span>No search results</span>
-    </div>
-    <v-overlay :value="loading">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
-    </v-overlay>
+      <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
+      <div v-if="items.length > 0">
+        <v-card flat tile dense class="d-flex flex-row-reverse mb-3">
+          <v-btn dense text @click="doCompare" :disabled="selectedSimulations.length == 0">
+            Compare
+          </v-btn>
+        </v-card>
+        <v-expansion-panels multiple accordion>
+          <v-expansion-panel v-for="(item,i) in items" :key="i">
+            <v-expansion-panel-header>
+              <v-checkbox v-model="selectedSimulations" :value="item.uuid.hex" @click.stop="" dense hide-details style="max-width: 50px" multiple></v-checkbox>
+              <span>
+                <a :href="'uuid/' + item.uuid.hex + '?server=' + server" @click.stop="">
+                  <[ getLabel(item) ]>
+                </a>
+              </span>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-simple-table>
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <data-row v-for="(field, index) in item.metadata" :key="index" :label="field.element" :value="field.value" :index="index"></data-row>
+                </tbody>
+              </v-simple-table>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+        <v-pagination v-model="page" :length="pageCount" @input="updatePage"></v-pagination>
+      </div>
+      <div v-else>
+        <span>No search results</span>
+      </div>
+      <v-overlay :value="loading">
+        <v-progress-circular indeterminate size="64"></v-progress-circular>
+      </v-overlay>
     </div>
   `,
   methods: {
@@ -95,10 +99,11 @@ Vue.component('search-output', {
       if (!this.getToken()) {
         this.dialog = true;
       } else {
-        this.fetchData("", "", page);
+        this.fetchData("", "");
       }
     },
     fetchData(username, password) {
+      this.selectedSimulations = [];
       this.dialog = false;
       if (!this.query) {
         return;

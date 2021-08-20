@@ -9,7 +9,8 @@ const app = new Vue({
       alias: null,
       inputs: [],
       outputs: [],
-      metadata: [],
+      items: [],
+      displayItems: ['description', 'summary.fusion.neutron_fluxes.dd.total.value'],
       token: null,
       dialog: true,
       status: {
@@ -23,7 +24,7 @@ const app = new Vue({
     const tokens = window.location.pathname.split('/');
     const params = new URLSearchParams(window.location.search);
     this.uuid = tokens[tokens.length - 1];
-    this.server = params.get('server') || '0.0.0.0:5000';
+    this.server = params.get('server') || '0.0.0.0:5000'; // TODO: change to use default server from config.js
     if (this.getToken()) {
       this.setItems("", "");
     } else {
@@ -33,6 +34,10 @@ const app = new Vue({
   methods: {
     getToken() {
       return this.token || window.sessionStorage.getItem('simdb-token-' + this.server);
+    },
+    getValue(name) {
+      let found = this.items.find(el => el.element.toLowerCase() === name);
+      return found ? found.value : null;
     },
     setItems: function (username, password) {
       this.status.show = false;
@@ -48,9 +53,10 @@ const app = new Vue({
         .then(response => {
           this.alias = response.data.alias;
           this.uuid = response.data.uuid.hex;
-          this.metadata = response.data.metadata;
+          this.items = response.data.metadata;
           this.outputs = response.data.outputs;
           this.inputs = response.data.inputs;
+          // this.displayItems = [];
         })
         .catch(function (error) {
           app.status.show = true;

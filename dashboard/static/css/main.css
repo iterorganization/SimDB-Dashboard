@@ -5,3 +5,9 @@ body * {
 .v-autocomplete {
     font-size: 0.8em;
 }
+
+.SkeletonBox {
+	 display: inline-block;
+	 vertical-align: middle;
+	 background-color: white;
+}

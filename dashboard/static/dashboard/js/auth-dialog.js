@@ -28,9 +28,14 @@ Vue.component('AuthDialog', {
         <v-btn color="green darken-1" text @click="submit">
           Submit
         </v-btn>
-        <v-btn color="green darken-1" text @click="storeToken">
-          Generate Token
-        </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn color="green darken-1" text @click="storeToken" v-bind="attrs" v-on="on">
+              Generate Token
+            </v-btn>
+          </template>
+          <span>Generate and save an access token in session storage.</span>
+        </v-tooltip>
       </v-card-actions>
     </v-card>
   </v-dialog> 

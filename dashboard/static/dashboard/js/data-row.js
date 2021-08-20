@@ -2,7 +2,7 @@ Vue.component('DataRow', {
   delimiters: ['<[', ']>'],
   template: `
   <tr>
-    <td><[ toLabel() ]></td>
+    <td><[ name.toLabel() ]></td>
     <td>
       <div v-if="isXML()">
         <v-container style="width: 70%;">
@@ -13,7 +13,7 @@ Vue.component('DataRow', {
       </div>
       <div v-else-if="isArray()">
         <v-container style="width: 70%">
-        <plotly-loader :id="'plot' + index" :ydata="processValue(value)" :ylabel="label" :xdata="getXData()" xlabel="time"></plotly-loader>
+        <plotly-loader :id="'plot' + index" :ydata="processValue(value)" :ylabel="name" :xdata="getXData()" xlabel="time"></plotly-loader>
         </v-container>
       </div>
       <div v-else>
@@ -25,14 +25,14 @@ Vue.component('DataRow', {
   </tr>
   `,
   props: {
-    label: null,
+    name: null,
     value: null,
     index: null,
     data: null,
   },
   methods: {
     getXData: function (name, value) {
-      let root = this.label.split('.')[0];
+      let root = this.name.split('.')[0];
       let time = this.data.find(el => el.element === root + '.time');
       return time ? this.processValue(time.value) : null;
     },
@@ -57,10 +57,7 @@ Vue.component('DataRow', {
       return (typeof this.value == "string") && this.value.startsWith('<?xml');
     },
     isArray: function () {
-      return (this.value.hasOwnProperty('_type') && this.value._type === 'numpy.ndarray');
-    },
-    toLabel: function () {
-      return this.label.toLabel();
+      return (this.value && this.value.hasOwnProperty('_type') && this.value._type === 'numpy.ndarray');
     },
   },
 });

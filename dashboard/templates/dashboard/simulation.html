@@ -4,22 +4,31 @@
 <div id="app">
   <v-app>
     <auth-dialog :server="server" :show="dialog" @ok="setItems" @error="dialog = false"></auth-dialog>
-    <v-app-bar app dark shrink-on-scroll dense color="indigo darken-2">
+
+    <v-system-bar app dark color="indigo">
       <v-spacer></v-spacer>
-      <v-toolbar-title><a href="/">SimDB Dashboard</a></v-toolbar-title>
+      Version 0.1
+    </v-system-bar>
+
+    <v-app-bar app shrink-on-scroll dark color="indigo darken-2" height="80" dense>
+      <v-spacer></v-spacer>
+      <v-toolbar-title class="d-flex align-center" style="height: 100%">
+        <v-btn text href="/" class="text-none text-h4" style="letter-spacing: 0; color: white !important;">SimDB Dashboard</v-btn>
+      </v-toolbar-title>
       <v-spacer></v-spacer>
     </v-app-bar>
+
     <v-main>
       <v-container fluid>
-        <v-row>
+        <v-row dense>
           <v-col cols="2" class="text-h5">Server</v-col>
           <v-col cols="10" class="text-h5"><[ server ]></v-col>
         </v-row>
-        <v-row>
+        <v-row dense>
           <v-col cols="2" class="text-h5">Simulation</v-col>
           <v-col cols="10" class="text-h5"><[ uuid ]></v-col>
         </v-row>
-        <v-row>
+        <v-row dense>
           <v-col cols="2" class="text-h5">Alias</v-col>
           <v-col cols="10" class="text-h5"><[ alias ]></v-col>
         </v-row>
@@ -29,7 +38,7 @@
             <template>
               <thead><tr><th>Key</th><th>Value</th></tr></thead>
               <tbody>
-                <data-row v-for="(item, index) in metadata" :key="index" :label="item.element" :value="item.value" :index="index" :data="metadata"></data-row>
+                <data-row v-for="(name, index) in displayItems" :key="index" :name="name" :value="getValue(name)" :index="index" :data="items"></data-row>
               </tbody>
             </template>
           </v-simple-table>
@@ -38,14 +47,6 @@
     </v-main>
   </v-app>
 </div>
-
-<style lang="css">
-.SkeletonBox {
-	 display: inline-block;
-	 vertical-align: middle;
-	 background-color: #ffffff;
-}
-</style>
 {% endblock %}
 
 {% block scripts %}
