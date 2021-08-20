@@ -29,7 +29,7 @@
             <template>
               <thead><tr><th>Key</th><th>Value</th></tr></thead>
               <tbody>
-                <data-row v-for="(item, index) in metadata" :key="index" :label="item.element" :value="item.value" :index="index"></data-row>
+                <data-row v-for="(item, index) in metadata" :key="index" :label="item.element" :value="item.value" :index="index" :data="metadata"></data-row>
               </tbody>
             </template>
           </v-simple-table>
@@ -49,7 +49,8 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='dashboard/js/config.js') }}"></script>
+{{ super() }}
+<script src="{{ url_for('static', filename='dashboard/js/plotly.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/data-row.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/auth-dialog.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/simulation.js') }}"></script>

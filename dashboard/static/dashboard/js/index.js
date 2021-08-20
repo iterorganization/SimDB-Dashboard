@@ -8,7 +8,7 @@ const app = new Vue({
       wildSearch: [{ value: null }],
       searchModels: [],
       searchFields: searchFields.map(el => {
-        return { name: el, display: to_label(el) };
+        return { name: el, display: el.toLabel() };
       }),
       servers: [
         '0.0.0.0:5000',
@@ -81,7 +81,7 @@ const app = new Vue({
         .get(url + '/metadata')
         .then(response => {
           this.items = response.data.map(el => {
-            return {value: el.name, text: to_label(el.name)}
+            return { value: el.name, text: el.name.toLabel() }
           })
         })
         .catch(function (error) {

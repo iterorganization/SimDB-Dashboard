@@ -106,7 +106,8 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='dashboard/js/config.js') }}"></script>
+{{ super() }}
+<script src="{{ url_for('static', filename='dashboard/js/plotly.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/data-row.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/auth-dialog.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/search-output.js') }}"></script>
