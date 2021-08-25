@@ -111,7 +111,9 @@ Vue.component('PlotlyLoader', {
     <div>
       <template v-if="isVisible">
         <plotly :id="id" :title="ylabel.toLabel()" :xdata="xdata" :ydata="ydata" :xlabel="xlabel" :ylabel="ylabel"></plotly>
-        <v-btn small text @click="downloadData(id)">Download Data</v-btn>
+        <v-card tile flat dense class="d-flex flex-row p-0 m-0">
+          <v-btn small text @click="downloadData(id)">Download Data</v-btn>
+        </v-card>        
       </template>
       <skeleton-box height="400px" v-else>Loading</skeleton-box>
     </div>

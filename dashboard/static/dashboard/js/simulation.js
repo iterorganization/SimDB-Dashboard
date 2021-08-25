@@ -1,3 +1,70 @@
+Vue.component('RowAdder', {
+  template: `
+      <tr>
+      <td class="p-0">
+        <v-autocomplete
+            auto-select-first
+            v-model="selectedItem"
+            :items="items"
+            dense
+            filled
+            hide-details
+            no-data-text="loading..."
+        ></v-autocomplete>
+      </td>
+      <td>
+        <v-btn class="m-1" :disabled="!(selectedItem && selectedItem.length > 0)" @click="$emit('add', selectedItem)">
+          Add Data
+        </v-btn>
+      </td>
+    </tr>
+  `,
+  props: {
+    server: null,
+  },
+  data() {
+    return {
+      items: [],
+      selectedItem: null,
+      status: {
+        show: false,
+        text: null,
+        type: 'error',
+      },
+    }
+  },
+  mounted() {
+    this.setOptions();
+  },
+  watch: {
+    server: function (newVal, oldVal) {
+      this.setOptions();
+    }
+  },
+  methods: {
+    setOptions: function () {
+      if (!this.server) {
+        return;
+      }
+      this.status.show = false;
+      const url = 'http://' + decodeURIComponent(this.server) + '/api/v1.0';
+      const comp = this;
+      axios
+        .get(url + '/metadata')
+        .then(response => {
+          this.items = response.data.map(el => {
+            return { value: el.name, text: el.name.toLabel() }
+          })
+        })
+        .catch(function (error) {
+          comp.status.show = true;
+          comp.status.text = error;
+          comp.status.type = 'error';
+        });
+    },
+  }
+});
+
 const app = new Vue({
   el: '#app',
   vuetify: new Vuetify(),
@@ -32,6 +99,9 @@ const app = new Vue({
     }
   },
   methods: {
+    addRow(name) {
+      this.displayItems.push(name);
+    },
     getToken() {
       return this.token || window.sessionStorage.getItem('simdb-token-' + this.server);
     },
@@ -48,6 +118,7 @@ const app = new Vue({
       } else {
         args['auth'] = { username: username, password: password };
       }
+      const comp = this;
       axios
         .get('http://' + this.server + '/api/v1.0/simulation/' + this.uuid, args)
         .then(response => {
@@ -56,12 +127,11 @@ const app = new Vue({
           this.items = response.data.metadata;
           this.outputs = response.data.outputs;
           this.inputs = response.data.inputs;
-          // this.displayItems = [];
         })
         .catch(function (error) {
-          app.status.show = true;
-          app.status.text = error;
-          app.status.type = 'error';
+          comp.status.show = true;
+          comp.status.text = error;
+          comp.status.type = 'error';
         });
     },
   },
