@@ -66,7 +66,7 @@ Vue.component('search-output', {
                   </tr>
                 </thead>
                 <tbody>
-                  <data-row v-for="(field, index) in item.metadata" :key="index" :label="field.element" :value="field.value" :index="index"></data-row>
+                  <data-row v-for="(field, index) in item.metadata" :key="index" :name="field.element" :value="field.value" :index="index" :data="item.metadata"></data-row>
                 </tbody>
               </v-simple-table>
             </v-expansion-panel-content>

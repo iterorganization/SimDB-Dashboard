@@ -44,7 +44,7 @@ const app = new Vue({
     getQueryPath: function () {
       return "?__server="
         + encodeURIComponent(this.selectedServer)
-        + "&description&status&summary.fusion.neutron_fluxes.thermal.value&"
+        + '&' + config.searchOutputFields.join('&')
         + this.getQuery();
     },
     getQuery: function () {

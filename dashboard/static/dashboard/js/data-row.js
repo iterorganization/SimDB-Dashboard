@@ -3,7 +3,7 @@ Vue.component('DataRow', {
   template: `
   <tr>
     <td style="min-width: 25em"><[ name.toLabel() ]></td>
-    <td>
+    <td style="min-width: 35em">
       <v-container style="width: 70%" class="ml-0">
         <template v-if="isXML()">
           <pre style="max-height: 400px">
@@ -21,10 +21,20 @@ Vue.component('DataRow', {
   </tr>
   `,
   props: {
-    name: null,
-    value: null,
-    index: null,
-    data: null,
+    name: {
+      type: String,
+      required: true,
+    },
+    value: {
+      required: true,
+    },
+    index: {
+      type: Number,
+      required: true,
+    },
+    data: {
+      required: true,
+    },
   },
   methods: {
     getXData: function (name, value) {

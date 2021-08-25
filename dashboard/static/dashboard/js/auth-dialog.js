@@ -41,8 +41,14 @@ Vue.component('AuthDialog', {
   </v-dialog> 
   `,
   props: {
-    server: null,
-    show: null,
+    server: {
+      type: String,
+      required: true,
+    },
+    show: {
+      type: Boolean,
+      required: true,
+    },
   },
   methods: {
     submit(evt) {
