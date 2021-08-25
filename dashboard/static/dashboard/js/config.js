@@ -1,16 +1,17 @@
-const searchFields = [
-    'database',
-    'shot',
-    'run',
-    'workflow.name',
-    'status',
-];
-
-const displayFields = [
-    'database',
-    'shot',
-    'run',
-    'workflow.name',
-    'status',
-    'description',
-];
+const config = {
+    searchFields: [
+        'database',
+        'shot',
+        'run',
+        'workflow.name',
+        'status',
+    ],
+    displayFields: [
+        'database',
+        'shot',
+        'run',
+        'workflow.name',
+        'status',
+        'description',
+    ],
+}

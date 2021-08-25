@@ -7,7 +7,7 @@ const app = new Vue({
       items: [],
       wildSearch: [{ value: null }],
       searchModels: [],
-      searchFields: searchFields.map(el => {
+      searchFields: config.searchFields.map(el => {
         return { name: el, display: el.toLabel() };
       }),
       servers: [

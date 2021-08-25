@@ -2,25 +2,21 @@ Vue.component('DataRow', {
   delimiters: ['<[', ']>'],
   template: `
   <tr>
-    <td><[ name.toLabel() ]></td>
+    <td style="min-width: 25em"><[ name.toLabel() ]></td>
     <td>
-      <div v-if="isXML()">
-        <v-container style="width: 70%;">
-        <pre style="max-height: 400px">
+      <v-container style="width: 70%" class="ml-0">
+        <template v-if="isXML()">
+          <pre style="max-height: 400px">
 <[ value ]>
-        </pre>
-        </v-container>
-      </div>
-      <div v-else-if="isArray()">
-        <v-container style="width: 70%">
-        <plotly-loader :id="'plot' + index" :ydata="processValue(value)" :ylabel="name" :xdata="getXData()" xlabel="time"></plotly-loader>
-        </v-container>
-      </div>
-      <div v-else>
-        <v-container style="width: 70%">
+          </pre>
+        </template>
+        <template v-else-if="isArray()">
+          <plotly-loader :id="'plot' + index" :ydata="processValue(value)" :ylabel="name" :xdata="getXData()" xlabel="time"></plotly-loader>
+        </template>
+        <template v-else>
           <[ processValue(value) ]>
-        </v-container>
-      </div>
+        </template>
+      </v-container>
     </td>
   </tr>
   `,
@@ -38,7 +34,7 @@ Vue.component('DataRow', {
     },
     processValue: function (value) {
       if (!value) {
-        return toString(value);
+        return "No data available.";
       }
       if (value.hasOwnProperty('_type') && value._type === 'numpy.ndarray') {
         if (value.dtype === "int32") {

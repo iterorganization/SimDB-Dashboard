@@ -1,7 +1,7 @@
 Vue.component('RowAdder', {
   template: `
       <tr>
-      <td class="p-0">
+      <td class="p-0 pb-3">
         <v-autocomplete
             auto-select-first
             v-model="selectedItem"
@@ -12,9 +12,12 @@ Vue.component('RowAdder', {
             no-data-text="loading..."
         ></v-autocomplete>
       </td>
-      <td>
-        <v-btn class="m-1" :disabled="!(selectedItem && selectedItem.length > 0)" @click="$emit('add', selectedItem)">
+      <td class="pb-3">
+        <v-btn class="m-1 ml-3" :disabled="!(selectedItem && selectedItem.length > 0)" @click="$emit('add', selectedItem)">
           Add Data
+        </v-btn>
+        <v-btn class="m-1" @click="$emit('reset')">
+          Reset
         </v-btn>
       </td>
     </tr>
@@ -77,7 +80,7 @@ const app = new Vue({
       inputs: [],
       outputs: [],
       items: [],
-      displayItems: ['description', 'summary.fusion.neutron_fluxes.dd.total.value'],
+      displayItems: config.displayFields,
       token: null,
       dialog: true,
       status: {
@@ -85,6 +88,11 @@ const app = new Vue({
         text: null,
         type: 'error',
       },
+    }
+  },
+  watch: {
+    displayItems: function() {
+      window.localStorage.setItem('simdb-display-items', JSON.stringify(this.displayItems));
     }
   },
   mounted() {
@@ -97,10 +105,17 @@ const app = new Vue({
     } else {
       this.dialog = true;
     }
+    let displayItems = window.localStorage.getItem('simdb-display-items');
+    if (displayItems) {
+      this.displayItems = JSON.parse(displayItems);
+    }
   },
   methods: {
     addRow(name) {
       this.displayItems.push(name);
+    },
+    resetRows() {
+      this.displayItems = config.displayFields;
     },
     getToken() {
       return this.token || window.sessionStorage.getItem('simdb-token-' + this.server);
