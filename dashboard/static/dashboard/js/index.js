@@ -45,24 +45,24 @@ const app = new Vue({
       return "?__server="
         + encodeURIComponent(this.selectedServer)
         + '&' + config.searchOutputFields.join('&')
-        + this.getQuery();
+        + '&' + this.getQuery();
     },
     getQuery: function () {
-      let query = "";
+      let args = [];
       for (let i = 0; i < this.searchModels.length; i++) {
         const el = this.searchModels[i];
         if (el) {
-          query += this.searchFields[i].name + "=" + el + "&";
+          args.push(this.searchFields[i].name + "=" + el)
         }
       }
       for (let i = 0; i < this.wildSearch.length; i++) {
         const name = this.wildSearch[i].name;
         const value = this.wildSearch[i].value;
         if (name && value) {
-          query += name + "=" + value + "&";
+          args.push(name + "=" + value);
         }
       }
-      return query;
+      return args.join('&');
     },
     doSearch: function (evt) {
       const query = this.getQueryPath();

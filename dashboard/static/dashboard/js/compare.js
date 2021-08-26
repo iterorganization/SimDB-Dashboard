@@ -5,8 +5,7 @@ const app = new Vue({
   data() {
     return {
       server: "",
-      uuid: null,
-      alias: null,
+      uuids: [],
       inputs: [],
       outputs: [],
       items: [],
@@ -18,6 +17,7 @@ const app = new Vue({
         text: null,
         type: 'error',
       },
+      simulations: [],
     }
   },
   watch: {
@@ -28,7 +28,7 @@ const app = new Vue({
   mounted() {
     const tokens = window.location.pathname.split('/');
     const params = new URLSearchParams(window.location.search);
-    this.uuid = tokens[tokens.length - 1];
+    this.uuids = params.getAll('uuid');
     this.server = params.get('server') || config.defaultServer;
     if (this.getToken()) {
       this.setItems("", "");
@@ -38,6 +38,11 @@ const app = new Vue({
     let displayItems = window.localStorage.getItem('simdb-display-items');
     if (displayItems) {
       this.displayItems = JSON.parse(displayItems);
+    }
+  },
+  computed: {
+    loaded: function() {
+      return this.uuids.length === this.simulations.length;
     }
   },
   methods: {
@@ -66,20 +71,25 @@ const app = new Vue({
         args['auth'] = { username: username, password: password };
       }
       const comp = this;
-      axios
-        .get('http://' + this.server + '/api/v1.0/simulation/' + this.uuid, args)
-        .then(response => {
-          this.alias = response.data.alias;
-          this.uuid = response.data.uuid.hex;
-          this.items = response.data.metadata;
-          this.outputs = response.data.outputs;
-          this.inputs = response.data.inputs;
-        })
-        .catch(function (error) {
-          comp.status.show = true;
-          comp.status.text = error;
-          comp.status.type = 'error';
-        });
+      this.uuids.forEach(function (uuid) {
+        axios
+          .get('http://' + comp.server + '/api/v1.0/simulation/' + uuid, args)
+          .then(response => {
+            let simulation = {
+              alias: response.data.alias,
+              uuid: response.data.uuid.hex,
+              items: response.data.metadata,
+              outputs: response.data.outputs,
+              inputs: response.data.inputs,
+            }
+            comp.simulations.push(simulation);
+          })
+          .catch(function (error) {
+            comp.status.show = true;
+            comp.status.text = error;
+            comp.status.type = 'error';
+          });
+      });
     },
   },
 });

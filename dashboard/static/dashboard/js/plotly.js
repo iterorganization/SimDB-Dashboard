@@ -31,7 +31,7 @@ Vue.component('SkeletonBox', {
 Vue.component('Plotly', {
   delimiters: ['<[', ']>'],
   template: `
-    <div :id="id" style="width:600px;height:400px;"></div>
+    <div :id="id" :style="style"></div>
   `,
   props: {
     id: {
@@ -42,10 +42,7 @@ Vue.component('Plotly', {
       type: String,
       required: true,
     },
-    xdata: {
-      required: true,
-    },
-    ydata: {
+    traces: {
       required: true,
     },
     xlabel: {
@@ -54,14 +51,16 @@ Vue.component('Plotly', {
     ylabel: {
       type: String,
     },
+    width: {
+      type: String,
+      required: true,
+    },
+    height: {
+      type: String,
+      required: true,
+    }
   },
   mounted() {
-    let trace = {
-      y: this.ydata,
-    };
-    if (this.xdata) {
-      trace['x'] = this.xdata;
-    }
     let layout = {
       title: {
         text: this.title,
@@ -77,8 +76,16 @@ Vue.component('Plotly', {
         },
       },
     };
-    let data = [trace];
-    Plotly.newPlot(this.$el, data, layout);
+    if (this.traces.length > 1) {
+      layout['showlegend'] = true;
+      layout['legend'] = { x: 1, xanchor: 'right', y: 1, };
+    }
+    Plotly.newPlot(this.$el, this.traces, layout);
+  },
+  computed: {
+    style: function () {
+      return "width: " + this.width + ";height: " + this.height + ";margin-left: calc((100% - " + this.width + ") / 2)";
+    }
   },
 })
 
@@ -89,10 +96,7 @@ Vue.component('PlotlyLoader', {
       type: String,
       required: true,
     },
-    xdata: {
-      required: true,
-    },
-    ydata: {
+    traces: {
       required: true,
     },
     xlabel: {
@@ -101,6 +105,14 @@ Vue.component('PlotlyLoader', {
     ylabel: {
       type: String,
     },
+    width: {
+      type: String,
+      default: '600px',
+    },
+    height: {
+      type: String,
+      default: '400px',
+    }
   },
   data() {
     return {
@@ -110,12 +122,20 @@ Vue.component('PlotlyLoader', {
   template: `
     <div>
       <template v-if="isVisible">
-        <plotly :id="id" :title="ylabel.toLabel()" :xdata="xdata" :ydata="ydata" :xlabel="xlabel" :ylabel="ylabel"></plotly>
+        <plotly 
+          :id="id"
+          :title="ylabel.toLabel()"
+          :traces="traces"
+          :xlabel="xlabel"
+          :ylabel="ylabel"
+          :height="height"
+          :width="width">  
+        </plotly>
         <v-card tile flat dense class="d-flex flex-row p-0 m-0">
-          <v-btn small text @click="downloadData(id)">Download Data</v-btn>
-        </v-card>        
+          <v-btn small text @click="downloadData(id)" style="margin-left: calc(50% - 5em);">Download Data</v-btn>
+        </v-card>
       </template>
-      <skeleton-box height="400px" v-else>Loading</skeleton-box>
+      <skeleton-box :height="height" :width="width" v-else>Loading</skeleton-box>
     </div>
   `,
   mounted() {
@@ -135,7 +155,8 @@ Vue.component('PlotlyLoader', {
     downloadData: function (id) {
       let labels = null;
       let data = null;
-      if (this.xdata) {
+      // TODO: fix this for multiple traces
+      if (this.traces.some(trace => trace.x)) {
         labels = (this.xlabel || 'time') + ',' + (this.ylabel || 'data');
         let ydata = this.ydata;
         let xdata = Array.from(this.xdata.values());

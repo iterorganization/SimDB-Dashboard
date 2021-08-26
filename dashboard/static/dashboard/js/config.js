@@ -1,4 +1,9 @@
 const config = {
+    servers: [
+      '0.0.0.0:5000',
+      '0.0.0.0:4000',
+    ],
+    defaultServer: '0.0.0.0:5000',
     searchFields: [
         'database',
         'shot',

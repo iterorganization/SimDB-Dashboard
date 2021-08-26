@@ -25,7 +25,7 @@ def simulation_by_alias(alias):
     return render_template('dashboard/simulation.html')
 
 
-@bp.route('/compare', methods=('GET',))
+@bp.route('/compare/', methods=('GET',))
 def compare():
     return render_template('dashboard/compare.html')
 

@@ -11,7 +11,7 @@ Vue.component('DataRow', {
           </pre>
         </template>
         <template v-else-if="isArray()">
-          <plotly-loader :id="'plot' + index" :ydata="processValue(value)" :ylabel="name" :xdata="getXData()" xlabel="time"></plotly-loader>
+          <plotly-loader :id="'plot' + index" :traces="getTraces(value)" :ylabel="name" xlabel="time"></plotly-loader>
         </template>
         <template v-else>
           <[ processValue(value) ]>
@@ -37,7 +37,17 @@ Vue.component('DataRow', {
     },
   },
   methods: {
-    getXData: function (name, value) {
+    getTraces: function (value) {
+      let data = {
+        y: this.processValue(value),
+      };
+      let xdata = this.getXData();
+      if (xdata) {
+        data['x'] = xdata;
+      }
+      return [data];
+    },
+    getXData: function () {
       let root = this.name.split('.')[0];
       let time = this.data.find(el => el.element === root + '.time');
       return time ? this.processValue(time.value) : null;
