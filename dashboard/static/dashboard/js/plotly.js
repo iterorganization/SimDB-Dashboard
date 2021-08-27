@@ -155,17 +155,40 @@ Vue.component('PlotlyLoader', {
     downloadData: function (id) {
       let labels = null;
       let data = null;
-      // TODO: fix this for multiple traces
       if (this.traces.some(trace => trace.x)) {
-        labels = (this.xlabel || 'time') + ',' + (this.ylabel || 'data');
-        let ydata = this.ydata;
-        let xdata = Array.from(this.xdata.values());
-        data = xdata.map(function(el, idx) {
-          return el.toString() + ',' + ydata[idx].toString();
-        }).join('\n');
+        labels = "time," + this.traces.map(el => el.name).join(",");
+        const max_lengths = this.traces.map(trace => Math.max(trace.x.length, trace.y.length));
+        const max_length = Math.max(...max_lengths);
+
+        let rows = [];
+        for (const i of Array(max_length).keys()) {
+          let row = Array(this.traces.length + 1);
+          for (const n of row.keys()) {
+            if (n === 0) {
+              row[n] = this.traces[n].x[i];
+            } else {
+              row[n] = this.traces[n - 1].y[i];
+            }
+          }
+          rows.push(row.map(e => e ? e.toString() : "").join(","));
+        }
+
+        data = rows.join("\n");
       } else {
-        labels = this.ylabel || 'data';
-        data = this.ydata.map(e => e.toString()).join("\n");
+        labels = this.traces.map(el => el.name).join(",");
+        const max_lengths = this.traces.map(trace => trace.y.length);
+        const max_length = Math.max(...max_lengths);
+
+        let rows = [];
+        for (const i of Array(max_length).keys()) {
+          let row = Array(this.traces.length);
+          for (const n of row.keys()) {
+            row[n] = this.traces[n].y[i];
+          }
+          rows.push(row.map(e => e ? e.toString() : "").join(","));
+        }
+
+        data = rows.join("\n");
       }
       let csvContent = "data:text/csv;charset=utf-8," + labels + "\n" + data;
       let encodedUri = encodeURI(csvContent);

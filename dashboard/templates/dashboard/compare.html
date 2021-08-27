@@ -39,8 +39,7 @@
                     :name="name"
                     :simulations="simulations"
                     :uuids="uuids"
-                    :index="index"
-                    :data="items">
+                    :index="index">
                 </compare-row>
                 <compare-plot
                     v-for="(name, index) in displayItems"
@@ -49,7 +48,6 @@
                     :simulations="simulations"
                     :uuids="uuids"
                     :index="index"
-                    :data="items"
                     :loaded="loaded">
                 </compare-plot>
                 <row-adder :server="server" @add="addRow" @reset="resetRows"></row-adder>

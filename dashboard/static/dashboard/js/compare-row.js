@@ -32,9 +32,6 @@ Vue.component('CompareRow', {
       type: Number,
       required: true,
     },
-    data: {
-      required: true,
-    },
   },
   methods: {
     getValue: function (simulation, name) {
@@ -111,9 +108,6 @@ Vue.component('ComparePlot', {
       type: Number,
       required: true,
     },
-    data: {
-      required: true,
-    },
     loaded: {
       required: true,
     }
@@ -123,7 +117,7 @@ Vue.component('ComparePlot', {
       return this.uuids.map(uuid => {
         let simulation = this.simulations.find(sim => sim.uuid === uuid);
         let data = {
-          y: this.processValue(simulation, name),
+          y: this.processValue(this.getValue(simulation, name)),
           name: simulation.alias || simulation.uuid,
         };
         let xdata = this.getXData(simulation, name);
@@ -139,11 +133,10 @@ Vue.component('ComparePlot', {
     },
     getXData: function (simulation, name) {
       let root = name.split('.')[0];
-      let time = this.data.find(el => el.element === root + '.time');
-      return time ? this.processValue(simulation, name) : null;
+      let time = this.getValue(simulation, root + '.time');
+      return time ? this.processValue(time) : null;
     },
-    processValue: function (simulation, name) {
-      let value = this.getValue(simulation, name);
+    processValue: function (value) {
       if (!value) {
         return "No data available.";
       }
