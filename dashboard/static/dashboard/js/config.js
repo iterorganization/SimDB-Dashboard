@@ -1,9 +1,9 @@
 const config = {
+    api_version: '1.0',
     servers: [
-      '0.0.0.0:5000',
-      '0.0.0.0:4000',
+      'io-ls-simdb01.iter.org',
     ],
-    defaultServer: '0.0.0.0:5000',
+    defaultServer: 'io-ls-simdb01.iter.org',
     searchFields: [
         'database',
         'shot',

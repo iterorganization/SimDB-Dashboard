@@ -121,7 +121,7 @@ Vue.component('search-output', {
       const params = new URLSearchParams(this.query);
       params.delete('__server');
       const query = params.toString();
-      const url = 'http://' + decodeURIComponent(this.server) + '/api/v1.0';
+      const url = 'https://' + decodeURIComponent(this.server) + '/api/v' + config.api_version;
       axios
         .get(url + '/simulations?' + query, args)
         .then(response => {

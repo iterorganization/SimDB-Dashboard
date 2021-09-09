@@ -60,7 +60,7 @@ Vue.component('AuthDialog', {
     storeToken(evt) {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
-      const url = 'http://' + decodeURIComponent(this.server) + '/api/v1.0';
+      const url = 'https://' + decodeURIComponent(this.server) + '/api/v' + config.api_version;
       axios
         .get(url + '/token', {
           auth: { username: username, password: password },

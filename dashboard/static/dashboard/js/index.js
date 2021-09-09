@@ -10,11 +10,8 @@ const app = new Vue({
       searchFields: config.searchFields.map(el => {
         return { name: el, display: el.toLabel() };
       }),
-      servers: [
-        '0.0.0.0:5000',
-        '0.0.0.0:4000',
-      ],
-      selectedServer: '0.0.0.0:5000',
+      servers: config.servers,
+      selectedServer: config.defaultServer,
       status: {
         show: false,
         text: null,
@@ -76,7 +73,7 @@ const app = new Vue({
     },
     setItems: function () {
       this.status.show = false;
-      const url = 'http://' + decodeURIComponent(this.selectedServer) + '/api/v1.0';
+      const url = 'https://' + decodeURIComponent(this.selectedServer) + '/api/v' + config.api_version;
       axios
         .get(url + '/metadata')
         .then(response => {

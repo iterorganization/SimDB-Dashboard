@@ -9,7 +9,7 @@ const app = new Vue({
       inputs: [],
       outputs: [],
       items: [],
-      displayItems: config.displayFields,
+      displayItems: [...config.displayFields],
       token: null,
       dialog: true,
       status: {
@@ -52,7 +52,7 @@ const app = new Vue({
       }
     },
     resetRows() {
-      this.displayItems = config.displayFields;
+      this.displayItems = [...config.displayFields];
     },
     getToken() {
       return this.token || window.sessionStorage.getItem('simdb-token-' + this.server);
@@ -71,9 +71,10 @@ const app = new Vue({
         args['auth'] = { username: username, password: password };
       }
       const comp = this;
+      const url = 'https://' + comp.server + '/api/v' + config.api_version;
       this.uuids.forEach(function (uuid) {
         axios
-          .get('http://' + comp.server + '/api/v1.0/simulation/' + uuid, args)
+          .get(url + '/simulation/' + uuid, args)
           .then(response => {
             let simulation = {
               alias: response.data.alias,
