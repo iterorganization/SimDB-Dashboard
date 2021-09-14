@@ -1,5 +1,5 @@
 [Unit]
-Description=simdb dashboard socket
+Description=SimDB dashboard socket
 
 [Socket]
 ListenStream=/run/dashboard.sock

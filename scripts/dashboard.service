@@ -1,5 +1,5 @@
 [Unit]
-Description=simdb dashboard gunicorn daemon
+Description=SimDB dashboard gunicorn daemon
 Requires=dashboard.socket
 After=network.target
 
