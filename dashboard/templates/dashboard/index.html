@@ -25,71 +25,7 @@
               <v-subheader>Search</v-subheader>
             </v-row>
             <v-divider></v-divider>
-            <v-row dense>
-              <v-col cols="12">
-                <v-select filled :items="servers" v-model="selectedServer" label="SimDB Server" hide-details @change="setItems"></v-select>
-              </v-col>
-            </v-row>
-            <v-row dense>
-              <v-col cols="12">
-                <v-alert text :value="status.show" :type="status.type"><[ status.text ]></v-alert>
-              </v-col>
-            </v-row>
-            <v-divider></v-divider>
-            <v-row dense v-for="(item, index) in searchFields" :key="item.name" align="center">
-              <v-col cols="6">
-                <v-subheader :for="item.name"><[ item.display ]></v-subheader>
-              </v-col>
-              <v-col cols="6" class="p-0">
-                <v-text-field :id="item.name" v-model="searchModels[index]" dense filled hide-details></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row dense v-for="(item, index) in wildSearch" :key="index" align="center">
-              <v-col cols="1">
-                <v-btn @click="deleteSearch(index)" block class="p-0" small text>
-                  <v-icon color="blue-grey">mdi-minus-box</v-icon>
-                </v-btn>
-              </v-col>
-              <v-col cols="5">
-                <v-autocomplete
-                    auto-select-first
-                    clearable
-                    v-model="item.name"
-                    :items="items"
-                    dense
-                    filled
-                    hide-details
-                    no-data-text="loading..."
-                ></v-autocomplete>
-              </v-col>
-              <v-col cols="6" class="p-0">
-                <v-text-field :id="item.id" v-model="item.value" dense filled hide-details></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row dense>
-              <v-card tile flat dense class="d-flex flex-row-reverse p-0 mt-2">
-                <v-btn @click="addSearch" class="p-0" small text dense>
-                  <v-icon color="blue-grey">mdi-plus</v-icon>
-                </v-btn>
-              </v-card>
-            </v-row>
-            <v-divider></v-divider>
-            <v-row dense>
-              <v-card tile flat dense class="d-flex flex-row-reverse p-0 mt-1">
-                <v-btn @click="doSearch">
-                  <template v-if="getQuery().length == 0">
-                    Show All
-                  </template>
-                  <template v-else>
-                    Search
-                    <v-icon>mdi-database-search</v-icon>
-                  </template>
-                </v-btn>
-                <v-btn @click="doSearch" class="mr-1" :disabled="getQuery().length == 0">
-                  Clear
-                </v-btn>
-              </v-card>
-            </v-row>
+            <search-input @search="doSearch"></search-input>
           </v-col>
           <v-col cols="9">
             <v-row>
@@ -110,6 +46,7 @@
 <script src="{{ url_for('static', filename='dashboard/js/plotly.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/data-row.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/auth-dialog.js') }}"></script>
+<script src="{{ url_for('static', filename='dashboard/js/search-input.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/search-output.js') }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/index.js') }}"></script>
 {% endblock %}

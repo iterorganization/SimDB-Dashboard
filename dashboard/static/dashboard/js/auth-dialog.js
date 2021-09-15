@@ -54,7 +54,6 @@ Vue.component('AuthDialog', {
     submit(evt) {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
-      this.show = false;
       this.$emit('ok', username, password);
     },
     storeToken(evt) {
@@ -71,7 +70,6 @@ Vue.component('AuthDialog', {
           this.$emit('ok', "", "");
         })
         .catch(function (error) {
-          app.status.show = true;
           app.status.text = error;
           app.status.type = 'error';
           this.$emit('error');

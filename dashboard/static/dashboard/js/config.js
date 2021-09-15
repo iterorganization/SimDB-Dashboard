@@ -1,5 +1,5 @@
 const config = {
-    api_version: '1.0',
+    api_version: '1.1',
     servers: [
       'io-ls-simdb01.iter.org',
     ],
