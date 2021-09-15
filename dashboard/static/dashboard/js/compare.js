@@ -71,7 +71,7 @@ const app = new Vue({
         args['auth'] = { username: username, password: password };
       }
       const comp = this;
-      const url = 'https://' + comp.server + '/api/v' + config.api_version;
+      const url = config.rootAPI(decodeURIComponent(comp.server));
       this.uuids.forEach(function (uuid) {
         axios
           .get(url + '/simulation/' + uuid, args)

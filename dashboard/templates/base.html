@@ -43,7 +43,7 @@
 <script src="https://cdn.plot.ly/plotly-2.3.0.min.js"></script>
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='dashboard/js/config.js') }}"></script>
+<script src="{{ url_for('static', filename='dashboard/js/' + config_file) }}"></script>
 <script src="{{ url_for('static', filename='dashboard/js/base.js') }}"></script>
 {% endblock %}
 </body>

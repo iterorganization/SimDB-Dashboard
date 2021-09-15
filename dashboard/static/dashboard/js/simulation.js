@@ -66,7 +66,7 @@ const app = new Vue({
         args['auth'] = { username: username, password: password };
       }
       const comp = this;
-      const url = 'https://' + this.server + '/api/v' + config.api_version;
+      const url = config.rootAPI(decodeURIComponent(this.server));
       axios
         .get(url + '/simulation/' + this.uuid, args)
         .then(response => {

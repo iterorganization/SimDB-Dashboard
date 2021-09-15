@@ -53,7 +53,7 @@ Vue.component('RowAdder', {
         return;
       }
       this.status.show = false;
-      const url = 'https://' + decodeURIComponent(this.server) + '/api/v' + config.api_version;
+      const url = config.rootAPI(decodeURIComponent(this.server));
       const comp = this;
       axios
         .get(url + '/metadata')

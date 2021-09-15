@@ -169,7 +169,7 @@ Vue.component('search-input', {
     },
     setItems: function () {
       this.status.show = false;
-      const url = 'https://' + decodeURIComponent(this.selectedServer) + '/api/v' + config.api_version;
+      const url = config.rootAPI(decodeURIComponent(this.selectedServer));
       axios
         .get(url + '/metadata')
         .then(response => {
