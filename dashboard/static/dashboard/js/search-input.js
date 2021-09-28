@@ -121,7 +121,7 @@ Vue.component('search-input', {
       isLoading: true,
       items: [],
       itemsFor: {},
-      wildSearch: [{value: null, comparator: 'eq', hover: false, items: []}],
+      wildSearch: [],
       searchFields: config.searchFields.map(el => {
         return {name: el, display: el.toLabel(), value: null, comparator: 'eq', hover: false};
       }),
@@ -137,13 +137,56 @@ Vue.component('search-input', {
     }
   },
   mounted() {
+    let params = new URLSearchParams(window.location.search);
+    let keys = new Set(params.keys());
+    for (let key of keys) {
+      if (key.startsWith('__')) {
+        continue;
+      }
+      for (let value of params.getAll(key)) {
+        let idx = value.search(':');
+        if (idx >= 0) {
+          let comp = value.substr(0, idx);
+          let name = value.substr(idx + 1);
+          this.setField(key, comp, name);
+        } else {
+          this.setField(key, "eq", value);
+        }
+      }
+    }
+    if (this.wildSearch.length === 0) {
+      this.wildSearch = [{value: null, comparator: 'eq', hover: false, items: []}];
+    }
     this.setItems();
   },
   methods: {
+    setField: function (name, comp, value) {
+      if (!value) {
+        return;
+      }
+      let found = false;
+      for (let i = 0; i < this.searchFields.length; i++) {
+        if (this.searchFields[i].name === name && !this.searchFields[i].value) {
+          this.searchFields[i].comparator = comp;
+          this.searchFields[i].value = value;
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        return;
+      }
+      this.wildSearch.push({name: name, value: value, comparator: comp, hover: false, items: []});
+    },
     changed: function() {
       for (let i = 0; i < this.wildSearch.length; i++) {
         let name = this.wildSearch[i].name;
+        if (!name) {
+          this.wildSearch[i].items = [];
+          continue;
+        }
         if (name in this.itemsFor) {
+          this.wildSearch[i].items = this.itemsFor[name];
           continue;
         }
         const url = config.rootAPI(decodeURIComponent(this.selectedServer));
@@ -151,8 +194,8 @@ Vue.component('search-input', {
         axios
           .get(url + '/metadata/' + name)
           .then(response => {
-            // this.itemsFor[name] = response.data;
             this.wildSearch[i].items = response.data;
+            this.itemsFor[name] = response.data;
           })
           .catch(function (error) {
             app.status.show = true;
@@ -162,7 +205,7 @@ Vue.component('search-input', {
       }
     },
     addSearch: function () {
-      this.wildSearch.push({value: null, comparator: 'eq', hover: false});
+      this.wildSearch.push({value: null, comparator: 'eq', hover: false, items: []});
     },
     deleteSearch: function (index) {
       this.wildSearch.splice(index, 1);
@@ -180,7 +223,11 @@ Vue.component('search-input', {
         const comp = this.searchFields[i].comparator + ":";
         const value = this.searchFields[i].value;
         if (value) {
-          args.push(name + "=" + comp + value.trim())
+          if (value.trim) {
+            args.push(name + "=" + comp + value.trim())
+          } else {
+            args.push(name + "=" + comp + value)
+          }
         }
       }
       for (let i = 0; i < this.wildSearch.length; i++) {
@@ -188,7 +235,11 @@ Vue.component('search-input', {
         const comp = this.wildSearch[i].comparator + ":";
         const value = this.wildSearch[i].value;
         if (name && value) {
-          args.push(name + "=" + comp + value.trim());
+          if (value.trim) {
+            args.push(name + "=" + comp + value.trim())
+          } else {
+            args.push(name + "=" + comp + value)
+          }
         }
       }
       return args.join('&');
