@@ -50,7 +50,7 @@
                     :index="index"
                     :loaded="loaded">
                 </compare-plot>
-                <row-adder :server="server" @add="addRow" @reset="resetRows"></row-adder>
+                <row-adder :server="server" @add="addRow" @remove="removeRow" @reset="resetRows"></row-adder>
               </tbody>
             </template>
           </v-simple-table>

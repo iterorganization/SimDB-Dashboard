@@ -14,7 +14,10 @@ Vue.component('RowAdder', {
       </td>
       <td class="pb-3">
         <v-btn class="m-1 ml-3" :disabled="!(selectedItem && selectedItem.length > 0)" @click="$emit('add', selectedItem)">
-          Add Data
+          Add Row
+        </v-btn>
+        <v-btn class="m-1" @click="$emit('remove', selectedItem)">
+          Remove Last Row
         </v-btn>
         <v-btn class="m-1" @click="$emit('reset')">
           Reset

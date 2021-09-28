@@ -43,14 +43,22 @@ Vue.component('search-output', {
       <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
       <div v-if="items.length > 0">
         <v-card flat tile dense class="d-flex flex-row-reverse mb-3">
-          <v-btn dense text @click="doCompare" :disabled="selectedSimulations.length == 0">
+          <v-btn dense text @click="doCompare" :disabled="selectedSimulations.length < 2">
             Compare
           </v-btn>
         </v-card>
         <v-expansion-panels multiple accordion>
           <v-expansion-panel v-for="(item,i) in items" :key="i">
             <v-expansion-panel-header>
-              <v-checkbox v-model="selectedSimulations" :value="item.uuid.hex" @click.stop="" dense hide-details style="max-width: 50px" multiple></v-checkbox>
+              <v-checkbox
+                  v-model="selectedSimulations"
+                  :value="item.uuid.hex"
+                  @click.stop="" 
+                  dense 
+                  hide-details 
+                  style="max-width: 50px" 
+                  multiple>
+                </v-checkbox>
               <span>
                 <a :href="'uuid/' + item.uuid.hex + '?server=' + server" @click.stop="">
                   <[ getLabel(item) ]>
@@ -66,7 +74,14 @@ Vue.component('search-output', {
                   </tr>
                 </thead>
                 <tbody>
-                  <data-row v-for="(field, index) in item.metadata" :key="index" :name="field.element" :value="field.value" :index="index" :data="item.metadata"></data-row>
+                  <data-row 
+                      v-for="(field, index) in item.metadata"
+                     :key="index" 
+                     :name="field.element" 
+                     :value="field.value" 
+                     :index="index" 
+                     :data="item.metadata">
+                  </data-row>
                 </tbody>
               </v-simple-table>
             </v-expansion-panel-content>

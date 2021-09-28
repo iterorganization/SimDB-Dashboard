@@ -31,7 +31,15 @@ Vue.component('search-input', {
         <v-card v-if="item.hover" style="position: absolute; padding: 0.2em"><[ helpText(item.comparator) ]></v-card>
       </v-col>
       <v-col cols="5" class="p-0" style="padding-left: 0">
-        <v-text-field :id="item.name" v-model="item.value" dense filled hide-details></v-text-field>
+        <v-combobox
+            clearable
+            v-model="item.value"
+            :items="itemsFor[item.name]"
+            dense
+            filled
+            hide-details
+        ></v-combobox>
+<!--        <v-text-field :id="item.name" v-model="item.value" dense filled hide-details></v-text-field>-->
       </v-col>
     </v-row>
     <v-row dense v-for="(item, index) in wildSearch" :key="index" align="center">
@@ -50,6 +58,8 @@ Vue.component('search-input', {
             filled
             hide-details
             no-data-text="loading..."
+            :loading="isLoading"
+            @change="changed"
         ></v-autocomplete>
       </v-col>
       <v-col cols="2" class="p-0" style="padding-right: 0">
@@ -66,7 +76,15 @@ Vue.component('search-input', {
         <v-card v-if="item.hover" style="position: absolute; padding: 0.2em"><[ helpText(item.comparator) ]></v-card>
       </v-col>
       <v-col cols="5" style="padding: 0">
-        <v-text-field v-model="item.value" dense filled hide-details></v-text-field>
+        <v-combobox
+            clearable
+            v-model="item.value"
+            :items="item.items"
+            dense
+            filled
+            hide-details
+        ></v-combobox>
+<!--        <v-text-field v-model="item.value" dense filled hide-details></v-text-field>-->
       </v-col>
     </v-row>
     <v-row dense class="d-flex flex-row-reverse">
@@ -100,8 +118,10 @@ Vue.component('search-input', {
   `,
   data() {
     return {
+      isLoading: true,
       items: [],
-      wildSearch: [{value: null, comparator: 'eq', hover: false}],
+      itemsFor: {},
+      wildSearch: [{value: null, comparator: 'eq', hover: false, items: []}],
       searchFields: config.searchFields.map(el => {
         return {name: el, display: el.toLabel(), value: null, comparator: 'eq', hover: false};
       }),
@@ -112,13 +132,35 @@ Vue.component('search-input', {
         text: null,
         type: 'error',
       },
-      comparators: ['eq', 'in', 'gt', 'ge', 'lt', 'le'],
+      // TODO: fetch comparators from simdb API
+      comparators: ['eq', 'ne', 'in', 'ni', 'gt', 'ge', 'lt', 'le'],
     }
   },
   mounted() {
     this.setItems();
   },
   methods: {
+    changed: function() {
+      for (let i = 0; i < this.wildSearch.length; i++) {
+        let name = this.wildSearch[i].name;
+        if (name in this.itemsFor) {
+          continue;
+        }
+        const url = config.rootAPI(decodeURIComponent(this.selectedServer));
+        const app = this;
+        axios
+          .get(url + '/metadata/' + name)
+          .then(response => {
+            // this.itemsFor[name] = response.data;
+            this.wildSearch[i].items = response.data;
+          })
+          .catch(function (error) {
+            app.status.show = true;
+            app.status.text = error;
+            app.status.type = 'error';
+          })
+      }
+    },
     addSearch: function () {
       this.wildSearch.push({value: null, comparator: 'eq', hover: false});
     },
@@ -138,7 +180,7 @@ Vue.component('search-input', {
         const comp = this.searchFields[i].comparator + ":";
         const value = this.searchFields[i].value;
         if (value) {
-          args.push(name + "=" + comp + value)
+          args.push(name + "=" + comp + value.trim())
         }
       }
       for (let i = 0; i < this.wildSearch.length; i++) {
@@ -146,7 +188,7 @@ Vue.component('search-input', {
         const comp = this.wildSearch[i].comparator + ":";
         const value = this.wildSearch[i].value;
         if (name && value) {
-          args.push(name + "=" + comp + value);
+          args.push(name + "=" + comp + value.trim());
         }
       }
       return args.join('&');
@@ -170,12 +212,27 @@ Vue.component('search-input', {
     setItems: function () {
       this.status.show = false;
       const url = config.rootAPI(decodeURIComponent(this.selectedServer));
+      const app = this;
+      for (let i = 0; i < this.searchFields.length; i++) {
+        let name = this.searchFields[i].name;
+        axios
+          .get(url + '/metadata/' + name)
+          .then(response => {
+            this.itemsFor[name] = response.data;
+          })
+          .catch(function (error) {
+            app.status.show = true;
+            app.status.text = error;
+            app.status.type = 'error';
+          })
+      }
       axios
         .get(url + '/metadata')
         .then(response => {
           this.items = response.data.map(el => {
             return {value: el.name, text: el.name.toLabel()}
           })
+          this.isLoading = false;
         })
         .catch(function (error) {
           app.status.show = true;
@@ -185,8 +242,10 @@ Vue.component('search-input', {
     },
     helpText: function (item) {
       const help = {
-        "eq": "Equals",
+        "eq": "Equal to",
+        "ne": "Not equal to",
         "in": "Contained in",
+        "ni": "Not contained in",
         "gt": "Greater than",
         "ge": "Greater than or equal to",
         "lt": "Less than",

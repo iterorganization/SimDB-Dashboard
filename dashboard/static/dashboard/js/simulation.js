@@ -46,6 +46,9 @@ const app = new Vue({
         this.displayItems.push(name);
       }
     },
+    removeRow() {
+      this.displayItems.pop();
+    },
     resetRows() {
       this.displayItems = [...config.displayFields];
     },

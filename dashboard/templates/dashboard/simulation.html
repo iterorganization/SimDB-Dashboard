@@ -40,7 +40,7 @@
               <thead><tr><th class="pl-1">Key</th><th class="pl-2">Value</th></tr></thead>
               <tbody>
                 <data-row v-for="(name, index) in displayItems" :key="index" :name="name" :value="getValue(name)" :index="index" :data="items"></data-row>
-                <row-adder :server="server" @add="addRow" @reset="resetRows"></row-adder>
+                <row-adder :server="server" @add="addRow" @remove="removeRow" @reset="resetRows"></row-adder>
               </tbody>
             </template>
           </v-simple-table>

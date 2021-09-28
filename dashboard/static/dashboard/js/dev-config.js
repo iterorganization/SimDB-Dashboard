@@ -17,6 +17,7 @@ const config = {
         'run',
         'workflow.name',
         'status',
+        'replaces',
     ],
     displayFields: [
         'database',
