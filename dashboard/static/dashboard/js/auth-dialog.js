@@ -60,6 +60,7 @@ Vue.component('AuthDialog', {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const url = config.rootAPI(decodeURIComponent(this.server));
+      const self = this;
       axios
         .get(url + '/token', {
           auth: { username: username, password: password },
@@ -72,7 +73,7 @@ Vue.component('AuthDialog', {
         .catch(function (error) {
           app.status.text = error;
           app.status.type = 'error';
-          this.$emit('error');
+          self.$emit('error');
         })
     },
   },

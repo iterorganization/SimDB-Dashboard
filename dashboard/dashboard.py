@@ -32,7 +32,7 @@ def simulation_by_alias(alias):
 
 @bp.route('/compare/', methods=('GET',))
 def compare():
-    return render_template('dashboard/compare.html', config_file='config.js')
+    return render_template('dashboard/compare.html', config_file=get_config_file())
 
 
 @bp.route('/404')

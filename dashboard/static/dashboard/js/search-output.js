@@ -1,57 +1,19 @@
 Vue.component('search-output', {
   delimiters: ['<[', ']>'],
-  data: function () {
-    return {
-      loading: false,
-      count: 0,
-      items: [],
-      page: 1,
-      pageCount: 0,
-      dialog: false,
-      token: null,
-      error: null,
-      selectedSimulations: [],
-    }
-  },
-  props: {
-    query: null,
-    server: null,
-  },
-  watch: {
-    query: function (newVal, oldVal) {
-      const params = new URLSearchParams(newVal);
-      const server = params.get('__server');
-      if (server) {
-        this.server = server;
-      }
-      if (this.query) {
-        if (!this.getToken()) {
-          this.dialog = true;
-        } else {
-          this.fetchData("", "", this.page);
-        }
-      } else {
-          this.items = [];
-          this.count = 0;
-          this.page = 1;
-          this.pageCount = 0;
-      }
-    }
-  },
   template: `
     <div>
       <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
       <div v-if="items.length > 0">
         <v-card flat tile dense class="d-flex flex-row-reverse mb-3">
-          <v-btn dense text @click="doCompare" :disabled="selectedSimulations.length < 2">
+          <v-btn dense text @click="doCompare" :disabled="numSelected < 2">
             Compare
           </v-btn>
         </v-card>
-        <v-expansion-panels multiple accordion>
+        <v-expansion-panels multiple accordion v-model="panels">
           <v-expansion-panel v-for="(item,i) in items" :key="i">
             <v-expansion-panel-header>
               <v-checkbox
-                  v-model="selectedSimulations"
+                  v-model="selectedSimulations[item.uuid.hex]"
                   :value="item.uuid.hex"
                   @click.stop="" 
                   dense 
@@ -97,9 +59,65 @@ Vue.component('search-output', {
       </v-overlay>
     </div>
   `,
+  data: function () {
+    return {
+      loading: false,
+      count: 0,
+      items: [],
+      page: 1,
+      pageCount: 0,
+      dialog: false,
+      token: null,
+      error: null,
+      selectedSimulations: {},
+      panels: [],
+    }
+  },
+  props: {
+    query: null,
+    server: null,
+  },
+  computed: {
+    numSelected() {
+      let count = 0;
+      for (let key in this.selectedSimulations) {
+        if (this.selectedSimulations[key].length) {
+          count += 1;
+        }
+      }
+      return count;
+    },
+  },
+  watch: {
+    query: function (newVal, oldVal) {
+      const params = new URLSearchParams(newVal);
+      const server = params.get('__server');
+      if (server) {
+        this.server = server;
+      }
+      if (this.query) {
+        if (!this.getToken()) {
+          this.dialog = true;
+        } else {
+          this.fetchData("", "", this.page);
+        }
+      } else {
+          this.items = [];
+          this.count = 0;
+          this.page = 1;
+          this.pageCount = 0;
+      }
+    }
+  },
   methods: {
     doCompare() {
-      window.location.href = 'compare/?uuid=' + this.selectedSimulations.join('&uuid=');
+      let uuids = [];
+      for (let uuid in this.selectedSimulations) {
+        if (this.selectedSimulations[uuid].length) {
+          uuids.push(uuid);
+        }
+      }
+      window.location.href = 'compare/?uuid=' + uuids.join('&uuid=');
     },
     getLabel(item) {
       return `${item.alias}`;
@@ -111,6 +129,7 @@ Vue.component('search-output', {
       return this.token;
     },
     updatePage(page) {
+      this.panels = [];
       if (!this.getToken()) {
         this.dialog = true;
       } else {
@@ -118,7 +137,7 @@ Vue.component('search-output', {
       }
     },
     fetchData(username, password) {
-      this.selectedSimulations = [];
+      // this.selectedSimulations = [];
       this.dialog = false;
       if (!this.query) {
         return;
