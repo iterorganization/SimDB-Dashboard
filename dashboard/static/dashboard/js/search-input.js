@@ -277,19 +277,19 @@ Vue.component('search-input', {
             app.status.type = 'error';
           })
       }
-      axios
-        .get(url + '/metadata')
-        .then(response => {
-          this.items = response.data.map(el => {
-            return {value: el.name, text: el.name.toLabel()}
-          })
-          this.isLoading = false;
-        })
-        .catch(function (error) {
-          app.status.show = true;
-          app.status.text = error;
-          app.status.type = 'error';
-        });
+      // axios
+      //   .get(url + '/metadata')
+      //   .then(response => {
+      //     this.items = response.data.map(el => {
+      //       return {value: el.name, text: el.name.toLabel()}
+      //     })
+      //     this.isLoading = false;
+      //   })
+      //   .catch(function (error) {
+      //     app.status.show = true;
+      //     app.status.text = error;
+      //     app.status.type = 'error';
+      //   });
     },
     helpText: function (item) {
       const help = {

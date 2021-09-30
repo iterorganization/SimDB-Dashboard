@@ -4,7 +4,33 @@ Vue.component('search-output', {
     <div>
       <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
       <div v-if="items.length > 0">
-        <v-card flat tile dense class="d-flex flex-row-reverse mb-3">
+        <v-card fluid class="d-flex align-center" flat tile>
+          <v-spacer></v-spacer>
+          <v-row dense align="center">
+            <v-col cols="3" style="padding-left: 0; padding-right: 0;">
+              <v-subheader style="justify-content: right">Sort By</v-subheader>
+            </v-col>
+            <v-col cols="7" style="padding-left: 0; padding-right: 0;">
+              <v-select
+                  dense
+                  filled
+                  hide-details 
+                  :items="sortItems"
+                  v-model="sort"
+                  @change="updatePage">
+              </v-select>
+            </v-col>
+            <v-col cols="2" style="padding-left: 0; padding-right: 0;">
+              <v-btn dense text @click="toggleSort">
+                <template v-if="sortDescending">
+                  <v-icon>mdi-chevron-down</v-icon>
+                </template>
+                <template v-else>
+                  <v-icon>mdi-chevron-up</v-icon>
+                </template>
+              </v-btn>
+            </v-col>
+          </v-row>
           <v-btn dense text @click="doCompare" :disabled="numSelected < 2">
             Compare
           </v-btn>
@@ -71,6 +97,9 @@ Vue.component('search-output', {
       error: null,
       selectedSimulations: {},
       panels: [],
+      sortDescending: true,
+      sort: null,
+      sortItems: ['status', 'run', 'shot'],
     }
   },
   props: {
@@ -95,6 +124,11 @@ Vue.component('search-output', {
       if (server) {
         this.server = server;
       }
+      const sort = params.get('__sort');
+      if (sort) {
+        this.sort = sort;
+      }
+      this.sortDescending = !Array.from(params.keys()).includes('__sort_asc');
       if (this.query) {
         if (!this.getToken()) {
           this.dialog = true;
@@ -110,6 +144,10 @@ Vue.component('search-output', {
     }
   },
   methods: {
+    toggleSort() {
+      this.sortDescending = !this.sortDescending;
+      this.updatePage();
+    },
     doCompare() {
       let uuids = [];
       for (let uuid in this.selectedSimulations) {
@@ -128,8 +166,16 @@ Vue.component('search-output', {
       }
       return this.token;
     },
-    updatePage(page) {
+    updatePage() {
       this.panels = [];
+      const params = new URLSearchParams(window.location.search);
+      params.delete('__sort')
+      params.delete('__sort_asc')
+      params.append('__sort', this.sort)
+      if (!this.sortDescending) {
+        params.append('__sort_asc', this.sort)
+      }
+      window.history.pushState({}, 'sort', '?' + params.toString());
       if (!this.getToken()) {
         this.dialog = true;
       } else {
@@ -137,7 +183,6 @@ Vue.component('search-output', {
       }
     },
     fetchData(username, password) {
-      // this.selectedSimulations = [];
       this.dialog = false;
       if (!this.query) {
         return;
@@ -147,13 +192,22 @@ Vue.component('search-output', {
       const args = {
         headers: {'simdb-result-limit': 10, 'simdb-page': this.page},
       };
+      if (this.sort) {
+        args.headers['simdb-sort-by'] = this.sort;
+        args.headers['simdb-sort-asc'] = !this.sortDescending;
+      }
       if (this.getToken()) {
         args.headers['Authorization'] = 'JWT-Token ' + this.token;
       } else {
         args['auth'] = { username: username, password: password };
       }
       const params = new URLSearchParams(this.query);
-      params.delete('__server');
+      const keys = Array.from(params.keys());
+      for (let key of keys) {
+        if (key.startsWith('__')) {
+          params.delete(key);
+        }
+      }
       const query = params.toString();
       const url = config.rootAPI(decodeURIComponent(this.server));
       axios
