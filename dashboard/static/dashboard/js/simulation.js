@@ -70,14 +70,14 @@ const app = new Vue({
       }
       const comp = this;
       const url = config.rootAPI(decodeURIComponent(this.server));
-      axios
-        .get(url + '/simulation/' + this.uuid, args)
-        .then(response => {
-          this.alias = response.data.alias;
-          this.uuid = response.data.uuid.hex;
-          this.items = response.data.metadata;
-          this.outputs = response.data.outputs;
-          this.inputs = response.data.inputs;
+      fetch(url + '/simulation/' + this.uuid, args)
+        .then(response => response.json())
+        .then(data => {
+          comp.alias = data.alias;
+          comp.uuid = data.uuid.hex;
+          comp.items = data.metadata;
+          comp.outputs = data.outputs;
+          comp.inputs = data.inputs;
         })
         .catch(function (error) {
           comp.status.show = true;

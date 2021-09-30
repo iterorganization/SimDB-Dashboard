@@ -58,10 +58,10 @@ Vue.component('RowAdder', {
       this.status.show = false;
       const url = config.rootAPI(decodeURIComponent(this.server));
       const comp = this;
-      axios
-        .get(url + '/metadata')
-        .then(response => {
-          this.items = response.data.map(el => {
+      fetch(url + '/metadata')
+        .then(response => response.json())
+        .then(data => {
+          comp.items = data.map(el => {
             return { value: el.name, text: el.name.toLabel() }
           })
         })

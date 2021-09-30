@@ -38,6 +38,7 @@ Vue.component('search-input', {
             dense
             filled
             hide-details
+            :loading="!itemsFor[item.name]"
         ></v-combobox>
 <!--        <v-text-field :id="item.name" v-model="item.value" dense filled hide-details></v-text-field>-->
       </v-col>
@@ -191,11 +192,10 @@ Vue.component('search-input', {
         }
         const url = config.rootAPI(decodeURIComponent(this.selectedServer));
         const app = this;
-        axios
-          .get(url + '/metadata/' + name)
+        fetch(url + '/metadata/' + name)
           .then(response => {
-            this.wildSearch[i].items = response.data;
-            this.itemsFor[name] = response.data;
+            app.wildSearch[i].items = response.data;
+            app.itemsFor[name] = response.data;
           })
           .catch(function (error) {
             app.status.show = true;
@@ -266,10 +266,10 @@ Vue.component('search-input', {
       const app = this;
       for (let i = 0; i < this.searchFields.length; i++) {
         let name = this.searchFields[i].name;
-        axios
-          .get(url + '/metadata/' + name)
-          .then(response => {
-            this.itemsFor[name] = response.data;
+        fetch(url + '/metadata/' + name)
+          .then(response => response.json())
+          .then(data => {
+            app.itemsFor[name] = data;
           })
           .catch(function (error) {
             app.status.show = true;
@@ -277,19 +277,19 @@ Vue.component('search-input', {
             app.status.type = 'error';
           })
       }
-      // axios
-      //   .get(url + '/metadata')
-      //   .then(response => {
-      //     this.items = response.data.map(el => {
-      //       return {value: el.name, text: el.name.toLabel()}
-      //     })
-      //     this.isLoading = false;
-      //   })
-      //   .catch(function (error) {
-      //     app.status.show = true;
-      //     app.status.text = error;
-      //     app.status.type = 'error';
-      //   });
+      fetch(url + '/metadata')
+        .then(response => response.json())
+        .then(data => {
+          app.items = data.map(el => {
+            return {value: el.name, text: el.name.toLabel()}
+          })
+          app.isLoading = false;
+        })
+        .catch(function (error) {
+          app.status.show = true;
+          app.status.text = error;
+          app.status.type = 'error';
+        });
     },
     helpText: function (item) {
       const help = {

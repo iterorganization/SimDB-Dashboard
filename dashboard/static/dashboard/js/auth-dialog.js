@@ -60,20 +60,20 @@ Vue.component('AuthDialog', {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const url = config.rootAPI(decodeURIComponent(this.server));
-      const self = this;
-      axios
-        .get(url + '/token', {
+      const comp = this;
+      fetch(url + '/token', {
           auth: { username: username, password: password },
         })
-        .then(response => {
-          this.token = response.data.token;
+        .then(response => response.json())
+        .then(data => {
+          comp.token = data.token;
           window.sessionStorage.setItem('simdb-token-' + this.server, this.token);
-          this.$emit('ok', "", "");
+          comp.$emit('ok', "", "");
         })
         .catch(function (error) {
           app.status.text = error;
           app.status.type = 'error';
-          self.$emit('error');
+          comp.$emit('error');
         })
     },
   },

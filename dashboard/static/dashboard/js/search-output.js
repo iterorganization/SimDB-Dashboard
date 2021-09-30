@@ -129,6 +129,7 @@ Vue.component('search-output', {
         this.sort = sort;
       }
       this.sortDescending = !Array.from(params.keys()).includes('__sort_asc');
+      this.sortItems = Array.from(params.keys()).filter(el => !el.startsWith('__')).sort();
       if (this.query) {
         if (!this.getToken()) {
           this.dialog = true;
@@ -173,7 +174,7 @@ Vue.component('search-output', {
       params.delete('__sort_asc')
       params.append('__sort', this.sort)
       if (!this.sortDescending) {
-        params.append('__sort_asc', this.sort)
+        params.append('__sort_asc', '')
       }
       window.history.pushState({}, 'sort', '?' + params.toString());
       if (!this.getToken()) {
@@ -188,7 +189,6 @@ Vue.component('search-output', {
         return;
       }
       this.loading = true;
-      const comp = this;
       const args = {
         headers: {'simdb-result-limit': 10, 'simdb-page': this.page},
       };
@@ -210,18 +210,19 @@ Vue.component('search-output', {
       }
       const query = params.toString();
       const url = config.rootAPI(decodeURIComponent(this.server));
-      axios
-        .get(url + '/simulations?' + query, args)
-        .then(response => {
-          this.items = response.data.results;
-          this.count = response.data.count;
-          this.page = response.data.page;
-          this.pageCount = Math.ceil(response.data.count / 10);
+      const comp = this;
+      fetch(url + '/simulations?' + query, args)
+        .then(response => response.json())
+        .then(data => {
+          comp.items = data.results;
+          comp.count = data.count;
+          comp.page = data.page;
+          comp.pageCount = Math.ceil(data.count / 10);
         })
         .catch(function (error) {
-          app.status.show = true;
-          app.status.text = error;
-          app.status.type = 'error';
+          comp.status.show = true;
+          comp.status.text = error;
+          comp.status.type = 'error';
         })
         .finally(function () {
           comp.loading = false;

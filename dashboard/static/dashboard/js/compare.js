@@ -76,15 +76,15 @@ const app = new Vue({
       const comp = this;
       const url = config.rootAPI(decodeURIComponent(comp.server));
       this.uuids.forEach(function (uuid) {
-        axios
-          .get(url + '/simulation/' + uuid, args)
-          .then(response => {
+        fetch(url + '/simulation/' + uuid, args)
+          .then(response => response.json())
+          .then(data => {
             let simulation = {
-              alias: response.data.alias,
-              uuid: response.data.uuid.hex,
-              items: response.data.metadata,
-              outputs: response.data.outputs,
-              inputs: response.data.inputs,
+              alias: data.alias,
+              uuid: data.uuid.hex,
+              items: data.metadata,
+              outputs: data.outputs,
+              inputs: data.inputs,
             }
             comp.simulations.push(simulation);
           })
