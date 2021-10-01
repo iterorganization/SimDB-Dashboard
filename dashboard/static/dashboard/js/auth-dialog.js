@@ -40,6 +40,15 @@ Vue.component('AuthDialog', {
     </v-card>
   </v-dialog> 
   `,
+  data() {
+    return {
+      status: {
+        show: false,
+        text: null,
+        type: 'error',
+      },
+    }
+  },
   props: {
     server: {
       type: String,
@@ -61,9 +70,12 @@ Vue.component('AuthDialog', {
       const password = document.getElementById('password').value;
       const url = config.rootAPI(decodeURIComponent(this.server));
       const comp = this;
-      fetch(url + '/token', {
-          auth: { username: username, password: password },
-        })
+      let args = {
+        headers: {
+          'Authorization': 'Basic ' + btoa(username + ":" + password)
+        }
+      };
+      fetch(url + '/token', args)
         .then(response => response.json())
         .then(data => {
           comp.token = data.token;
@@ -71,8 +83,8 @@ Vue.component('AuthDialog', {
           comp.$emit('ok', "", "");
         })
         .catch(function (error) {
-          app.status.text = error;
-          app.status.type = 'error';
+          comp.status.text = error;
+          comp.status.type = 'error';
           comp.$emit('error');
         })
     },

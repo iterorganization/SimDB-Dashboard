@@ -199,7 +199,9 @@ Vue.component('search-output', {
       if (this.getToken()) {
         args.headers['Authorization'] = 'JWT-Token ' + this.token;
       } else {
-        args['auth'] = { username: username, password: password };
+        args.headers['Authorization'] = {
+          'Authorization': 'Basic ' + btoa(username + ":" + password)
+        }
       }
       const params = new URLSearchParams(this.query);
       const keys = Array.from(params.keys());

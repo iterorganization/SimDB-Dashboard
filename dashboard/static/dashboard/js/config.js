@@ -5,6 +5,7 @@ const config = {
     ],
     defaultServer: 'io-ls-simdb01.iter.org',
     searchFields: [
+        'alias',
         'database',
         'shot',
         'run',

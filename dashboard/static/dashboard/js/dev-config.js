@@ -5,6 +5,7 @@ const config = {
     ],
     defaultServer: 'localhost:5000',
     searchFields: [
+        'alias',
         'database',
         'shot',
         'run',

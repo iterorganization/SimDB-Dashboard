@@ -71,7 +71,9 @@ const app = new Vue({
       if (this.getToken()) {
         args.headers['Authorization'] = 'JWT-Token ' + this.getToken();
       } else {
-        args['auth'] = { username: username, password: password };
+        args.headers['Authorization'] = {
+          'Authorization': 'Basic ' + btoa(username + ":" + password)
+        }
       }
       const comp = this;
       const url = config.rootAPI(decodeURIComponent(comp.server));

@@ -28,7 +28,12 @@ const app = new Vue({
   mounted() {
     const tokens = window.location.pathname.split('/');
     const params = new URLSearchParams(window.location.search);
-    this.uuid = tokens[tokens.length - 1];
+    let aliasIdx = tokens.findIndex(el => el === 'alias');
+    if (aliasIdx >= 0) {
+      this.alias = tokens.slice(aliasIdx + 1).join('/');
+    } else {
+      this.uuid = tokens[tokens.length - 1];
+    }
     this.server = params.get('server') || config.defaultServer;
     if (this.getToken()) {
       this.setItems("", "");
@@ -66,11 +71,14 @@ const app = new Vue({
       if (this.getToken()) {
         args.headers['Authorization'] = 'JWT-Token ' + this.getToken();
       } else {
-        args['auth'] = { username: username, password: password };
+        args.headers['Authorization'] = {
+          'Authorization': 'Basic ' + btoa(username + ":" + password)
+        }
       }
       const comp = this;
       const url = config.rootAPI(decodeURIComponent(this.server));
-      fetch(url + '/simulation/' + this.uuid, args)
+      let sim_id = this.uuid ? this.uuid : this.alias;
+      fetch(url + '/simulation/' + sim_id, args)
         .then(response => response.json())
         .then(data => {
           comp.alias = data.alias;
