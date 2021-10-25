@@ -13,6 +13,9 @@ Vue.component('DataRow', {
         <template v-else-if="isArray()">
           <plotly-loader :id="'plot' + index" :traces="getTraces(value)" :ylabel="name" xlabel="time"></plotly-loader>
         </template>
+        <template v-else-if="isUUID()">
+          <a :href="'uuid/' + value.hex" :title="value.hex"><[ value.hex ]></a>
+        </template>
         <template v-else>
           <[ processValue(value) ]>
         </template>
@@ -74,6 +77,9 @@ Vue.component('DataRow', {
     },
     isArray: function () {
       return (this.value && this.value.hasOwnProperty('_type') && this.value._type === 'numpy.ndarray');
+    },
+    isUUID: function () {
+      return (this.value && this.value.hasOwnProperty('_type') && this.value._type === 'uuid.UUID');
     },
   },
 });

@@ -18,6 +18,8 @@ const config = {
         'run',
         'workflow.name',
         'status',
+        'replaces',
+        'replaced_by',
     ],
     displayFields: [
         'database',
@@ -25,6 +27,8 @@ const config = {
         'run',
         'workflow.name',
         'status',
+        'replaces',
+        'replaced_by',
         'description',
     ],
     rootAPI: function (server) {
