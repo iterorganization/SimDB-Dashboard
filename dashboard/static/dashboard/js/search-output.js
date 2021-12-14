@@ -119,6 +119,7 @@ Vue.component('search-output', {
   },
   watch: {
     query: function (newVal, oldVal) {
+      this.selectedSimulations = {};
       const params = new URLSearchParams(newVal);
       const server = params.get('__server');
       if (server) {

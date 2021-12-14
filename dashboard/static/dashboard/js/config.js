@@ -31,6 +31,7 @@ const config = {
         'replaced_by',
         'description',
     ],
+    prefix: 'dashboard',
     rootAPI: function (server) {
         return 'https://' + server + '/api/v' + config.api_version;
     }

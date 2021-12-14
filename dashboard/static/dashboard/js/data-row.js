@@ -14,7 +14,7 @@ Vue.component('DataRow', {
           <plotly-loader :id="'plot' + index" :traces="getTraces(value)" :ylabel="name" xlabel="time"></plotly-loader>
         </template>
         <template v-else-if="isUUID()">
-          <a :href="'uuid/' + value.hex" :title="value.hex"><[ value.hex ]></a>
+          <a :href="'/dashboard/uuid/' + value.hex" :title="value.hex"><[ value.hex ]></a>
         </template>
         <template v-else>
           <[ processValue(value) ]>
