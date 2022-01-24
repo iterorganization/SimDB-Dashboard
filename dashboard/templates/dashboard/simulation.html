@@ -29,6 +29,8 @@
           <v-divider></v-divider>
         </v-row>
         <v-row>
+          <v-col>
+          <v-subheader class="text-h5">Metadata</v-subheader>
           <v-simple-table>
             <template>
               <thead><tr><th class="pl-1">Key</th><th class="pl-2">Value</th></tr></thead>
@@ -40,6 +42,40 @@
               </tbody>
             </template>
           </v-simple-table>
+            </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+          <v-subheader class="text-h5">Inputs</v-subheader>
+          <v-simple-table>
+            <template>
+              <thead><tr><th class="pl-1">URI</th><th class="pl-2">Creation Time</th></thead>
+              <tbody>
+                <tr v-for="input in inputs" :key="input.uuid.hex">
+                  <td><[ input.uri ]></td>
+                  <td><[ (new Date(input.datetime)).toUTCString() ]></td>
+                </tr>
+              </tbody>
+              </tbody>
+            </template>
+          </v-simple-table>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+          <v-subheader class="text-h5">Outputs</v-subheader>
+          <v-simple-table>
+            <template>
+              <thead><tr><th class="pl-1">URI</th><th class="pl-2">Creation Time</th></thead>
+              <tbody>
+                <tr v-for="output in outputs" :key="output.uuid.hex">
+                  <td><[ output.uri ]></td>
+                  <td><[ (new Date(output.datetime)).toUTCString() ]></td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+          </v-col>
         </v-row>
       </v-container>
     </v-main>
