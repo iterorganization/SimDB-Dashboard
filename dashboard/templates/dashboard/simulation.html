@@ -8,7 +8,7 @@
     <v-system-bar app dark color="indigo">
       ITER Simulation Database
       <v-spacer></v-spacer>
-      Version 0.1
+      Version {{ version }}
     </v-system-bar>
 
     <v-app-bar app shrink-on-scroll dark color="indigo darken-2" height="80" dense>
@@ -35,7 +35,14 @@
             <template>
               <thead><tr><th class="pl-1">Key</th><th class="pl-2">Value</th></tr></thead>
               <tbody>
-                <data-row v-for="(name, index) in displayItems" :key="index" :name="name" :value="getValue(name)" :index="index" :data="items"></data-row>
+                <data-row
+                    v-for="(name, index) in displayItems"
+                    :key="index" :name="name"
+                    :value="getValue(name)"
+                    :index="index"
+                    :data="items"
+                    :server="server">
+                </data-row>
                 <div v-if="!showAllFields">
                   <row-adder :server="server" @add="addRow" @remove="removeRow" @reset="resetRows"></row-adder>
                 </div>

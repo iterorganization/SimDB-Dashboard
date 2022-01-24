@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from .version import __version__
 
 
 def create_app(test_config=None):

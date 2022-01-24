@@ -1,6 +1,7 @@
 from flask import (
     Blueprint, render_template, current_app
 )
+from .version import __version__
 
 bp = Blueprint('dashboard', __name__, url_prefix='/')
 
@@ -17,17 +18,17 @@ def index():
         {'display': 'Run', 'name': 'run'},
     ]
 
-    return render_template('dashboard/index.html', search_fields=search_fields, config_file=get_config_file())
+    return render_template('dashboard/index.html', version=__version__, search_fields=search_fields, config_file=get_config_file())
 
 
 @bp.route('/uuid/<uuid>', methods=('GET',))
 def simulation_by_uuid(uuid):
-    return render_template('dashboard/simulation.html', config_file=get_config_file())
+    return render_template('dashboard/simulation.html', version=__version__, config_file=get_config_file())
 
 
 @bp.route('/alias/<path:alias>', methods=('GET',))
 def simulation_by_alias(alias):
-    return render_template('dashboard/simulation.html', config_file=get_config_file())
+    return render_template('dashboard/simulation.html', version=__version__, config_file=get_config_file())
 
 
 @bp.route('/compare/', methods=('GET',))

@@ -18,10 +18,16 @@ Vue.component('DataRow', {
         <template v-else-if="isUUID()">
           <a :href="'uuid/' + value.hex" :title="value.hex"><[ value.hex ]></a>
         </template>
-        <template v-else>
+        <template v-else-if="isShortString()">
+          <a :href="'/?__server=' + server + '&' + name + '=eq:' + value"><[ processValue(value) ]></a>
+        </template>
+        <template v-else-if="value">
           <span style="white-space: pre-wrap;">
 <[ processValue(value) ]>
           </span>
+        </template>
+        <template v-else>
+          No data available.
         </template>
       </v-container>
     </td>
@@ -40,6 +46,9 @@ Vue.component('DataRow', {
       required: true,
     },
     data: {
+      required: true,
+    },
+    server: {
       required: true,
     },
   },
@@ -84,6 +93,9 @@ Vue.component('DataRow', {
     },
     isUUID: function () {
       return (this.value && this.value.hasOwnProperty('_type') && this.value._type === 'uuid.UUID');
+    },
+    isShortString: function () {
+      return (this.value && this.value.toString && this.value.toString().length < 20);
     },
   },
 });

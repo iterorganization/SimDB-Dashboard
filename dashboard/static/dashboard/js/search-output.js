@@ -46,11 +46,12 @@ Vue.component('search-output', {
               <tbody>
                 <data-row 
                     v-for="(field, index) in item.metadata"
-                   :key="index" 
-                   :name="field.element" 
-                   :value="field.value" 
-                   :index="index" 
-                   :data="item.metadata">
+                    :key="index" 
+                    :name="field.element" 
+                    :value="field.value" 
+                    :index="index" 
+                    :data="item.metadata"
+                    :server="server">
                 </data-row>
               </tbody>
             </v-simple-table>
