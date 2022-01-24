@@ -11,3 +11,7 @@ body * {
 	 vertical-align: middle;
 	 background-color: white;
 }
+
+.scroll {
+	overflow-y: scroll;
+}

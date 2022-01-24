@@ -6,9 +6,11 @@ Vue.component('DataRow', {
     <td style="min-width: 35em">
       <v-container style="width: 70%" class="ml-0">
         <template v-if="isXML()">
-          <pre style="max-height: 400px">
+          <v-card height="400px" class="scroll">
+            <pre style="max-height: 400px">
 <[ value ]>
-          </pre>
+            </pre>
+          </v-card>
         </template>
         <template v-else-if="isArray()">
           <plotly-loader :id="'plot' + index" :traces="getTraces(value)" :ylabel="name" xlabel="time"></plotly-loader>
@@ -17,7 +19,9 @@ Vue.component('DataRow', {
           <a :href="'uuid/' + value.hex" :title="value.hex"><[ value.hex ]></a>
         </template>
         <template v-else>
-          <[ processValue(value) ]>
+          <span style="white-space: pre-wrap;">
+<[ processValue(value) ]>
+          </span>
         </template>
       </v-container>
     </td>

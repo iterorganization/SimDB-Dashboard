@@ -21,6 +21,7 @@ const config = {
         'replaces',
         'replaced_by',
     ],
+    // displayFields: 'all',
     displayFields: [
         'database',
         'shot',

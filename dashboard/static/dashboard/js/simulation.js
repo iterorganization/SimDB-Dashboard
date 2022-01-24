@@ -3,6 +3,10 @@ const app = new Vue({
   vuetify: new Vuetify(),
   delimiters: ['<[', ']>'],
   data() {
+    let showAllFields = (typeof(config.displayFields) === 'string' && config.displayFields.toLowerCase() === 'all');
+    let displayFields = showAllFields
+      ? []
+      : [...config.displayFields];
     return {
       server: "",
       uuid: null,
@@ -10,7 +14,8 @@ const app = new Vue({
       inputs: [],
       outputs: [],
       items: [],
-      displayItems: [...config.displayFields],
+      showAllFields: showAllFields,
+      displayItems: displayFields,
       token: null,
       dialog: true,
       status: {
@@ -22,7 +27,9 @@ const app = new Vue({
   },
   watch: {
     displayItems: function() {
-      window.localStorage.setItem('simdb-display-items', JSON.stringify(this.displayItems));
+      if (!this.showAllFields) {
+        window.localStorage.setItem('simdb-display-items', JSON.stringify(this.displayItems));
+      }
     }
   },
   mounted() {
@@ -55,7 +62,9 @@ const app = new Vue({
       this.displayItems.pop();
     },
     resetRows() {
-      this.displayItems = [...config.displayFields];
+      this.displayItems = this.showAllFields
+        ? []
+        : [...config.displayFields];
     },
     getToken() {
       return this.token || window.sessionStorage.getItem('simdb-token-' + this.server);
@@ -86,6 +95,9 @@ const app = new Vue({
           comp.items = data.metadata;
           comp.outputs = data.outputs;
           comp.inputs = data.inputs;
+          if (comp.showAllFields) {
+            comp.displayItems = data.metadata.map(el => el.element);
+          }
         })
         .catch(function (error) {
           comp.status.show = true;

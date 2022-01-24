@@ -11,7 +11,7 @@ Vue.component('search-output', {
         :sort-desc.sync="sortDesc"
         :page.sync="page"
         :items-per-page="itemsPerPage"
-        single-select="false"
+        single-select=false
         :single-expand="singleExpand"
         :expanded.sync="expanded"
         item-key="uuid.hex"
