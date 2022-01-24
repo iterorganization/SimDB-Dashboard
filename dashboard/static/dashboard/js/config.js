@@ -1,9 +1,9 @@
 const config = {
     api_version: '1.1',
     servers: [
-      'io-ls-simdb01.iter.org',
+      'localhost:5000',
     ],
-    defaultServer: 'io-ls-simdb01.iter.org',
+    defaultServer: 'localhost:5000',
     searchFields: [
         'alias',
         'database',
@@ -31,7 +31,12 @@ const config = {
         'replaced_by',
         'description',
     ],
+    searchOutputColumns: [
+        'alias',
+        'status',
+        'datetime',
+    ],
     rootAPI: function (server) {
-        return 'https://' + server + '/api/v' + config.api_version;
+        return 'http://' + server + '/v' + config.api_version;
     }
 }

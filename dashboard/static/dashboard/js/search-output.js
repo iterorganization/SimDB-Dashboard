@@ -3,83 +3,61 @@ Vue.component('search-output', {
   template: `
     <div>
       <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
-      <div v-if="items.length > 0">
-        <v-card fluid class="d-flex align-center" flat tile>
-          <v-spacer></v-spacer>
-          <v-row dense align="center">
-            <v-col cols="3" style="padding-left: 0; padding-right: 0;">
-              <v-subheader style="justify-content: right">Sort By</v-subheader>
-            </v-col>
-            <v-col cols="7" style="padding-left: 0; padding-right: 0;">
-              <v-select
-                  dense
-                  filled
-                  hide-details 
-                  :items="sortItems"
-                  v-model="sort"
-                  @change="updatePage">
-              </v-select>
-            </v-col>
-            <v-col cols="2" style="padding-left: 0; padding-right: 0;">
-              <v-btn dense text @click="toggleSort">
-                <template v-if="sortDescending">
-                  <v-icon>mdi-chevron-down</v-icon>
-                </template>
-                <template v-else>
-                  <v-icon>mdi-chevron-up</v-icon>
-                </template>
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-btn dense text @click="doCompare" :disabled="numSelected < 2">
-            Compare
-          </v-btn>
-        </v-card>
-        <v-expansion-panels multiple accordion v-model="panels">
-          <v-expansion-panel v-for="(item,i) in items" :key="i">
-            <v-expansion-panel-header>
-              <v-checkbox
-                  v-model="selectedSimulations[item.uuid.hex]"
-                  :value="item.uuid.hex"
-                  @click.stop="" 
-                  dense 
-                  hide-details 
-                  style="max-width: 50px" 
-                  multiple>
-                </v-checkbox>
-              <span>
-                <a :href="'uuid/' + item.uuid.hex + '?server=' + server" @click.stop="">
-                  <[ getLabel(item) ]>
-                </a>
-              </span>
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-simple-table>
-                <thead>
-                  <tr>
-                    <th>Key</th>
-                    <th>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <data-row 
-                      v-for="(field, index) in item.metadata"
-                     :key="index" 
-                     :name="field.element" 
-                     :value="field.value" 
-                     :index="index" 
-                     :data="item.metadata">
-                  </data-row>
-                </tbody>
-              </v-simple-table>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-        <v-pagination v-model="page" :length="pageCount" @input="updatePage"></v-pagination>
-      </div>
-      <div v-else>
-        <span>No search results</span>
-      </div>
+      <v-data-table
+        v-model="selected"
+        :headers="searchHeaders"
+        :items="items"
+        :sort-by.sync="sortBy"
+        :sort-desc.sync="sortDesc"
+        :page.sync="page"
+        :items-per-page="itemsPerPage"
+        single-select="false"
+        :single-expand="singleExpand"
+        :expanded.sync="expanded"
+        item-key="uuid.hex"
+        show-expand
+        show-select
+        @page-count="pageCount = $event"
+        >
+        <template v-slot:top>
+          <v-card fluid class="d-flex align-center" flat tile>
+            <v-toolbar-title>Search Results</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-switch v-model="singleExpand" label="single expand" class=""></v-switch>
+            <v-btn dense text @click="doCompare" :disabled="selected.length < 2">
+              Compare
+            </v-btn>
+          </v-card>
+        </template>
+        <template v-slot:item.alias="{ item }">
+          <a :href="'uuid/' + item.uuid.hex + '?server=' + server" @click.stop=""><[ item.alias ]></a>
+        </template>
+        <template v-slot:item.datetime="{ item }">
+          <[ (new Date(item.datetime)).toUTCString() ]>
+        </template>
+        <template v-slot:expanded-item="{ headers, item }">
+          <td :colspan="headers.length">
+            <v-simple-table>
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <data-row 
+                    v-for="(field, index) in item.metadata"
+                   :key="index" 
+                   :name="field.element" 
+                   :value="field.value" 
+                   :index="index" 
+                   :data="item.metadata">
+                </data-row>
+              </tbody>
+            </v-simple-table>
+          </td>
+        </template>
+      </v-data-table>
       <v-overlay :value="loading">
         <v-progress-circular indeterminate size="64"></v-progress-circular>
       </v-overlay>
@@ -88,6 +66,11 @@ Vue.component('search-output', {
   data: function () {
     return {
       loading: false,
+      singleExpand: false,
+      expanded: [],
+      selected: [],
+      searchHeaders: [],
+      itemsPerPage: 10,
       count: 0,
       items: [],
       page: 1,
@@ -97,25 +80,14 @@ Vue.component('search-output', {
       error: null,
       selectedSimulations: {},
       panels: [],
-      sortDescending: true,
-      sort: null,
+      sortDesc: true,
+      sortBy: null,
       sortItems: ['status', 'run', 'shot'],
     }
   },
   props: {
     query: null,
     server: null,
-  },
-  computed: {
-    numSelected() {
-      let count = 0;
-      for (let key in this.selectedSimulations) {
-        if (this.selectedSimulations[key].length) {
-          count += 1;
-        }
-      }
-      return count;
-    },
   },
   watch: {
     query: function (newVal, oldVal) {
@@ -142,6 +114,23 @@ Vue.component('search-output', {
           this.page = 1;
           this.pageCount = 0;
       }
+      let additionalColumns = Array.from(params.keys())
+        .filter(el => !el.startsWith('__'))
+        .filter(el => params.getAll(el).join(''))
+        .filter(onlyUnique)
+        .filter(el => !config.searchOutputColumns.includes(el))
+      let searchColumns = config.searchOutputColumns.concat(additionalColumns);
+      this.searchHeaders = searchColumns.map(el => {
+        let value = "";
+        if (el === "alias" || el === "datetime") {
+          value = el;
+        } else if (el === "uuid") {
+          value = "uuid.hex";
+        } else {
+          value = "metadata." + el.replaceAll('.', '_dot_');
+        }
+        return { text: el.toLabel(), align: 'start', sortable: true, value: value };
+      });
     }
   },
   methods: {
@@ -150,12 +139,7 @@ Vue.component('search-output', {
       this.updatePage();
     },
     doCompare() {
-      let uuids = [];
-      for (let uuid in this.selectedSimulations) {
-        if (this.selectedSimulations[uuid].length) {
-          uuids.push(uuid);
-        }
-      }
+      let uuids = this.selected.map(el => el.uuid.hex);
       window.location.href = 'compare/?uuid=' + uuids.join('&uuid=');
     },
     getLabel(item) {
@@ -190,7 +174,7 @@ Vue.component('search-output', {
       }
       this.loading = true;
       const args = {
-        headers: {'simdb-result-limit': 10, 'simdb-page': this.page},
+        headers: {'simdb-result-limit': 0, 'simdb-page': this.page},
       };
       if (this.sort) {
         args.headers['simdb-sort-by'] = this.sort;
@@ -216,7 +200,12 @@ Vue.component('search-output', {
       fetch(url + '/simulations?' + query, args)
         .then(response => response.json())
         .then(data => {
-          comp.items = data.results;
+          comp.items = data.results.map(el => {
+            // Adding a version of the metadata to that the table can dynamically read
+            el.metadata.forEach(m => { el.metadata[m.element.replaceAll('.', '_dot_')] = m.value });
+            return el;
+          });
+          // comp.items = data.results;
           comp.count = data.count;
           comp.page = data.page;
           comp.pageCount = Math.ceil(data.count / 10);

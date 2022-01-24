@@ -31,3 +31,7 @@ const capitalize = function (word) {
 String.prototype.toLabel = function (name) {
   return this.split(/[\._]/).map(process_array_key).map(capitalize).join(' ');
 }
+
+const onlyUnique = function (value, index, self) {
+  return self.indexOf(value) === index;
+}
