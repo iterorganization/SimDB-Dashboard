@@ -21,6 +21,11 @@ const config = {
         'replaces',
         'replaced_by',
     ],
+    displayHeaders: [
+        {label: 'Server', value: 'server'},
+        {label: 'Simulation', value: 'uuid'},
+        {label: 'Alias', value: 'alias'},
+    ],
     // displayFields: 'all',
     displayFields: [
         'database',

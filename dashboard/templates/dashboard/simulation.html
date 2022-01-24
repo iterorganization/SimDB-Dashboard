@@ -21,17 +21,9 @@
 
     <v-main>
       <v-container fluid>
-        <v-row dense>
-          <v-col cols="2" class="text-h5">Server</v-col>
-          <v-col cols="10" class="text-h5"><[ server ]></v-col>
-        </v-row>
-        <v-row dense>
-          <v-col cols="2" class="text-h5">Simulation</v-col>
-          <v-col cols="10" class="text-h5"><[ uuid ]></v-col>
-        </v-row>
-        <v-row dense>
-          <v-col cols="2" class="text-h5">Alias</v-col>
-          <v-col cols="10" class="text-h5"><[ alias ]></v-col>
+        <v-row v-for="item in displayHeaders" :key="item.label" dense>
+          <v-col cols="2" class="text-h5"><[ item.label ]></v-col>
+          <v-col cols="10" class="text-h5"><[ valueFor(item.value) ]></v-col>
         </v-row>
         <v-row>
           <v-divider></v-divider>

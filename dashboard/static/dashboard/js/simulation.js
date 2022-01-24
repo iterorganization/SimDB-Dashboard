@@ -16,6 +16,7 @@ const app = new Vue({
       items: [],
       showAllFields: showAllFields,
       displayItems: displayFields,
+      displayHeaders: config.displayHeaders,
       token: null,
       dialog: true,
       status: {
@@ -53,6 +54,9 @@ const app = new Vue({
     }
   },
   methods: {
+    valueFor(name) {
+      return this[name];
+    },
     addRow(name) {
       if (!this.displayItems.includes(name)) {
         this.displayItems.push(name);
