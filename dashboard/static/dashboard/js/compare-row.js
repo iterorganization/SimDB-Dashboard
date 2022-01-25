@@ -10,8 +10,18 @@ Vue.component('CompareRow', {
 <[ getValue(uuid, name) ]>
           </pre>
         </template>
-        <template v-else>
+        <template v-else-if="isUUID(uuid, name)">
+          <a :href="'/dashboard/uuid/' + getValueForUUID(uuid, name).hex" :title="getValueForUUID(uuid, name).hex">
+            <[ getValueForUUID(uuid, name).hex ]>
+          </a>
+        </template>
+        <template v-else-if="isShortString(uuid, name)">
           <[ processValue(uuid, name) ]>
+        </template>
+        <template v-else>
+          <span style="white-space: pre-wrap;">
+<[ processValue(uuid, name) ]>
+          </span>
         </template>
       </v-container>
     </td>
@@ -38,9 +48,12 @@ Vue.component('CompareRow', {
       let item = simulation == null ? null : simulation.items.find(el => el.element === name);
       return item != null ? item.value : null;
     },
-    processValue: function (uuid, name) {
+    getValueForUUID: function (uuid, name) {
       let simulation = this.getSimulation(uuid);
-      let value = this.getValue(simulation, name);
+      return this.getValue(simulation, name);
+    },
+    processValue: function (uuid, name) {
+      let value = this.getValueForUUID(uuid, name);
       if (!value) {
         return "No data available.";
       }
@@ -61,14 +74,21 @@ Vue.component('CompareRow', {
       return this.simulations.find(el => el.uuid === uuid);
     },
     isXML: function (uuid, name) {
-      let simulation = this.getSimulation(uuid);
-      let value = this.getValue(simulation, name);
+      let value = this.getValueForUUID(uuid, name);
       return (typeof value == "string") && value.startsWith('<?xml');
+    },
+    isUUID: function (uuid, name) {
+      let value = this.getValueForUUID(uuid, name);
+      return (value && value.hasOwnProperty('_type') && value._type === 'uuid.UUID');
     },
     isArray: function (name) {
       return this.simulations
         .map(sim => this.getValue(sim, name))
         .some(value => value && value.hasOwnProperty('_type') && value._type === 'numpy.ndarray');
+    },
+    isShortString: function (uuid, name) {
+      let value = this.getValueForUUID(uuid, name);
+      return (value && value.toString && value.toString().length < 20);
     },
   },
 });

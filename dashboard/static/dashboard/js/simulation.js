@@ -13,6 +13,8 @@ const app = new Vue({
       alias: null,
       inputs: [],
       outputs: [],
+      parent: [],
+      children: [],
       items: [],
       showAllFields: showAllFields,
       displayItems: displayFields,
@@ -99,6 +101,8 @@ const app = new Vue({
           comp.items = data.metadata;
           comp.outputs = data.outputs;
           comp.inputs = data.inputs;
+          comp.parents = data.parents;
+          comp.children = data.children;
           if (comp.showAllFields) {
             comp.displayItems = data.metadata.map(el => el.element);
           }
