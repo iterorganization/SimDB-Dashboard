@@ -89,7 +89,9 @@
             <v-subheader class="text-h5">Parents</v-subheader>
             <v-list>
               <v-list-item v-for="parent in parents" :key="parent.uuid">
-                <v-list-item-content><[ parent ]></v-list-item-content>
+                <v-list-item-content>
+                  <a :href="'uuid/' + parent.uuid.hex + '?server=' + server" @click.stop=""><[ parent.alias ]></a>
+                </v-list-item-content>
               </v-list-item>
             </v-list>
           </v-col>
@@ -99,7 +101,9 @@
           <v-subheader class="text-h5">Children</v-subheader>
             <v-list>
               <v-list-item v-for="child in children" :key="child.uuid">
-                <v-list-item-content><[ child ]></v-list-item-content>
+                <v-list-item-content>
+                  <a :href="'uuid/' + child.uuid.hex + '?server=' + server" @click.stop=""><[ child.alias ]></a>
+                </v-list-item-content>
               </v-list-item>
             </v-list>
           </v-col>
