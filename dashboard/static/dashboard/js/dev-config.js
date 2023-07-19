@@ -21,6 +21,11 @@ const config = {
         'replaces',
         'replaced_by',
     ],
+    displayHeaders: [
+        {label: 'Server', value: 'server'},
+        {label: 'Simulation', value: 'uuid'},
+        {label: 'Alias', value: 'alias'},
+    ],
     displayFields: [
         'database',
         'shot',
@@ -31,6 +36,9 @@ const config = {
         'replaced_by',
         'description',
     ],
+    rootURL: function (server) {
+        return 'http://' + server + '/';
+    },
     rootAPI: function (server) {
       return 'http://' + server + '/v' + config.api_version;
     }

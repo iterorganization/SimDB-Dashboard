@@ -26,6 +26,7 @@ const app = new Vue({
         text: null,
         type: 'error',
       },
+      authentication: null,
     }
   },
   watch: {
@@ -45,19 +46,36 @@ const app = new Vue({
       this.uuid = tokens[tokens.length - 1];
     }
     this.server = params.get('server') || config.defaultServer;
-    if (this.getToken()) {
-      this.setItems("", "");
-    } else {
-      this.dialog = true;
-    }
-    let displayItems = window.localStorage.getItem('simdb-display-items');
-    if (displayItems) {
-      this.displayItems = JSON.parse(displayItems);
-    }
+    this.updateAuth().then(_ => {
+      if (this.requiresAuth() && !this.getToken()) {
+        this.dialog = true;
+      } else {
+        this.setItems("", "");
+      }
+      let displayItems = window.localStorage.getItem('simdb-display-items');
+      if (displayItems) {
+        this.displayItems = JSON.parse(displayItems);
+      }
+    });
   },
   methods: {
     valueFor(name) {
       return this[name];
+    },
+    updateAuth() {
+      this.status.show = false;
+      const url = config.rootURL(decodeURIComponent(this.server));
+      const comp = this;
+      return fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          comp.authentication = data.authentication;
+        })
+        .catch(function (error) {
+          comp.status.show = true;
+          comp.status.error = error;
+          comp.status.type = 'error';
+        });
     },
     addRow(name) {
       if (!this.displayItems.includes(name)) {
@@ -71,6 +89,9 @@ const app = new Vue({
       this.displayItems = this.showAllFields
         ? []
         : [...config.displayFields];
+    },
+    requiresAuth() {
+      return this.authentication !== null && this.authentication !== "None";
     },
     getToken() {
       return this.token || window.sessionStorage.getItem('simdb-token-' + this.server);

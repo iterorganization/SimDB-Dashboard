@@ -1,9 +1,10 @@
 const config = {
-    api_version: '1.1',
+    api_version: '1.2',
     servers: [
-      'io-ls-simdb01.iter.org',
+      'simdb.iter.org/scenarios',
+      'simdb.iter.org/itpa',
     ],
-    defaultServer: 'io-ls-simdb01.iter.org',
+    defaultServer: 'simdb.iter.org/scenarios',
     searchFields: [
         'alias',
         'database',
@@ -43,7 +44,10 @@ const config = {
         'status',
         'datetime',
     ],
+    rootURL: function (server) {
+        return 'https://' + server + '/';
+    },
     rootAPI: function (server) {
-        return 'https://' + server + '/api/v' + config.api_version;
+        return 'https://' + server + '/v' + config.api_version;
     }
 }
