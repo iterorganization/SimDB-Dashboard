@@ -2,6 +2,11 @@ Vue.component('search-output', {
   delimiters: ['<[', ']>'],
   template: `
     <div>
+      <v-row dense>
+        <v-col cols="12">
+          <v-alert text :value="status.show" :type="status.type"><[ status.text ]></v-alert>
+        </v-col>
+      </v-row>
       <auth-dialog :server="server" :show="dialog" @ok="fetchData" @error="dialog = false"></auth-dialog>
       <v-data-table
         v-model="selected"
@@ -83,6 +88,12 @@ Vue.component('search-output', {
       sortDesc: true,
       sortBy: null,
       sortItems: ['status', 'run', 'shot'],
+      authentication: null,
+      status: {
+        show: false,
+        text: null,
+        type: 'error',
+      },
     }
   },
   props: {
@@ -90,13 +101,27 @@ Vue.component('search-output', {
     server: null,
   },
   watch: {
-    query: function (newVal, oldVal) {
+    query: function (newVal) {
       this.selectedSimulations = {};
       const params = new URLSearchParams(newVal);
+      this.updateServer(params).then(_ => { this.doQuery(params); });
+    }
+  },
+  methods: {
+    toggleSort() {
+      this.sortDescending = !this.sortDescending;
+      this.updatePage();
+    },
+    updateServer(params) {
       const server = params.get('__server');
+      let promise = Promise.resolve({});
       if (server) {
         this.server = server;
+        promise = this.updateAuth();
       }
+      return promise;
+    },
+    doQuery(params) {
       const sort = params.get('__sort');
       if (sort) {
         this.sort = sort;
@@ -104,7 +129,7 @@ Vue.component('search-output', {
       this.sortDescending = !Array.from(params.keys()).includes('__sort_asc');
       this.sortItems = Array.from(params.keys()).filter(el => !el.startsWith('__')).sort();
       if (this.query) {
-        if (!this.getToken()) {
+        if (this.requiresAuth() && !this.getToken()) {
           this.dialog = true;
         } else {
           this.fetchData("", "", this.page);
@@ -132,12 +157,6 @@ Vue.component('search-output', {
         }
         return { text: el.toLabel(), align: 'start', sortable: true, value: value };
       });
-    }
-  },
-  methods: {
-    toggleSort() {
-      this.sortDescending = !this.sortDescending;
-      this.updatePage();
     },
     doCompare() {
       let uuids = this.selected.map(el => el.uuid.hex);
@@ -145,6 +164,24 @@ Vue.component('search-output', {
     },
     getLabel(item) {
       return `${item.alias}`;
+    },
+    updateAuth() {
+      this.status.show = false;
+      const url = config.rootURL(decodeURIComponent(this.server));
+      const comp = this;
+      return fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          comp.authentication = data.authentication;
+        })
+        .catch(function (error) {
+          comp.status.show = true;
+          comp.status.error = error;
+          comp.status.type = 'error';
+        });
+    },
+    requiresAuth() {
+      return this.authentication !== null && this.authentication !== "None";
     },
     getToken() {
       if (!this.token) {
@@ -181,11 +218,13 @@ Vue.component('search-output', {
         args.headers['simdb-sort-by'] = this.sort;
         args.headers['simdb-sort-asc'] = !this.sortDescending;
       }
-      if (this.getToken()) {
-        args.headers['Authorization'] = 'JWT-Token ' + this.token;
-      } else {
-        args.headers['Authorization'] = {
-          'Authorization': 'Basic ' + btoa(username + ":" + password)
+      if (this.requiresAuth()) {
+        if (this.getToken()) {
+          args.headers['Authorization'] = 'JWT-Token ' + this.token;
+        } else {
+          args.headers['Authorization'] = {
+            'Authorization': 'Basic ' + btoa(username + ":" + password)
+          }
         }
       }
       const params = new URLSearchParams(this.query);
@@ -197,12 +236,13 @@ Vue.component('search-output', {
       }
       const query = params.toString();
       const url = config.rootAPI(decodeURIComponent(this.server));
+      this.status.show = false;
       const comp = this;
       fetch(url + '/simulations?' + query, args)
         .then(response => response.json())
         .then(data => {
           comp.items = data.results.map(el => {
-            // Adding a version of the metadata to that the table can dynamically read
+            // Adding a version of the metadata so that the table can dynamically read
             el.metadata.forEach(m => { el.metadata[m.element.replaceAll('.', '_dot_')] = m.value });
             return el;
           });

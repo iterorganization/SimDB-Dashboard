@@ -133,6 +133,7 @@ Vue.component('search-input', {
         text: null,
         type: 'error',
       },
+      authentication: null,
       // TODO: fetch comparators from simdb API
       comparators: ['eq', 'ne', 'in', 'ni', 'gt', 'ge', 'lt', 'le'],
     }
@@ -147,8 +148,8 @@ Vue.component('search-input', {
       for (let value of params.getAll(key)) {
         let idx = value.search(':');
         if (idx >= 0) {
-          let comp = value.substr(0, idx);
-          let name = value.substr(idx + 1);
+          let comp = value.substring(0, idx);
+          let name = value.substring(idx + 1);
           this.setField(key, comp, name);
         } else {
           this.setField(key, "eq", value);
