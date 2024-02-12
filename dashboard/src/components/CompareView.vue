@@ -83,8 +83,10 @@ function resetRows() {
 }
 
 function requiresAuth() {
-  return true
-  //   return authentication.value !== null && authentication.value !== 'None'
+  if (server.value !== null && server.value in config.serverConfig) {
+    return config.serverConfig[server.value].requiresAuth;
+  }
+  return authentication.value !== null && authentication.value !== 'None';
 }
 
 function getToken() {

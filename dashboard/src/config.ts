@@ -1,9 +1,16 @@
 export { config }
 
-const config = {
+const config: Readonly<{ [key: string]: any }> = {
   api_version: '1.2',
-  servers: ['http://localhost:8000'],
-  defaultServer: 'http://localhost:8000',
+  servers: [
+    'https://simdb.iter.org/scenarios/api',
+    'https://simdb.iter.org/itpa/api',
+  ],
+  serverConfig: {
+    'https://simdb.iter.org/scenarios/api': { 'requiresAuth': false },
+    'https://simdb.iter.org/itpa/api': { 'requiresAuth': false },
+  },
+  defaultServer: 'https://simdb.iter.org/scenarios/api',
   searchFields: ['alias', 'database', 'shot', 'run', 'workflow.name', 'status'],
   searchOutputFields: [
     'database',

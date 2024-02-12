@@ -77,7 +77,8 @@ function updateServer() {
 }
 
 function doQuery() {
-  if (params.value.size) {
+  if (Array.from(params.value).length) {
+  // if (params.value.size) {
     if (requiresAuth() && !getToken()) {
       dialog.value = true
     } else {
@@ -142,8 +143,10 @@ function updateAuth(): Promise<void> {
 }
 
 function requiresAuth() {
-  return true
-  // return authentication.value !== null && authentication.value !== 'None'
+  if (selectedServer.value !== null && selectedServer.value in config.serverConfig) {
+    return config.serverConfig[selectedServer.value].requiresAuth;
+  }
+  return authentication.value !== null && authentication.value !== 'None';
 }
 
 function getToken() {

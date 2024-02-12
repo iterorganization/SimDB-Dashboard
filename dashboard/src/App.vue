@@ -15,7 +15,7 @@ import { RouterView } from 'vue-router'
       <v-toolbar-title class="d-flex align-center" style="height: 100%">
         <v-btn
           variant="text"
-          href="/"
+          href="/dashboard"
           class="text-none text-h4"
           style="letter-spacing: 0; color: white !important"
           >SimDB Dashboard</v-btn
