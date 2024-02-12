@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900');
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:100,300,400,500,700,900');
+@import url('https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css');
+
+body * {
+  font-family: 'Source Sans Pro', 'Roboto', sans-serif !important;
+}
+
+p.sub-header {
+  color: #002f55;
+  padding-bottom: 1em;
+}
+
+div.v-table th {
+  font-weight: bold !important;
+}
+
+.v-autocomplete {
+  font-size: 0.8em;
+}
+
+.SkeletonBox {
+  display: inline-block;
+  vertical-align: middle;
+  background-color: white;
+}
+
+.scroll {
+  overflow-y: scroll;
+}

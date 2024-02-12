@@ -1,3 +1,0 @@
-graft dashboard/static
-graft dashboard/templates
-global-exclude *.pyc

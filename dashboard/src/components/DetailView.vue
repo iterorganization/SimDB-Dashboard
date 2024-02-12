@@ -1,0 +1,282 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { config } from '../config'
+import DataRow from './DataRow.vue'
+import AuthDialog from './AuthDialog.vue'
+import RowAdder from './RowAdder.vue'
+
+const _showAllFields =
+  typeof config.displayFields === 'string' && new String(config.displayFields).toLowerCase() === 'all'
+const _displayFields = _showAllFields ? [] : [...config.displayFields]
+
+type UUID = { hex: string }
+
+const selectedServer = ref('')
+const dialog = ref(false)
+const displayHeaders = ref(config.displayHeaders)
+const showAllFields = ref(_showAllFields)
+const displayItems = ref(_displayFields)
+const uuid = ref<UUID | undefined>()
+const alias = ref<string | undefined>()
+const items = ref<Data[]>([])
+const outputs = ref<File[]>([])
+const inputs = ref<File[]>([])
+const parents = ref<Item[]>([])
+const children = ref<Item[]>([])
+const token = ref('')
+const authentication = ref('')
+
+onMounted(() => {
+  const tokens = window.location.pathname.split('/')
+  const params = new URLSearchParams(window.location.search)
+
+  let aliasIdx = tokens.findIndex((el) => el === 'alias')
+  if (aliasIdx >= 0) {
+    alias.value = tokens.slice(aliasIdx + 1).join('/')
+  } else {
+    uuid.value = { hex: tokens[tokens.length - 1] }
+  }
+
+  selectedServer.value = params.get('server') || config.defaultServer
+
+  updateAuth().then((_) => {
+    if (requiresAuth() && !getToken()) {
+      dialog.value = true
+    } else {
+      setItems('', '')
+    }
+    const _displayItems = window.localStorage.getItem('simdb-display-items')
+    if (_displayItems) {
+      displayItems.value = JSON.parse(_displayItems)
+    }
+  })
+})
+
+type Item = {
+  alias: string
+  uuid: UUID
+}
+
+type Data = { element: string; value: any }
+
+type File = {
+  uri: string
+  uuid: UUID
+  datetime: string
+}
+
+type AlertType = 'error' | 'success' | 'warning' | 'info' | undefined
+const status = ref<{ show: boolean; text: string | null; type: AlertType }>({
+  show: false,
+  text: null,
+  type: undefined
+})
+
+function getToken() {
+  return token.value || window.sessionStorage.getItem('simdb-token-' + selectedServer.value)
+}
+
+function requiresAuth() {
+  return true
+  //   return authentication !== null && authentication !== "None";
+}
+
+function getValue(name: string) {
+  if (name === 'server') {
+    return selectedServer.value
+  } else if (name === 'alias') {
+    return alias.value
+  } else if (name === 'uuid') {
+    return uuid.value?.hex
+  } else {
+    let found: any = items.value
+      ? items.value.find((el: any) => el.element.toLowerCase() === name)
+      : false
+    return found ? found.value : null
+  }
+}
+
+function addRow(name: string) {
+  if (!displayItems.value.includes(name)) {
+    displayItems.value.push(name)
+  }
+}
+
+function removeRow() {
+  displayItems.value.pop()
+}
+
+function resetRows() {
+  displayItems.value = showAllFields.value ? [] : [...config.displayFields]
+}
+
+function setItems(username: string, password: string) {
+  status.value.show = false
+  dialog.value = false
+  const args: { headers: { [key: string]: any } } = { headers: {} }
+  if (getToken()) {
+    args.headers['Authorization'] = 'JWT-Token ' + getToken()
+  } else {
+    args.headers['Authorization'] = {
+      Authorization: 'Basic ' + btoa(username + ':' + password)
+    }
+  }
+  const url = config.rootAPI(decodeURIComponent(selectedServer.value))
+  let sim_id = uuid.value ? uuid.value.hex : alias.value
+  fetch(url + '/simulation/' + sim_id, args)
+    .then((response) => response.json())
+    .then((data) => {
+      alias.value = data.alias
+      uuid.value = data.uuid
+      items.value = data.metadata
+      outputs.value = data.outputs
+      inputs.value = data.inputs
+      parents.value = data.parents
+      children.value = data.children
+      if (showAllFields.value) {
+        displayItems.value = data.metadata.map((el: any) => el.element)
+      }
+    })
+    .catch(function (error) {
+      status.value.show = true
+      status.value.text = error
+      status.value.type = 'error'
+    })
+}
+
+function updateAuth() {
+  status.value.show = false
+  const url = config.rootURL(decodeURIComponent(selectedServer.value))
+  return fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      authentication.value = data.authentication
+    })
+    .catch(function (error) {
+      status.value.show = true
+      status.value.text = error
+      status.value.type = 'error'
+    })
+}
+
+function showError(error: string) {
+  status.value.show = true
+  status.value.text = error
+  status.value.type = 'error'
+}
+</script>
+
+<template>
+  <AuthDialog
+    :server="selectedServer"
+    v-model="dialog"
+    @ok="setItems"
+    @error="dialog = false"
+  ></AuthDialog>
+
+  <v-container fluid class="pa-10">
+    <v-row v-for="item in displayHeaders" :key="item.label" dense>
+      <v-col cols="2" class="text-h5">{{ item.label }}</v-col>
+      <v-col cols="10" class="text-h5">{{ getValue(item.value) }}</v-col>
+    </v-row>
+    <v-row>
+      <v-divider></v-divider>
+    </v-row>
+    <v-row>
+      <v-col>
+        <span class="text-h5">Metadata</span>
+        <v-table>
+          <thead>
+            <tr>
+              <th class="pl-1">Key</th>
+              <th class="pl-2">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <DataRow
+              v-for="(name, index) in displayItems"
+              :key="index"
+              :name="name"
+              :value="getValue(name)"
+              :index="index"
+              :data="items"
+              :server="selectedServer"
+            >
+            </DataRow>
+          </tbody>
+          <div v-if="!showAllFields">
+            <RowAdder
+              :server="selectedServer"
+              @add="addRow"
+              @remove="removeRow"
+              @reset="resetRows"
+              @error="showError"
+            ></RowAdder>
+          </div>
+        </v-table>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <span class="text-h5">Inputs</span>
+        <v-table>
+          <thead>
+            <tr>
+              <th class="pl-1">URI</th>
+              <th class="pl-2">Creation Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="input in inputs" :key="input.uuid.hex">
+              <td>{{ input.uri }}</td>
+              <td>{{ new Date(input.datetime).toUTCString() }}</td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <span class="text-h5">Outputs</span>
+        <v-table>
+          <thead>
+            <tr>
+              <th class="pl-1">URI</th>
+              <th class="pl-2">Creation Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="output in outputs" :key="output.uuid.hex">
+              <td>{{ output.uri }}</td>
+              <td>{{ new Date(output.datetime).toUTCString() }}</td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <span class="text-h5">Parents</span>
+        <v-list>
+          <v-list-item v-for="parent in parents" :key="parent.uuid.hex">
+            <a :href="'uuid/' + parent.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
+              parent.alias
+            }}</a>
+          </v-list-item>
+        </v-list>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <span class="text-h5">Children</span>
+        <v-list>
+          <v-list-item v-for="child in children" :key="child.uuid.hex">
+            <a :href="'uuid/' + child.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
+              child.alias
+            }}</a>
+          </v-list-item>
+        </v-list>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
