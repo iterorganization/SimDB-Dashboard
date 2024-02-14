@@ -6,7 +6,7 @@
 2. Change to the `dashboard` directory: `cd dashboard`
 3. Install the node dependencies: `npm install`
 4. Build the dashboard: `npm run build`
-5. As root install the dashboard: `cp -r ../dashboard /www-data/` (the location to install the files to will depend on which user is being used to serve them using nginx -- see below).
+5. As root install the dashboard: `cp -r dist/* /www-data/dashboard` (the location to install the files to will depend on which user is being used to serve them using nginx -- see below).
 
 ## Configuring nginx
 

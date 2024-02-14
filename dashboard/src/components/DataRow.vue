@@ -105,10 +105,10 @@ function getHex(value: number | string | NumpyValue | UUIDValue | undefined): st
           ></PlotlyLoader>
         </template>
         <template v-else-if="isUUID()">
-          <a :href="'/dashboard/uuid/' + getHex(value)" :title="getHex(value)">{{ getHex(value) }}</a>
+          <a :href="'../uuid/' + getHex(value)" :title="getHex(value)">{{ getHex(value) }}</a>
         </template>
         <template v-else-if="isShortString()">
-          <a :href="'/?__server=' + server + '&' + name + '=eq:' + value">{{
+          <a :href="'../?__server=' + server + '&' + name + '=eq:' + value">{{
             processValue(value)
           }}</a>
         </template>

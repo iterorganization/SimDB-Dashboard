@@ -92,7 +92,7 @@ function isShortString(uuid: string, name: string) {
         </template>
         <template v-else-if="isUUID(uuid, name)">
           <a
-            :href="'/dashboard/uuid/' + getValueForUUID(uuid, name).hex"
+            :href="'../uuid/' + getValueForUUID(uuid, name).hex"
             :title="getValueForUUID(uuid, name).hex"
           >
             {{ getValueForUUID(uuid, name).hex }}
