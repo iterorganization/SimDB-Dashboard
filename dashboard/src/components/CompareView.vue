@@ -112,11 +112,13 @@ function setItems(username: string, password: string) {
   status.value.show = false
   dialog.value = false
   const args: { headers: { [key: string]: any } } = { headers: {} }
-  if (getToken()) {
-    args.headers['Authorization'] = 'JWT-Token ' + getToken()
-  } else {
-    args.headers['Authorization'] = {
-      Authorization: 'Basic ' + btoa(username + ':' + password)
+  if (requiresAuth()) {
+    if (getToken()) {
+      args.headers['Authorization'] = 'JWT-Token ' + getToken()
+    } else {
+      args.headers['Authorization'] = {
+        Authorization: 'Basic ' + btoa(username + ':' + password)
+      }
     }
   }
   if (server.value === null) {
