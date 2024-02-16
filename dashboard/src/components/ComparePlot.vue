@@ -78,11 +78,6 @@ function processValue(value: any) {
   return value
 }
 
-function isXML(simulation: Simulation, name: string) {
-  let value = getValue(simulation, name)
-  return typeof value == 'string' && value.startsWith('<?xml')
-}
-
 function isArray(name: string) {
   return props.simulations
     .map((sim) => getValue(sim, name))

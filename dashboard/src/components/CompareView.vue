@@ -83,7 +83,7 @@ function resetRows() {
 }
 
 function requiresAuth() {
-  if (server.value !== null && server.value in config.serverConfig) {
+  if (server.value !== null && config.serverConfig && server.value in config.serverConfig) {
     return config.serverConfig[server.value].requiresAuth;
   }
   return authentication.value !== null && authentication.value !== 'None';
@@ -135,6 +135,7 @@ function setItems(username: string, password: string) {
           inputs: data.inputs
         }
         simulations.value.push(simulation)
+        loaded.value = true;
       })
       .catch(function (error) {
         status.value.show = true

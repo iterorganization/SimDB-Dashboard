@@ -47,7 +47,9 @@ const params = ref<URLSearchParams>(new URLSearchParams(props.query))
 onMounted(() => {
   params.value = new URLSearchParams(window.location.search)
   selectedServer.value = params.value.get('__server')
-  doQuery()
+  updateServer().then((_) => {
+    doQuery()
+  })
 })
 
 watch(
@@ -143,7 +145,7 @@ function updateAuth(): Promise<void> {
 }
 
 function requiresAuth() {
-  if (selectedServer.value !== null && selectedServer.value in config.serverConfig) {
+  if (selectedServer.value !== null && config.serverConfig && selectedServer.value in config.serverConfig) {
     return config.serverConfig[selectedServer.value].requiresAuth;
   }
   return authentication.value !== null && authentication.value !== 'None';

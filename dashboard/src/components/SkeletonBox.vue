@@ -3,10 +3,10 @@ import { computed } from 'vue'
 
 const props = withDefaults(
   defineProps<{
-    maxWidth: number
-    minWidth: number
-    height: string
-    width: string | null
+    maxWidth?: number
+    minWidth?: number
+    height?: string
+    width?: string | null
   }>(),
   {
     maxWidth: 100,

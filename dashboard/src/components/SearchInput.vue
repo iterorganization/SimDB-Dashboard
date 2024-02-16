@@ -31,7 +31,7 @@ const authentication = null
 const comparators = ['eq', 'ne', 'in', 'ni', 'gt', 'ge', 'lt', 'le']
 
 const isLoading = ref<boolean>(true)
-const items = ref<string[]>([])
+const items = ref<{ value: string, text: string }[]>([])
 const itemsFor = ref<{ [key: string]: string[] }>({})
 const wildSearch = ref<SearchEntry[]>([])
 const selectedServer = ref<string>(config.defaultServer)
@@ -240,6 +240,8 @@ function changed() {
           auto-select-first
           clearable
           v-model="item.name"
+          item-title="text"
+          item-value="value"
           :items="items"
           dense
           filled

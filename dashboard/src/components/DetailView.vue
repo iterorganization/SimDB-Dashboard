@@ -77,7 +77,7 @@ function getToken() {
 }
 
 function requiresAuth() {
-  if (selectedServer.value !== null && selectedServer.value in config.serverConfig) {
+  if (selectedServer.value !== null && config.serverConfig && selectedServer.value in config.serverConfig) {
     return config.serverConfig[selectedServer.value].requiresAuth;
   }
   return authentication.value !== null && authentication.value !== 'None';

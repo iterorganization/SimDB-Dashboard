@@ -12,8 +12,8 @@ const props = withDefaults(
     traces: Trace[]
     xlabel: string
     ylabel: string
-    width: string
-    height: string
+    width?: string
+    height?: string
   }>(),
   {
     width: '600px',
@@ -21,7 +21,7 @@ const props = withDefaults(
   }
 )
 
-const isVisible = ref(false)
+const isVisible = ref(true)
 const root = ref<HTMLElement | null>(null)
 
 // onMounted(() => {
@@ -102,7 +102,7 @@ function downloadData(id: string) {
 <template>
   <div ref="root">
     <template v-if="isVisible">
-      <!-- <PlotlyDiv
+      <PlotlyDiv
         :id="id"
         :title="ylabel.toLabel()"
         :traces="traces"
@@ -111,13 +111,13 @@ function downloadData(id: string) {
         :height="height"
         :width="width"
       >
-      </PlotlyDiv> -->
+      </PlotlyDiv>
       <v-card tile flat dense class="d-flex flex-row p-0 m-0">
         <v-btn small variant="text" @click="downloadData(id)" style="margin-left: calc(50% - 5em)"
           >Download Data</v-btn
         >
       </v-card>
     </template>
-    <!-- <SkeletonBox :height="height" :width="width" v-else>Loading</SkeletonBox> -->
+    <SkeletonBox :height="height" :width="width" v-else>Loading</SkeletonBox>
   </div>
 </template>

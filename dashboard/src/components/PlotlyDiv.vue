@@ -3,7 +3,7 @@ import { onMounted, computed, ref } from 'vue'
 // @ts-ignore
 import Plotly from 'plotly.js'
 
-type Trace = { name: string; x: number[]; y: number[] }
+type Trace = { name: string; x?: number[]; y: number[] }
 
 const props = defineProps<{
   id: string
@@ -49,7 +49,7 @@ onMounted(() => {
     layout['showlegend'] = true
     layout['legend'] = { x: 1, xanchor: 'right', y: 1 }
   }
-  Plotly.newPlot(canvas, props.traces, layout)
+  Plotly.newPlot(canvas.value, props.traces, layout)
 })
 </script>
 
