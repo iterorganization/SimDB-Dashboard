@@ -1,6 +1,7 @@
 <!-- eslint-disable no-prototype-builtins -->
 <script setup lang="ts">
 import { to_i32_array, to_f32_array, to_f64_array } from '../common'
+import { config } from '../config'
 
 import PlotlyLoader from './PlotlyLoader.vue'
 
@@ -105,10 +106,10 @@ function getHex(value: number | string | NumpyValue | UUIDValue | undefined): st
           ></PlotlyLoader>
         </template>
         <template v-else-if="isUUID()">
-          <a :href="'../uuid/' + getHex(value)" :title="getHex(value)">{{ getHex(value) }}</a>
+          <a :href="'/' + config.prefix + '/uuid/' + getHex(value)" :title="getHex(value)">{{ getHex(value) }}</a>
         </template>
         <template v-else-if="isShortString()">
-          <a :href="'../?__server=' + server + '&' + name + '=eq:' + value">{{
+          <a :href="'/' + config.prefix + '../?__server=' + server + '&' + name + '=eq:' + value">{{
             processValue(value)
           }}</a>
         </template>
