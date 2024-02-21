@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { config } from '../config'
 
 type SearchEntry = {
@@ -25,8 +25,6 @@ const searchFields = ref<SearchEntry[]>(
     }
   })
 )
-
-const authentication = null
 
 const comparators = ['eq', 'ne', 'in', 'ni', 'gt', 'ge', 'lt', 'le']
 
@@ -55,6 +53,49 @@ const helpText = function (item: string) {
     le: 'Less than or equal to'
   }
   return help[item]
+}
+
+onMounted(() => {
+  let params = new URLSearchParams(window.location.search);
+  let keys = new Set(params.keys());
+  for (let key of keys) {
+    if (key.startsWith('__')) {
+      continue;
+    }
+    for (let value of params.getAll(key)) {
+      let idx = value.search(':');
+      if (idx >= 0) {
+        let comp = value.substring(0, idx);
+        let name = value.substring(idx + 1);
+        setField(key, comp, name);
+      } else {
+        setField(key, "eq", value);
+      }
+    }
+  }
+  if (wildSearch.value.length === 0) {
+    wildSearch.value = [];
+  }
+  setItems();
+})
+
+function setField(name: string, comp: string, value: string) {
+  if (!value) {
+    return;
+  }
+  let found = false;
+  for (let i = 0; i < searchFields.value.length; i++) {
+    if (searchFields.value[i].name === name && !searchFields.value[i].value) {
+      searchFields.value[i].comparator = comp;
+      searchFields.value[i].value = value;
+      found = true;
+      break;
+    }
+  }
+  if (found) {
+    return;
+  }
+  wildSearch.value.push({name: name, display: name.toLabel(), value: value, comparator: comp, hover: false, items: []});
 }
 
 function addSearch() {
@@ -187,7 +228,6 @@ function changed() {
           label="SimDB Server"
           hide-details
           @update:model-value="setItems"
-          @vue:mounted="setItems"
         ></v-select>
       </v-col>
     </v-row>
