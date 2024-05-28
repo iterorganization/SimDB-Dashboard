@@ -47,7 +47,7 @@ onMounted(() => {
   }
   if (props.traces.length > 1) {
     layout['showlegend'] = true
-    layout['legend'] = { x: 1, xanchor: 'right', y: 1 }
+    layout['legend'] = { x: 1, xanchor: 'left', y: 1 }
   }
   Plotly.newPlot(canvas.value, props.traces, layout)
 })
