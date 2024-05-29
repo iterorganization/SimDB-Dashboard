@@ -3,6 +3,8 @@ import { ref, onMounted } from 'vue'
 
 import PlotlyDiv from './PlotlyDiv.vue'
 import SkeletonBox from './SkeletonBox.vue'
+import { trace } from 'console';
+import { el } from 'vuetify/locale';
 
 type Trace = { name: string; x?: number[]; y: number[] }
 
@@ -44,27 +46,43 @@ const root = ref<HTMLElement | null>(null)
 // })
 
 function downloadData(id: string) {
-  let labels = null
+  var labels = ''
   let data = null
-  if (props.traces.some((trace) => trace.x)) {
-    labels = 'time,' + props.traces.map((el) => el.name).join(',')
+  if (props.traces.some((trace) => trace.x)) {    
+    var split_array = props.traces.map((el) => el.name).join(',').split(',')
+    split_array.forEach(element => {
+      labels = labels + 'time,' + element + ','      
+    });
+    labels = labels.substring(0, labels.length-1)
+    //labels = 'time,' + props.traces.map((el) => el.name).join(',')
     const max_lengths = props.traces.map((trace) =>
       Math.max(trace.x ? trace.x.length : 0, trace.y.length)
     )
     const max_length = Math.max(...max_lengths)
-
+    console.log("max_length " + max_length)
     let rows = []
     for (const i of Array(max_length).keys()) {
-      let row = Array(props.traces.length + 1)
+      let row = Array(props.traces.length)
       for (const n of row.keys()) {
-        if (n === 0) {
-          const x = props.traces[n].x
-          if (x !== undefined) {
-            row[n] = x[i]
+        if (props.traces[n] !== undefined) {
+          const x = props.traces[n].x            
+          if (x !== undefined) 
+          {
+            row[n] = x[i] + ',' + props.traces[n].y[i]
           }
-        } else {
-          row[n] = props.traces[n - 1].y[i]
         }
+                      
+        // if (n === 0) {
+        //   const x = props.traces[n].x            
+        //   if (x !== undefined) {
+        //     console.log("x " + x[i])
+        //     row[n] = x[i]
+        //   }
+        //   console.log("y " + props.traces[n].y[i])
+        // } else {
+        //   console.log("y " + props.traces[n - 1].y[i])
+        //   row[n] = props.traces[n - 1].y[i]                       
+        // }
       }
       rows.push(row.map((e) => (e ? e.toString() : '')).join(','))
     }
