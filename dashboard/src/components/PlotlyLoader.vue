@@ -3,8 +3,6 @@ import { ref, onMounted } from 'vue'
 
 import PlotlyDiv from './PlotlyDiv.vue'
 import SkeletonBox from './SkeletonBox.vue'
-import { trace } from 'console';
-import { el } from 'vuetify/locale';
 
 type Trace = { name: string; x?: number[]; y: number[] }
 
@@ -59,7 +57,6 @@ function downloadData(id: string) {
       Math.max(trace.x ? trace.x.length : 0, trace.y.length)
     )
     const max_length = Math.max(...max_lengths)
-    console.log("max_length " + max_length)
     let rows = []
     for (const i of Array(max_length).keys()) {
       let row = Array(props.traces.length)
@@ -75,12 +72,9 @@ function downloadData(id: string) {
         // if (n === 0) {
         //   const x = props.traces[n].x            
         //   if (x !== undefined) {
-        //     console.log("x " + x[i])
         //     row[n] = x[i]
         //   }
-        //   console.log("y " + props.traces[n].y[i])
         // } else {
-        //   console.log("y " + props.traces[n - 1].y[i])
         //   row[n] = props.traces[n - 1].y[i]                       
         // }
       }
