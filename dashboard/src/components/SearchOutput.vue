@@ -201,6 +201,7 @@ function fetchData(username: string, password: string) {
         el.metadata.forEach((m: any) => {
           el.metadata[m.element.replaceAll('.', '_dot_')] = m.value
         })
+        console.log(el.metadata)
         return el
       })
       // comp.items = data.results;
@@ -234,7 +235,6 @@ function getMetadata(item: any) : any[] {
   return typeof(item) === 'object' && 'metadata' in item && item.metadata
 }
 </script>
-
 <template>
   <AuthDialog
     :server="selectedServer"
@@ -257,6 +257,7 @@ function getMetadata(item: any) : any[] {
       single-expand="true"
       show-select
       show-expand
+      style="word-wrap: anywhere"
     >
       <template #top>
         <v-card fluid class="d-flex align-center" flat tile>
@@ -293,8 +294,8 @@ function getMetadata(item: any) : any[] {
                   :value="field.value"
                   :index="index"
                   :data="getMetadata(item)"
-                  :server="selectedServer"
-                >
+                  :server="selectedServer"                  
+                >                
                 </DataRow>
               </tbody>
             </v-table>
