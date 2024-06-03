@@ -31,7 +31,6 @@ const sortBy = ref<string>('')
 const sortItems = ref<string[]>(['status', 'run', 'shot'])
 const authentication = ref(null)
 const selectedServer = ref<string | null>(null)
-
 type AlertType = 'error' | 'success' | 'warning' | 'info' | undefined
 const status = ref<{ show: boolean; text: string | null; type: AlertType }>({
   show: false,
@@ -201,7 +200,6 @@ function fetchData(username: string, password: string) {
         el.metadata.forEach((m: any) => {
           el.metadata[m.element.replaceAll('.', '_dot_')] = m.value
         })
-        console.log(el.metadata)
         return el
       })
       // comp.items = data.results;
@@ -257,7 +255,6 @@ function getMetadata(item: any) : any[] {
       single-expand="true"
       show-select
       show-expand
-      style="word-wrap: anywhere"
     >
       <template #top>
         <v-card fluid class="d-flex align-center" flat tile>
@@ -295,7 +292,7 @@ function getMetadata(item: any) : any[] {
                   :index="index"
                   :data="getMetadata(item)"
                   :server="selectedServer"                  
-                >                
+                >
                 </DataRow>
               </tbody>
             </v-table>

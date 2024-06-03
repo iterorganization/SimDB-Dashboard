@@ -15,6 +15,13 @@ div.v-table th {
   font-weight: bold !important;
 }
 
+div.v-table td {
+  max-width: 50px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;  
+}
+
 .v-autocomplete {
   font-size: 0.8em;
 }
