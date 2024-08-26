@@ -179,11 +179,21 @@ function fetchData(username: string, password: string) {
   }
   const new_params = new URLSearchParams(params.value)
   const keys: string[] = Array.from(new_params.keys())
+  var has_value = false
   for (let key of keys) {
     if (key.startsWith('__')) {
       new_params.delete(key)
     }
+    if(key.match("value"))
+    {
+      has_value = true
+    }  
   }
+
+  if (has_value === true){
+    new_params.append("summary.time","")
+  }
+  console.log(new_params.toString())
   const query = new_params.toString()
   if (selectedServer.value === null) {
     return

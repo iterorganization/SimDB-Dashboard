@@ -16,8 +16,7 @@ div.v-table th {
 }
 
 div.v-table td {
-  max-width: 50px;
-  white-space: nowrap;
+  max-width: 60%;  
   overflow: hidden;
   text-overflow: ellipsis;  
 }

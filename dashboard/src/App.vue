@@ -7,7 +7,7 @@ import { RouterView } from 'vue-router'
     <v-system-bar app dark color="#002F55">
       ITER Simulation Database
       <v-spacer></v-spacer>
-      Version 0.3
+      Version 0.4
     </v-system-bar>
 
     <v-app-bar app shrink-on-scroll dark color="#002F55" height="80" dense>
