@@ -263,7 +263,7 @@ function showError(error: string) {
         <span class="text-h5">Parents</span>
         <v-list>
           <v-list-item v-for="parent in parents" :key="parent.uuid.hex">
-            <a :href="'uuid/' + parent.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
+            <a :href="parent.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
               parent.alias
             }}</a>
           </v-list-item>
@@ -275,7 +275,7 @@ function showError(error: string) {
         <span class="text-h5">Children</span>
         <v-list>
           <v-list-item v-for="child in children" :key="child.uuid.hex">
-            <a :href="'uuid/' + child.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
+            <a :href="child.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
               child.alias
             }}</a>
           </v-list-item>
