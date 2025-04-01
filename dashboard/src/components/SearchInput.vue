@@ -341,5 +341,40 @@ function changed() {
         <v-btn @click="clearSearch" class="mr-1" :disabled="getQuery().length == 0"> Clear </v-btn>
       </v-card>
     </v-row>
-  </div>
+  </div>  
+  <v-row dense style="padding-top: 20px;">
+    <v-card flat class="pa-3">  
+      <div class="d-flex align-center">
+        <span class="text-body-1"> 
+        For more information on how to use the SimDB, please refer to the
+        </span>
+      </div>
+      <div class="d-flex align-center" style="padding-top: 20px;">
+        <span class="text-body-1">        
+          <a 
+            href="https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/simdb-doc/html/user_guide.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="text-decoration-none"
+            style="color: #1976D2; "
+          >
+            SimDB User Guide<v-icon class="ml-2">mdi-open-in-new</v-icon>
+          </a>
+        </span>      
+      </div>
+      <div class="d-flex align-center">
+        <span class="text-body-1">        
+          <a 
+            href="https://sharepoint.iter.org/departments/POP/CM/IMDesign/Code%20Documentation/simdb-doc/html/cli.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="text-decoration-none"
+            style="color: #1976D2;"
+          >
+            SimDB CLI Commands <v-icon class="ml-2" >mdi-open-in-new</v-icon>
+          </a>
+        </span>        
+      </div>
+    </v-card>   
+  </v-row>
 </template>
