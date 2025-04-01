@@ -91,8 +91,8 @@ function getHex(value: number | string | NumpyValue | UUIDValue | undefined): st
     <td style="min-width: 25em">{{ name.toLabel() }}</td>
     <td style="min-width: 35em">
       <v-container style="width: 70%;white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;" class="ml-0">
+        overflow: hidden;
+        text-overflow: ellipsis;" class="ml-0">
         <template v-if="isXML()">
           <v-card height="400px" class="scroll">
             <pre style="max-height: 400px"
