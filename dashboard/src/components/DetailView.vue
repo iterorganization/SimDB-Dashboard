@@ -168,6 +168,35 @@ function showError(error: string) {
   status.value.text = error
   status.value.type = 'error'
 }
+
+const showOutputs = ref(false)
+const showInputs = ref(false)
+const showParents = ref(false)
+const showChildren = ref(false)
+function toggleSection(section: string) {
+  if (section === 'inputs') {
+    showInputs.value = !showInputs.value;
+    showOutputs.value = false;
+    showParents.value = false;
+    showChildren.value = false;
+  } else if (section === 'outputs') {
+    showOutputs.value = !showOutputs.value;
+    showInputs.value = false;
+    showParents.value = false;
+    showChildren.value = false;
+  } else if (section === 'parents') {
+    showParents.value = !showParents.value;
+    showInputs.value = false;
+    showOutputs.value = false;
+    showChildren.value = false;
+  } else if (section === 'children') {
+    showChildren.value = !showChildren.value;
+    showInputs.value = false;
+    showOutputs.value = false;
+    showParents.value = false;
+  }
+}
+
 </script>
 
 <template>
@@ -222,8 +251,15 @@ function showError(error: string) {
     </v-row>
     <v-row>
       <v-col>
-        <span class="text-h5">Inputs</span>
-        <v-table>
+        <div class="d-flex align-center justify-space-between">
+          <span class="text-h5">Input Simulation/s</span>
+          <v-list-item v-if="outputs.length > 0">
+            <v-btn icon @click="toggleSection('inputs')" style="box-shadow: none;">
+              <v-icon>{{ showInputs ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            </v-btn>
+          </v-list-item>
+        </div>
+        <v-table v-if="showInputs">
           <thead>
             <tr>
               <th class="pl-1">URI</th>
@@ -235,14 +271,25 @@ function showError(error: string) {
               <td>{{ input.uri }}</td>
               <td>{{ new Date(input.datetime).toUTCString() }}</td>
             </tr>
+            <tr v-if="inputs.length === 0">
+              <td>No input simulation</td>
+              <td></td>
+            </tr>
           </tbody>
         </v-table>
       </v-col>
     </v-row>
     <v-row>
       <v-col>
-        <span class="text-h5">Outputs</span>
-        <v-table>
+        <div class="d-flex align-center justify-space-between">
+          <span class="text-h5">Output Simulation/s</span>
+          <v-list-item v-if="outputs.length > 0">
+            <v-btn icon @click="toggleSection('outputs')" style="box-shadow: none;">
+              <v-icon>{{ showOutputs ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            </v-btn>
+          </v-list-item>
+        </div>
+        <v-table v-if="showOutputs">
           <thead>
             <tr>
               <th class="pl-1">URI</th>
@@ -254,32 +301,66 @@ function showError(error: string) {
               <td>{{ output.uri }}</td>
               <td>{{ new Date(output.datetime).toUTCString() }}</td>
             </tr>
+            <tr v-if="outputs.length === 0">
+              <td>No output simulation</td>
+              <td></td>
+            </tr>
           </tbody>
         </v-table>
       </v-col>
     </v-row>
     <v-row>
       <v-col>
-        <span class="text-h5">Parents</span>
-        <v-list>
+        <v-tooltip top>
+          <template v-slot:activator="{ props }">
+            <div class="d-flex align-center justify-space-between">
+              <span class="text-h5" v-bind="props">Parent Simulation/s<v-icon>{{'mdi-information-variant'}}</v-icon></span>
+              <v-list-item v-if="parents.length > 0">
+                <v-btn icon @click="toggleSection('parents')" style="box-shadow: none;">
+                  <v-icon>{{ showParents ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                </v-btn>
+              </v-list-item>
+            </div>
+          </template>
+          <span>This section shows the parents simulation/s</span>
+        </v-tooltip>
+        <v-list v-if="showParents">
           <v-list-item v-for="parent in parents" :key="parent.uuid.hex">
             <a :href="parent.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
               parent.alias
             }}</a>
           </v-list-item>
         </v-list>
+        <v-list-item v-if="parents.length === 0">
+          <span>No parent simulation</span>
+        </v-list-item>
       </v-col>
     </v-row>
     <v-row>
       <v-col>
-        <span class="text-h5">Children</span>
-        <v-list>
+        <v-tooltip top>
+          <template v-slot:activator="{ props }">
+            <div class="d-flex align-center justify-space-between" >
+              <span class="text-h5" v-bind="props">Child Simulation/s<v-icon>{{'mdi-information-variant'}}</v-icon></span>
+              <v-list-item v-if="children.length > 0">
+                <v-btn icon @click="toggleSection('children')" style="box-shadow: none;">
+                  <v-icon>{{ showChildren ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                </v-btn>
+              </v-list-item>
+            </div>
+          </template>
+          <span>This section shows the child simulation/s</span>
+        </v-tooltip>
+        <v-list v-if="showChildren">
           <v-list-item v-for="child in children" :key="child.uuid.hex">
             <a :href="child.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
               child.alias
             }}</a>
           </v-list-item>
         </v-list>
+        <v-list-item v-if="children.length === 0">
+          <span>No child simulation</span>
+        </v-list-item>
       </v-col>
     </v-row>
   </v-container>
