@@ -17,7 +17,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.toLabel(),
+      display: el.includes('pulse') ? 'Pulse' : el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -54,6 +54,8 @@ const helpText = function (item: string) {
   }
   return help[item]
 }
+
+const shouldShow = ref(false);
 
 onMounted(() => {
   let params = new URLSearchParams(window.location.search);
@@ -220,7 +222,7 @@ function changed() {
 <template>
   <div>
     <v-row dense>
-      <v-col cols="12">
+      <v-col cols="12" v-if="shouldShow">
         <v-select
           filled
           :items="servers"
