@@ -16,9 +16,7 @@ const config: Readonly<{ [key: string]: any }> = {
     'dataset_description.data_entry.pulse',
     'dataset_description.data_entry.run',
     'workflow.name',
-    'status',
-    'replaces',
-    'replaced_by'
+    'status'
   ],
   displayHeaders: [
     { label: 'Server', value: 'server' },
