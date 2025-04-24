@@ -15,8 +15,7 @@ const config: Readonly<{ [key: string]: any }> = {
   searchOutputFields: [
     'dataset_description.data_entry.pulse',
     'dataset_description.data_entry.run',
-    'workflow.name',
-    'status'
+    'workflow.name'
   ],
   displayHeaders: [
     { label: 'Server', value: 'server' },
