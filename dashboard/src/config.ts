@@ -15,7 +15,9 @@ const config: Readonly<{ [key: string]: any }> = {
   searchOutputFields: [
     'dataset_description.data_entry.pulse',
     'dataset_description.data_entry.run',
-    'workflow.name'
+    'workflow.name',
+    'status',
+    'uploaded_by'
   ],
   displayHeaders: [
     { label: 'Server', value: 'server' },
@@ -25,9 +27,12 @@ const config: Readonly<{ [key: string]: any }> = {
   // displayFields: 'all',
   displayFields: [
     'dataset_description.data_entry.pulse',
-    'dataset_description.data_entry.run',
     'workflow.name',
-    'description'
+    'ids',
+    'description',
+    'status',
+    'uploaded_by',
+    'creation_date'
   ],
   prefix: 'dashboard',
   searchOutputColumns: ['alias', 'status', 'datetime'],
