@@ -18,6 +18,7 @@ const showAllFields = ref(_showAllFields)
 const displayItems = ref(_displayFields)
 const uuid = ref<UUID | undefined>()
 const alias = ref<string | undefined>()
+const creationDate = ref('')
 const items = ref<Data[]>([])
 const outputs = ref<File[]>([])
 const inputs = ref<File[]>([])
@@ -91,10 +92,11 @@ function getValue(name: string) {
   } else if (name === 'uuid') {
     return uuid.value?.hex
   } else {
+    // removed .toLowerCase() to avoid case sensitivity
     let found: any = items.value
-      ? items.value.find((el: any) => el.element.toLowerCase() === name)
+      ? items.value.find((el: any) => el.element === name)
       : false
-    return found ? found.value : null
+    return found ? name==='creation_date'? new Date(found.value).toUTCString() : found.value : null
   }
 }
 

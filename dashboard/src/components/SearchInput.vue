@@ -17,7 +17,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.includes('pulse') ? 'Pulse' : el.toLabel(),
+      display: el.includes('pulse') ? 'Pulse' : el.includes('name') ? 'Code Name' : el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -221,7 +221,7 @@ function changed() {
 
 <template>
   <div>
-    <v-row dense>
+    <!-- <v-row dense>
       <v-col cols="12" v-if="shouldShow">
         <v-select
           filled
@@ -232,7 +232,7 @@ function changed() {
           @update:model-value="setItems"
         ></v-select>
       </v-col>
-    </v-row>
+    </v-row> -->
     <v-row dense>
       <v-col cols="12">
         <v-alert variant="text" :value="status.show" :type="status.type">{{ status.text }}</v-alert>

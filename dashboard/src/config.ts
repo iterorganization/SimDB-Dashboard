@@ -3,19 +3,17 @@ export { config }
 const config: Readonly<{ [key: string]: any }> = {
   api_version: '1.2',
   servers: [
-    'https://simdb.iter.org/scenarios/api',
-    'https://simdb.iter.org/itpa/api',
+    'http://localhost:5001',
   ],
   serverConfig: {
-    'https://simdb.iter.org/scenarios/api': { 'requiresAuth': false },
-    'https://simdb.iter.org/itpa/api': { 'requiresAuth': false },
+    'http://localhost:5001': { 'requiresAuth': false },
   },
-  defaultServer: 'https://simdb.iter.org/scenarios/api',
-  searchFields: ['alias','dataset_description.data_entry.pulse','workflow.name'],
+  defaultServer: 'http://localhost:5001/',
+  searchFields: ['alias','dataset_description.pulse','dataset_description.code.name'],
   searchOutputFields: [
-    'dataset_description.data_entry.pulse',
-    'dataset_description.data_entry.run',
-    'workflow.name',
+    'dataset_description.pulse',
+    'dataset_description.run',
+    'dataset_description.code.name',
     'status',
     'uploaded_by'
   ],
@@ -26,10 +24,10 @@ const config: Readonly<{ [key: string]: any }> = {
   ],
   // displayFields: 'all',
   displayFields: [
-    'dataset_description.data_entry.pulse',
-    'workflow.name',
+    'dataset_description.pulse',
+    'dataset_description.code.name',
     'ids',
-    'description',
+    'dataset_description.simulation.description',
     'status',
     'uploaded_by',
     'creation_date'

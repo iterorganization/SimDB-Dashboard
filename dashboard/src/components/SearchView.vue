@@ -16,18 +16,18 @@ function doSearch(queryPath: string) {
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="4">
-        <v-row>
+      <v-col cols="4" style="margin-top: -30px;">
+        <!-- <v-row>
           <p class="text-h5 sub-header">Search</p>
         </v-row>
-        <v-divider></v-divider>
+        <v-divider></v-divider> -->
         <SearchInput @search="doSearch"></SearchInput>
       </v-col>
-      <v-col cols="8">
-        <v-row>
+      <v-col cols="8" style="margin-top: -30px;">
+        <!-- <v-row>
           <p class="text-h5 sub-header">Search Results</p>
         </v-row>
-        <v-divider></v-divider>
+        <v-divider></v-divider> -->
         <SearchOutput :query="searchQuery"></SearchOutput>
       </v-col>
     </v-row>
