@@ -9,11 +9,10 @@ const config: Readonly<{ [key: string]: any }> = {
     'http://localhost:5001': { 'requiresAuth': false },
   },
   defaultServer: 'http://localhost:5001/',
-  searchFields: ['alias','dataset_description.pulse','dataset_description.code.name'],
+  searchFields: ['alias','summary.pulse','summary.code.name'],
   searchOutputFields: [
-    'dataset_description.pulse',
-    'dataset_description.run',
-    'dataset_description.code.name',
+    'summary.pulse',
+    'summary.code.name',
     'status',
     'uploaded_by'
   ],
@@ -24,10 +23,10 @@ const config: Readonly<{ [key: string]: any }> = {
   ],
   // displayFields: 'all',
   displayFields: [
-    'dataset_description.pulse',
-    'dataset_description.code.name',
+    'summary.pulse',
+    'summary.code.name',
     'ids',
-    'dataset_description.simulation.description',
+    'summary.simulation.description',
     'status',
     'uploaded_by',
     'creation_date'

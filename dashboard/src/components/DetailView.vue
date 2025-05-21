@@ -238,7 +238,7 @@ function toggleSection(section: string) {
             <DataRow
               v-for="(name, index) in displayItems"
               :key="index"
-              :name="name"
+              :name="name === 'summary.pulse' ? 'Pulse' : name === 'summary.code.name' ? 'Code Nam': name === 'summary.simulation.description' ? 'Description' : name === 'ids' ? 'IDSs' :name"
               :value="getValue(name)"
               :index="index"
               :data="items"
@@ -272,13 +272,13 @@ function toggleSection(section: string) {
           <thead>
             <tr>
               <th class="pl-1">URI</th>
-              <th class="pl-2">Creation Time</th>
+              <!-- <th class="pl-2">Creation Time</th> -->
             </tr>
           </thead>
           <tbody>
             <tr v-for="input in inputs" :key="input.uuid.hex">
               <td>{{ input.uri }}</td>
-              <td>{{ new Date(input.datetime).toUTCString() }}</td>
+              <!-- <td>{{ new Date(input.datetime).toUTCString() }}</td> -->
             </tr>
             <tr v-if="inputs.length === 0">
               <td>No input simulation</td>
@@ -302,13 +302,13 @@ function toggleSection(section: string) {
           <thead>
             <tr>
               <th class="pl-1">URI</th>
-              <th class="pl-2">Creation Time</th>
+              <!-- <th class="pl-2">Creation Time</th> -->
             </tr>
           </thead>
           <tbody>
             <tr v-for="output in outputs" :key="output.uuid.hex">
               <td>{{ output.uri }}</td>
-              <td>{{ new Date(output.datetime).toUTCString() }}</td>
+              <!-- <td>{{ new Date(output.datetime).toUTCString() }}</td> -->
             </tr>
             <tr v-if="outputs.length === 0">
               <td>No output simulation</td>
