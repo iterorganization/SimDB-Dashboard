@@ -18,7 +18,6 @@ const showAllFields = ref(_showAllFields)
 const displayItems = ref(_displayFields)
 const uuid = ref<UUID | undefined>()
 const alias = ref<string | undefined>()
-const creationDate = ref('')
 const items = ref<Data[]>([])
 const outputs = ref<File[]>([])
 const inputs = ref<File[]>([])
@@ -238,11 +237,12 @@ function toggleSection(section: string) {
             <DataRow
               v-for="(name, index) in displayItems"
               :key="index"
-              :name="name === 'summary.pulse' ? 'Pulse' : name === 'summary.code.name' ? 'Code Nam': name === 'summary.simulation.description' ? 'Description' : name === 'ids' ? 'IDSs' :name"
+              :name="name === 'summary.pulse' ? 'Pulse' : name === 'summary.code.name' ? 'Code Name': name === 'summary.simulation.description' ? 'Description' : name === 'ids' ? 'IDSs' :name"
               :value="getValue(name)"
               :index="index"
               :data="items"
               :server="selectedServer"
+              :meta_name="name"
             >
             </DataRow>
           </tbody>

@@ -16,6 +16,7 @@ const props = defineProps<{
   index: number
   data: Data[]
   server: string | null
+  meta_name: string
 }>()
 
 function getTraces(value: any): Trace[] {
@@ -88,7 +89,9 @@ function getHex(value: number | string | NumpyValue | UUIDValue | undefined): st
 
 <template>
   <tr>
-    <td style="min-width: 25em">{{ name.toLabel() }}</td>
+    <td style="min-width: 25em">{{ (name.replaceAll(".", " " )).replaceAll("_", " " ).split(' ')
+   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+   .join(' ') }}</td>
     <td style="min-width: 35em">
       <v-container style="width: 70%;white-space: nowrap;
         overflow: hidden;
@@ -112,7 +115,7 @@ function getHex(value: number | string | NumpyValue | UUIDValue | undefined): st
           <a :href="'/' + config.prefix + '/uuid/' + getHex(value)" :title="getHex(value)">{{ getHex(value) }}</a>
         </template>
         <template v-else-if="isShortString()">
-          <a :href="'/' + config.prefix + '../?__server=' + server + '&' + name + '=eq:' + value">{{
+          <a :href="'/' + config.prefix + '../?__server=' + server + '&' + meta_name + '=eq:' + value">{{
             processValue(value)
           }}</a>
         </template>
