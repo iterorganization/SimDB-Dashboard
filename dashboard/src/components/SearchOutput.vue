@@ -301,7 +301,8 @@ function getMetadata(item: any) : any[] {
                   :value="field.value"
                   :index="index"
                   :data="getMetadata(item)"
-                  :server="selectedServer"                  
+                  :server="selectedServer"        
+                  :meta_name="field.element"          
                 >
                 </DataRow>
               </tbody>
