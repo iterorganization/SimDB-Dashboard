@@ -3,12 +3,14 @@ export { config }
 const config: Readonly<{ [key: string]: any }> = {
   api_version: '1.2',
   servers: [
-    'http://localhost:5001',
+    'https://simdb.iter.org/scenarios/api',
+    //'https://simdb.iter.org/itpa/api',    
   ],
   serverConfig: {
-    'http://localhost:5001': { 'requiresAuth': false },
+    'https://simdb.iter.org/scenarios/api': { 'requiresAuth': false },
+    //'https://simdb.iter.org/itpa/api': { 'requiresAuth': false },
   },
-  defaultServer: 'http://localhost:5001/',
+  defaultServer: 'https://simdb.iter.org/scenarios/api',
   searchFields: ['alias','summary.pulse','summary.code.name'],
   searchOutputFields: [
     'summary.pulse',
