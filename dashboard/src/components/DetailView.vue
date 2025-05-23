@@ -281,7 +281,7 @@ function toggleSection(section: string) {
               <!-- <td>{{ new Date(input.datetime).toUTCString() }}</td> -->
             </tr>
             <tr v-if="inputs.length === 0">
-              <td>No input simulation</td>
+              <td>No input data</td>
               <td></td>
             </tr>
           </tbody>
