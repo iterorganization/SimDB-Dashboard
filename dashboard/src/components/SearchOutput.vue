@@ -297,7 +297,7 @@ function getMetadata(item: any) : any[] {
                 <DataRow
                   v-for="(field, index) in getMetadata(item)"
                   :key="index"
-                  :name="field.element"
+                  :name="field.element === 'summary.pulse' ? 'Pulse' : field.element === 'summary.code.name' ? 'Code Name' : field.element"
                   :value="field.value"
                   :index="index"
                   :data="getMetadata(item)"
