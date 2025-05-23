@@ -232,7 +232,6 @@ function changed() {
   }
 }
 
-
 function displayError(message: string) {
   errorMessage.value = message
   showError.value = true
@@ -240,32 +239,6 @@ function displayError(message: string) {
     showError.value = false
     errorMessage.value = ''
   }, 5000)
-}
-
-function handleSearch() {
-  const queryPath = getQueryPath()
-  fetch(queryPath)
-    .then(response => {
-      if (!response.ok) {
-        console.error('Error:', response.status, response.statusText)
-        return response.json().then(err => {
-          throw new Error(err.message || 'Server Error')
-        })
-      }
-      return response.json()
-    })
-    .then(data => {
-      $emit('search', queryPath)
-    })
-    .catch(error => {
-      console.log('Error:')
-      // errorMessage.value = error.message
-      showError.value = true
-      setTimeout(() => {
-        showError.value = false
-        errorMessage.value = ''
-      }, 5000)
-    })
 }
 </script>
 
@@ -383,14 +356,7 @@ function handleSearch() {
     </v-row>
     <v-row dense>
       <v-card tile flat dense class="d-flex flex-row-reverse p-0 mt-2">
-        <!-- <v-btn @click="$emit('search', getQueryPath())">
-          <template v-if="getQuery().length == 0"> Show All </template>
-          <template v-else>
-            Search
-            <v-icon>mdi-database-search</v-icon>
-          </template>
-        </v-btn> -->
-        <v-btn @click="handleSearch">
+        <v-btn @click="$emit('search', getQueryPath())">
           <template v-if="getQuery().length == 0"> Show All </template>
           <template v-else>
             Search
