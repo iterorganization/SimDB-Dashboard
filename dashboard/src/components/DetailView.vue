@@ -343,7 +343,7 @@ function toggleSection(section: string) {
                     </v-list-item>
                   </div>
                 </template>
-                <span>Simulation whose outputs is equal to the inputs of the current simulation</span>
+                <span>Simulation whose outputs are the inputs of the current simulation</span>
               </v-tooltip>
               <v-list v-if="showParents">
                 <v-list-item v-for="parent in parents" :key="parent.uuid.hex">
