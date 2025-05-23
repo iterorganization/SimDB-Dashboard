@@ -165,7 +165,9 @@ function setItems(username: string, password: string) {
           <thead>
             <tr>
               <th class="pl-1">UUID</th>
-              <th class="pl-2" v-for="id in uuids" v-bind:key="id">{{ id }}</th>
+              <th class="pl-2" v-for="id in uuids" v-bind:key="id">
+                <a :href="'../uuid/' + id" > {{ id }} </a>
+              </th>
             </tr>
             <tr>
               <th class="pl-1">Alias</th>

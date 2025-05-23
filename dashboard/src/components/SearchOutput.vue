@@ -276,7 +276,7 @@ function getMetadata(item: any) : any[] {
         </v-card>
       </template>
       <template #[`item.alias`]="{ item }">
-        <a :href="'uuid/' + getHex(item) + '?server=' + selectedServer" @click.stop="">{{
+        <a :href="'uuid/' + getHex(item)" @click.stop="">{{
           getAlias(item)
         }}</a>
       </template>

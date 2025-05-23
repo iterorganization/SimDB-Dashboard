@@ -33,6 +33,8 @@ const items = ref<{ value: string, text: string }[]>([])
 const itemsFor = ref<{ [key: string]: string[] }>({})
 const wildSearch = ref<SearchEntry[]>([])
 const selectedServer = ref<string>(config.defaultServer)
+const errorMessage = ref('')
+const showError = ref(false)
 
 type AlertType = 'error' | 'success' | 'warning' | 'info' | undefined
 const status = ref<{ show: boolean; text: string | null; type: AlertType }>({
@@ -120,6 +122,10 @@ function clearSearch() {
     searchFields.value[i].value = null
     searchFields.value[i].comparator = 'eq'
   }
+  for (let i = 0; i < wildSearch.value.length; i++) {
+    wildSearch.value[i].value = null
+    wildSearch.value[i].comparator = 'eq'
+  }
 }
 
 function setItems() {
@@ -171,6 +177,10 @@ function getQuery() {
     const comp = searchFields.value[i].comparator + ':'
     const value = searchFields.value[i].value
     if (value !== null) {
+      if (value.toString().indexOf(':') >= 0){
+        displayError('Invalid search character ":" in ' + value)
+        return ''
+      }
       if (value.trim) {
         args.push(name + '=' + comp + value.trim())
       } else {
@@ -183,6 +193,10 @@ function getQuery() {
     const comp = wildSearch.value[i].comparator + ':'
     const value = wildSearch.value[i].value
     if (name && value) {
+      if (value.toString().indexOf(':') >= 0){
+        displayError('Invalid search character ":" in ' + value)
+        return ''
+      }
       if (value.trim) {
         args.push(name + '=' + comp + value.trim())
       } else {
@@ -216,6 +230,42 @@ function changed() {
         status.value.type = 'error'
       })
   }
+}
+
+
+function displayError(message: string) {
+  errorMessage.value = message
+  showError.value = true
+  setTimeout(() => {
+    showError.value = false
+    errorMessage.value = ''
+  }, 5000)
+}
+
+function handleSearch() {
+  const queryPath = getQueryPath()
+  fetch(queryPath)
+    .then(response => {
+      if (!response.ok) {
+        console.error('Error:', response.status, response.statusText)
+        return response.json().then(err => {
+          throw new Error(err.message || 'Server Error')
+        })
+      }
+      return response.json()
+    })
+    .then(data => {
+      $emit('search', queryPath)
+    })
+    .catch(error => {
+      console.log('Error:')
+      // errorMessage.value = error.message
+      showError.value = true
+      setTimeout(() => {
+        showError.value = false
+        errorMessage.value = ''
+      }, 5000)
+    })
 }
 </script>
 
@@ -333,7 +383,14 @@ function changed() {
     </v-row>
     <v-row dense>
       <v-card tile flat dense class="d-flex flex-row-reverse p-0 mt-2">
-        <v-btn @click="$emit('search', getQueryPath())">
+        <!-- <v-btn @click="$emit('search', getQueryPath())">
+          <template v-if="getQuery().length == 0"> Show All </template>
+          <template v-else>
+            Search
+            <v-icon>mdi-database-search</v-icon>
+          </template>
+        </v-btn> -->
+        <v-btn @click="handleSearch">
           <template v-if="getQuery().length == 0"> Show All </template>
           <template v-else>
             Search
@@ -379,4 +436,13 @@ function changed() {
       </div>
     </v-card>   
   </v-row>
+  <v-alert
+    v-model="showError"
+    type="error"
+    variant="tonal"
+    closable
+    class="mb-2"
+  >
+    {{ errorMessage }}
+  </v-alert>
 </template>
