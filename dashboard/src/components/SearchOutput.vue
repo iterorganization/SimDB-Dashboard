@@ -193,7 +193,6 @@ function fetchData(username: string, password: string) {
   if (has_value === true){
     new_params.append("summary.time","")
   }
-  console.log(new_params.toString())
   const query = new_params.toString()
   if (selectedServer.value === null) {
     return
@@ -219,8 +218,23 @@ function fetchData(username: string, password: string) {
     })
     .catch(function (error) {
       status.value.show = true
-      status.value.text = error
+      // For more specific error handling:
+      if (error.message.includes('NetworkError when attempting to fetch resource.')) {
+        status.value.text = 'Search failed: Invalid query parameters. Please check your search criteria and try again.'
+      } else if (error.message.includes('400')) {
+        status.value.text = 'Bad request: Please verify your search parameters.'
+      } else if (error.message.includes('500')) {
+        status.value.text = 'Server error: Please try again or contact support.'
+      } else {
+        status.value.text = error.message
+      }
       status.value.type = 'error'
+      // Auto-hide the status message after 5 seconds
+      setTimeout(() => {
+        status.value.show = false
+        status.value.text = ''
+        status.value.type = undefined
+      }, 5000)
     })
     .finally(function () {
       loading.value = false
