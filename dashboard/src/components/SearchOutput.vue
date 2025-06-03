@@ -106,13 +106,17 @@ function doQuery() {
   let searchColumns: string[] = config.searchOutputColumns.concat(additionalColumns)
   headers.value = searchColumns.map((el: string) => {
     let value = ''
-    if (el === 'alias' || el === 'datetime') {
+
+    if (el === 'alias') {
       value = el
     } else if (el === 'uuid') {
       value = 'uuid.hex'
+    } else if (el === 'Upload Date' ){
+      value = 'datetime'
     } else {
       value = 'metadata.' + el.replaceAll('.', '_dot_')
     }
+
     return { title: el.toLabel(), align: 'start', sortable: true, key: value }
   })
 }
@@ -311,7 +315,7 @@ function getMetadata(item: any) : any[] {
                 <DataRow
                   v-for="(field, index) in getMetadata(item)"
                   :key="index"
-                  :name="field.element === 'summary.pulse' ? 'Pulse' : field.element === 'summary.code.name' ? 'Code Name' : field.element"
+                  :name="field.element === 'summary.code.name' ? 'Code Name' : field.element"
                   :value="field.value"
                   :index="index"
                   :data="getMetadata(item)"

@@ -17,7 +17,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.includes('pulse') ? 'Pulse' : el.includes('name') ? 'Code Name' : el.toLabel(),
+      display: el.includes('name') ? 'Code Name': el.includes('summary.simulation.description') ? 'Description' : el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -133,6 +133,10 @@ function setItems() {
   const url = config.rootAPI(decodeURIComponent(selectedServer.value))
   for (let i = 0; i < searchFields.value.length; i++) {
     let name = searchFields.value[i].name
+    if (name === 'summary.simulation.description') {
+      itemsFor.value[name] = []
+    }
+    else{
     fetch(url + '/metadata/' + name)
       .then((response) => response.json())
       .then((data) => {
@@ -143,6 +147,7 @@ function setItems() {
         status.value.text = error
         status.value.type = 'error'
       })
+    }
   }
   fetch(url + '/metadata')
     .then((response) => response.json())

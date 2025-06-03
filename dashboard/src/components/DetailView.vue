@@ -237,7 +237,7 @@ function toggleSection(section: string) {
             <DataRow
               v-for="(name, index) in displayItems"
               :key="index"
-              :name="name === 'summary.pulse' ? 'Pulse' : name === 'summary.code.name' ? 'Code Name': name === 'summary.simulation.description' ? 'Description' : name === 'ids' ? 'IDSs' : name === 'creation_date' ? 'Datetime' :name"
+              :name="name === 'summary.code.name' ? 'Code Name': name === 'summary.simulation.description' ? 'Description' : name === 'ids' ? 'IDSs' : name === 'summary.ids_properties.creation_date' ? 'Creation Date' :name"
               :value="getValue(name)"
               :index="index"
               :data="items"
