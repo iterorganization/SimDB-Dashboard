@@ -106,7 +106,6 @@ function doQuery() {
   let searchColumns: string[] = config.searchOutputColumns.concat(additionalColumns)
   headers.value = searchColumns.map((el: string) => {
     let value = ''
-    console.log('el', el)
     if (el === 'alias/UUID') {
       value = 'alias' // el
     } else if (el === 'uuid') {
@@ -223,7 +222,7 @@ function fetchData(username: string, password: string) {
     .catch(function (error) {
       status.value.show = true
       // For more specific error handling:
-      if (error.message.includes('NetworkError when attempting to fetch resource.')) {
+      if (error.message.includes('NetworkError when attempting to fetch resource.') || error.message.includes('JSON.parse: unexpected character at line 1 column 1 of the JSON data')) {
         status.value.text = 'Search failed: Invalid query parameters. Please check your search criteria and try again.'
       } else if (error.message.includes('400')) {
         status.value.text = 'Bad request: Please verify your search parameters.'
@@ -246,7 +245,6 @@ function fetchData(username: string, password: string) {
 }
 
 function getAlias(item: any) : string {
-  console.log(item)
   return (typeof item === 'object' && item.alias) || getHex(item)
   // return typeof(item) === 'object' && 'alias' in item && item.alias
 }

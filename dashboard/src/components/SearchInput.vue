@@ -140,7 +140,6 @@ function setItems() {
     fetch(url + '/metadata/' + name)
       .then((response) => response.json())
       .then((data) => {
-        console.log('Fetched items for', name, data)
         itemsFor.value[name] = data
       })
       .catch(function (error) {
