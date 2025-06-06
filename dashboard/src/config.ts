@@ -11,7 +11,7 @@ const config: Readonly<{ [key: string]: any }> = {
     //'https://simdb.iter.org/itpa/api': { 'requiresAuth': false },
   },
   defaultServer: 'http://localhost:5001',
-  searchFields: ['alias','summary.code.name','summary.simulation.description'],
+  searchFields: ['alias','summary.code.name','summary.heating_current_drive.power_additional.value','summary.global_quantities.ip.value', 'summary.local.magnetic_axis.b_field_tor.value','summary.simulation.description'],
   searchOutputFields: [
     'summary.code.name',
     'status',
@@ -32,7 +32,7 @@ const config: Readonly<{ [key: string]: any }> = {
     'summary.ids_properties.creation_date'
   ],
   prefix: 'dashboard',
-  searchOutputColumns: ['alias', 'status', 'Upload Date'],
+  searchOutputColumns: ['alias/UUID', 'status', 'Upload Date'],
   rootURL: function (server: string) {
     return server + '/'
   },

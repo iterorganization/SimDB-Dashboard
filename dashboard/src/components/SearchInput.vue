@@ -17,7 +17,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.includes('name') ? 'Code Name': el.includes('summary.simulation.description') ? 'Description' : el.toLabel(),
+      display: el.includes('name') ? 'Code Name': el.includes('summary.simulation.description') ? 'Description' : el.includes('power_additional') ? 'Power Additional' : el.includes('global_quantities.ip') ? 'Global Quantities IP': el.includes('local.magnetic_axis.b_field_tor') ? 'Toroidal Magnetic Field' :el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -133,13 +133,14 @@ function setItems() {
   const url = config.rootAPI(decodeURIComponent(selectedServer.value))
   for (let i = 0; i < searchFields.value.length; i++) {
     let name = searchFields.value[i].name
-    if (name === 'summary.simulation.description') {
+    if (name === 'summary.simulation.description' || name === 'summary.heating_current_drive.power_additional.value' || name === 'summary.global_quantities.ip.value' || name === 'summary.local.magnetic_axis.b_field_tor.value') {
       itemsFor.value[name] = []
     }
     else{
     fetch(url + '/metadata/' + name)
       .then((response) => response.json())
       .then((data) => {
+        console.log('Fetched items for', name, data)
         itemsFor.value[name] = data
       })
       .catch(function (error) {

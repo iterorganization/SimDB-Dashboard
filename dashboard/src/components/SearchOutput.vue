@@ -106,9 +106,9 @@ function doQuery() {
   let searchColumns: string[] = config.searchOutputColumns.concat(additionalColumns)
   headers.value = searchColumns.map((el: string) => {
     let value = ''
-
-    if (el === 'alias') {
-      value = el
+    console.log('el', el)
+    if (el === 'alias/UUID') {
+      value = 'alias' // el
     } else if (el === 'uuid') {
       value = 'uuid.hex'
     } else if (el === 'Upload Date' ){
@@ -246,7 +246,9 @@ function fetchData(username: string, password: string) {
 }
 
 function getAlias(item: any) : string {
-  return typeof(item) === 'object' && 'alias' in item && item.alias
+  console.log(item)
+  return (typeof item === 'object' && item.alias) || getHex(item)
+  // return typeof(item) === 'object' && 'alias' in item && item.alias
 }
 
 function getDatetime(item: any) : string {
