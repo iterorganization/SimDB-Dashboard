@@ -245,7 +245,13 @@ function fetchData(username: string, password: string) {
 }
 
 function getAlias(item: any) : string {
-  return (typeof item === 'object' && item.alias) || getHex(item)
+  if (item.alias != 'None' && item.alias != null)
+  {
+    return item.alias
+  } else{
+    return getHex(item)
+  }
+  // return (typeof item === 'object' && item.alias) || getHex(item)
   // return typeof(item) === 'object' && 'alias' in item && item.alias
 }
 
