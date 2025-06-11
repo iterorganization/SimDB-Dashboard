@@ -17,7 +17,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.includes('name') ? 'Code Name': el.includes('summary.simulation.description') ? 'Description' : el.includes('power_additional') ? 'Power Additional' : el.includes('global_quantities.ip') ? 'Global Quantities IP': el.includes('local.magnetic_axis.b_field_tor') ? 'Toroidal Magnetic Field' :el.toLabel(),
+      display: el.includes('name') ? 'Code Name': el.includes('summary.simulation.description') ? 'Description' : el.includes('power_additional') ? 'power_additional' : el.includes('global_quantities.ip') ? 'ip': el.includes('local.magnetic_axis.b_field_tor') ? 'b_field_phi' :el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -26,7 +26,7 @@ const searchFields = ref<SearchEntry[]>(
   })
 )
 
-const comparators = ['eq', 'ne', 'in', 'ni', 'gt', 'ge', 'lt', 'le']
+const comparators = ['eq', 'ne', 'in', 'ni', 'gt', 'agt', 'ge', 'age', 'lt', 'alt', 'le', 'ale']
 
 const isLoading = ref<boolean>(true)
 const items = ref<{ value: string, text: string }[]>([])
@@ -50,11 +50,28 @@ const helpText = function (item: string) {
     in: 'Contained in',
     ni: 'Not contained in',
     gt: 'Greater than',
+    agt: 'Any greater than',
     ge: 'Greater than or equal to',
+    age: 'Any greater than or equal to',
     lt: 'Less than',
-    le: 'Less than or equal to'
+    alt: 'Any less than',
+    le: 'Less than or equal to',
+    ale: 'Any less than or equal to'
+
   }
   return help[item]
+}
+
+const quantitiesName = function (item: string) {
+  const name: { [key: string]: string } = {
+    'Alias': 'Simulation Alias',
+    'Code Name': 'summary.simulation.code_name',
+    'Description': 'summary.simulation.description',
+    'power_additional': 'summary.heating_current_drive.power_additional',
+    'ip': 'summary.global_quantities.ip',
+    'b_field_phi': 'summary.local.magnetic_axis.b_field_tor',
+  }
+  return name[item]
 }
 
 const shouldShow = ref(false);
@@ -269,7 +286,14 @@ function displayError(message: string) {
     <v-divider></v-divider>
     <v-row dense v-for="item in searchFields" :key="item.name" align="center">
       <v-col cols="5">
-        <p :for="item.name">{{ item.display }}</p>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ props }">
+            <p v-bind="props" :for="item.name" style="cursor: help;">
+              {{ item.display }}
+            </p>
+          </template>
+          <span>{{ quantitiesName(item.display) }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="2" class="p-0" style="padding-right: 0">
         <v-select
