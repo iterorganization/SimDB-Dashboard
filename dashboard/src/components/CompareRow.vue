@@ -20,6 +20,7 @@ const props = defineProps<{
   simulations: Simulation[]
   uuids: string[]
   index: number
+  name_label: string
 }>()
 
 function getValue(simulation: Simulation, name: string) {
@@ -82,7 +83,7 @@ function isShortString(uuid: string, name: string) {
 
 <template>
   <tr v-if="!isArray(name)">
-    <td style="min-width: 20em">{{ name.toLabel() }}</td>
+    <td style="min-width: 20em">{{ name_label.toLabel() }}</td>
     <td v-for="uuid in uuids" v-bind:key="uuid">
       <v-container class="ml-0">
         <template v-if="isXML(uuid, name)">

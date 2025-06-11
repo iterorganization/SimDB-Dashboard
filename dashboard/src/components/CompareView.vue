@@ -95,6 +95,14 @@ function getToken() {
 
 function getAlias(uuid: string) {
   return simulations.value.find((el) => el.uuid === uuid)?.alias
+  // const simulation = simulations.value.find((el) => el.uuid === uuid)
+  
+  // // Return UUID if alias is null, undefined, 'None', or empty string
+  // if (!simulation || !simulation.alias || simulation.alias === 'None' || simulation.alias === '') {
+  //   return uuid
+  // }
+  
+  // return simulation.alias
 }
 
 function getValue(name: string) {
@@ -183,6 +191,7 @@ function setItems(username: string, password: string) {
               :simulations="simulations"
               :uuids="uuids"
               :index="index"
+              :name_label="name === 'summary.code.name' ? 'Code Name': name === 'summary.simulation.description' ? 'Description' : name === 'ids' ? 'IDSs' : name === 'summary.ids_properties.creation_date' ? 'Creation Date' :name"
             >
             </CompareRow>
             <ComparePlot
