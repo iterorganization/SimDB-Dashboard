@@ -38,11 +38,11 @@ function getTraces(name: string): PlotData[] {
       return { y: [], name: '' }
     }
 
-    if (processValue(getValue(simulation, name)) === 'undefined')
+    let value = getValue(simulation, name)
+    if (value._type != 'numpy.ndarray')
     {
-      console.log(getValue(simulation, name))
       let data: PlotData = {
-        y: [getValue(simulation, name)],
+        y: [value],
         name: simulation?.alias || simulation?.uuid
       }
       let xdata = [0]
@@ -51,16 +51,17 @@ function getTraces(name: string): PlotData[] {
       }
       return data
     }
-
-    let data: PlotData = {
-      y: processValue(getValue(simulation, name)),
-      name: simulation?.alias || simulation?.uuid
+    else {
+      let data: PlotData = {
+        y: processValue(value),
+        name: simulation?.alias || simulation?.uuid
+      }
+      let xdata = getXData(simulation, name)
+      if (xdata) {
+        data['x'] = xdata
+      }
+      return data
     }
-    let xdata = getXData(simulation, name)
-    if (xdata) {
-      data['x'] = xdata
-    }
-    return data
   })
 }
 
@@ -91,7 +92,7 @@ function processValue(value: any) {
       return 'Unknown data type: ' + value.dtype
     }
   }
-  return 'undefined'
+  return value
 }
 
 function isArray(name: string) {
