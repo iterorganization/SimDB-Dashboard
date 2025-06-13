@@ -34,9 +34,24 @@ const props = defineProps<{
 function getTraces(name: string): PlotData[] {
   return props.uuids.map((uuid) => {
     let simulation = props.simulations.find((sim) => sim.uuid === uuid)
-    if (simulation === undefined) {
+    if (simulation === undefined || processValue(getValue(simulation, name)) === 'No data available.') {
       return { y: [], name: '' }
     }
+
+    if (processValue(getValue(simulation, name)) === 'undefined')
+    {
+      console.log(getValue(simulation, name))
+      let data: PlotData = {
+        y: [getValue(simulation, name)],
+        name: simulation?.alias || simulation?.uuid
+      }
+      let xdata = [0]
+      if (xdata) {
+        data['x'] = xdata
+      }
+      return data
+    }
+
     let data: PlotData = {
       y: processValue(getValue(simulation, name)),
       name: simulation?.alias || simulation?.uuid
@@ -61,6 +76,7 @@ function getXData(simulation: Simulation, name: string) {
 }
 
 function processValue(value: any) {
+  
   if (!value) {
     return 'No data available.'
   }
@@ -75,7 +91,7 @@ function processValue(value: any) {
       return 'Unknown data type: ' + value.dtype
     }
   }
-  return value
+  return 'undefined'
 }
 
 function isArray(name: string) {
