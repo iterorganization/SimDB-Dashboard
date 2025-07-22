@@ -108,6 +108,8 @@ function doQuery() {
     let value = ''
     if (el === 'alias/UUID') {
       value = 'alias' // el
+    } else if (el === 'alias') {
+      return {}
     } else if (el === 'uuid') {
       value = 'uuid.hex'
     } else if (el === 'Upload Date' ){
