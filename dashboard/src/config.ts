@@ -11,7 +11,7 @@ const config: Readonly<{ [key: string]: any }> = {
     //'https://simdb.iter.org/itpa/api': { 'requiresAuth': false },
   },
   defaultServer: 'https://simdb.iter.org/scenarios/api',
-  searchFields: ['alias','summary.code.name','summary.heating_current_drive.power_additional.value','summary.global_quantities.ip.value', 'summary.local.magnetic_axis.b_field_tor.value','summary.simulation.description'],
+  searchFields: ['alias','summary.code.name','summary.heating_current_drive.power_additional.value','summary.global_quantities.ip.value', 'summary.global_quantities.b0.value','summary.simulation.description'],
   searchOutputFields: [
     'summary.code.name',
     'status',

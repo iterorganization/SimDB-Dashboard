@@ -17,7 +17,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.includes('alias') ? 'alias': el.includes('name') ? 'code name': el.includes('summary.simulation.description') ? 'description' : el.includes('power_additional') ? 'power_additional' : el.includes('global_quantities.ip') ? 'ip': el.includes('local.magnetic_axis.b_field_tor') ? 'b_field_phi' :el.toLabel(),
+      display: el.includes('alias') ? 'alias': el.includes('name') ? 'code name': el.includes('summary.simulation.description') ? 'description' : el.includes('power_additional') ? 'power_additional' : el.includes('global_quantities.ip') ? 'ip': el.includes('global_quantities.b0') ? 'b0' :el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -26,7 +26,7 @@ const searchFields = ref<SearchEntry[]>(
   })
 )
 
-const comparators = ['eq', 'ne', 'in', 'ni', 'gt', 'agt', 'ge', 'age', 'lt', 'alt', 'le', 'ale']
+const comparators = ['eq', 'ne', 'in', 'ni', 'gt', 'ge', 'lt', 'le', 'ale', 'alt', 'agt', 'age']
 
 const isLoading = ref<boolean>(true)
 const items = ref<{ value: string, text: string }[]>([])
@@ -50,14 +50,13 @@ const helpText = function (item: string) {
     in: 'Contained in',
     ni: 'Not contained in',
     gt: 'Greater than',
-    agt: 'Any greater than',
     ge: 'Greater than or equal to',
-    age: 'Any greater than or equal to',
     lt: 'Less than',
-    alt: 'Any less than',
     le: 'Less than or equal to',
-    ale: 'Any less than or equal to'
-
+    ale:'Any less than or equal to',
+    alt:'Any less than',
+    agt:'Any greater than',
+    age:'Any greater than or equal to',
   }
   return help[item]
 }
@@ -69,7 +68,7 @@ const quantitiesName = function (item: string) {
     'description': 'summary.simulation.description',
     'power_additional': 'summary.heating_current_drive.power_additional',
     'ip': 'summary.global_quantities.ip',
-    'b_field_phi': 'summary.local.magnetic_axis.b_field_tor',
+    'b0': 'summary.global_quantities.b0',
   }
   return name[item]
 }
@@ -150,7 +149,7 @@ function setItems() {
   const url = config.rootAPI(decodeURIComponent(selectedServer.value))
   for (let i = 0; i < searchFields.value.length; i++) {
     let name = searchFields.value[i].name
-    if (name === 'summary.simulation.description' || name === 'summary.heating_current_drive.power_additional.value' || name === 'summary.global_quantities.ip.value' || name === 'summary.local.magnetic_axis.b_field_tor.value') {
+    if (name === 'summary.simulation.description' || name === 'summary.heating_current_drive.power_additional.value' || name === 'summary.global_quantities.ip.value' || name === 'summary.global_quantities.b0.value') {
       itemsFor.value[name] = []
     }
     else{
