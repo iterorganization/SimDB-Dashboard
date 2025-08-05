@@ -361,13 +361,8 @@ function displayError(message: string) {
           @change="changed"
           hide-details
           style="white-space: nowrap;"
-          @mouseover="item.hoveritem = true"
-          @mouseleave="item.hoveritem = false"
         >
         </v-autocomplete>
-        <v-card v-if="item.hoveritem" style="position: absolute; padding: 0.2em">{{
-          item.name
-        }}</v-card>
       </v-col>
       <v-col cols="2" class="p-0" style="padding-right: 0">
         <v-select
