@@ -4,6 +4,7 @@ import { to_i32_array, to_f32_array, to_f64_array } from '../common'
 import { config } from '../config'
 
 import PlotlyLoader from './PlotlyLoader.vue'
+import { truncateSummary } from '../utils/utils'
 
 type Data = { element: string; value: any }
 type UUIDValue = { _type: string; hex: string }
@@ -89,9 +90,7 @@ function getHex(value: number | string | NumpyValue | UUIDValue | undefined): st
 
 <template>
   <tr>
-    <td style="min-width: 25em">{{ (name.replaceAll(".", " " )).replaceAll("_", " " ).split(' ')
-   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-   .join(' ') }}</td>
+    <td style="min-width: 25em">{{ truncateSummary(name) }}</td>
     <td style="min-width: 35em">
       <v-container style="width: 70%;white-space: nowrap;
         overflow: hidden;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { config } from '../config'
+import { truncateSummary } from '../utils/utils'
 
 type SearchEntry = {
   name: string
@@ -26,7 +27,20 @@ const searchFields = ref<SearchEntry[]>(
   })
 )
 
-const comparators = ['eq', 'ne', 'in', 'ni', 'gt', 'ge', 'lt', 'le', 'ale', 'alt', 'agt', 'age']
+const comparators = [
+  {value:'eq',title:"Equal to"},
+  {value:'ne',title:"Not equal to"},
+  {value:'in',title:"Contained in"},
+  {value:'ni',title:"Not contained in"},
+  {value:'gt',title:"Greater than"},
+  {value:'ge',title:"Greater than or equal to"},
+  {value:'lt',title:"Less than"},
+  {value:'le',title:"Less than or equal to"},
+  {value:'ale',title:"Any less than or equal to"},
+  {value:'alt',title:"Any less than"},
+  {value:'agt',title:"Any greater than"},
+  {value:'age',title:"Any greater than or equal to"},
+]
 
 const isLoading = ref<boolean>(true)
 const items = ref<{ value: string, text: string }[]>([])
@@ -169,7 +183,7 @@ function setItems() {
     .then((response) => response.json())
     .then((data) => {
       items.value = data.map((el: any) => {
-        return { value: el.name, text: el.name.toLabel() }
+        return { value: el.name, text: truncateSummary(el.name) }
       })
       isLoading.value = false
     })
@@ -284,7 +298,7 @@ function displayError(message: string) {
     </v-row>
     <v-divider></v-divider>
     <v-row dense v-for="item in searchFields" :key="item.name" align="center">
-      <v-col cols="5">
+      <v-col cols="6">
         <v-tooltip bottom>
           <template v-slot:activator="{ props }">
             <p v-bind="props" :for="item.name" style="cursor: help;">
@@ -303,14 +317,23 @@ function displayError(message: string) {
           v-model="item.comparator"
           @mouseover="item.hover = true"
           @mouseleave="item.hover = false"
+          item-title="title"
+          item-value="value"
           style="font-size: 0.7em"
         >
+        <template v-slot:selection="{ item }">
+            {{ item.raw.value }}
+          </template>
+          <template v-slot:item="{ props, item }">
+            <v-list-item v-bind="props" :title="item.raw.title" :subtitle="item.raw.value">
+            </v-list-item>
+          </template>
         </v-select>
         <v-card v-if="item.hover" style="position: absolute; padding: 0.2em">{{
           helpText(item.comparator)
         }}</v-card>
       </v-col>
-      <v-col cols="5" class="p-0" style="padding-left: 0">
+      <v-col cols="4" class="p-0" style="padding-left: 0">
         <v-combobox
           clearable
           v-model="item.value"
@@ -323,12 +346,7 @@ function displayError(message: string) {
       </v-col>
     </v-row>
     <v-row dense v-for="(item, index) in wildSearch" :key="index" align="center">
-      <v-col cols="1">
-        <v-btn @click="deleteSearch(index)" block small variant="text" style="padding: 0">
-          <v-icon color="blue-grey">mdi-minus-box</v-icon>
-        </v-btn>
-      </v-col>
-      <v-col cols="4">
+      <v-col cols="6">
         <v-autocomplete
           auto-select-first
           clearable
@@ -338,11 +356,18 @@ function displayError(message: string) {
           :items="items"
           dense
           filled
-          hide-details
           no-data-text="loading..."
           :loading="isLoading"
           @change="changed"
-        ></v-autocomplete>
+          hide-details
+          style="white-space: nowrap;"
+          @mouseover="item.hoveritem = true"
+          @mouseleave="item.hoveritem = false"
+        >
+        </v-autocomplete>
+        <v-card v-if="item.hoveritem" style="position: absolute; padding: 0.2em">{{
+          item.name
+        }}</v-card>
       </v-col>
       <v-col cols="2" class="p-0" style="padding-right: 0">
         <v-select
@@ -351,16 +376,25 @@ function displayError(message: string) {
           hide-details
           @mouseover="item.hover = true"
           @mouseleave="item.hover = false"
+          item-title="title"
+          item-value="value"
           :items="comparators"
           v-model="item.comparator"
           style="font-size: 0.7em"
         >
+        <template v-slot:selection="{ item }">
+            {{ item.raw.value }}
+          </template>
+          <template v-slot:item="{ props, item }">
+            <v-list-item v-bind="props" :title="item.raw.title" :subtitle="item.raw.value">
+            </v-list-item>
+          </template>
         </v-select>
         <v-card v-if="item.hover" style="position: absolute; padding: 0.2em">{{
           helpText(item.comparator)
         }}</v-card>
       </v-col>
-      <v-col cols="5" style="padding: 0">
+      <v-col cols="3" style="padding: 0">
         <v-combobox
           clearable
           v-model="item.value"
@@ -369,6 +403,11 @@ function displayError(message: string) {
           filled
           hide-details
         ></v-combobox>
+      </v-col>
+      <v-col cols="1">
+        <v-btn @click="deleteSearch(index)" block small variant="text" style="padding: 0">
+          <v-icon color="blue-grey">mdi-minus-box</v-icon>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row dense class="d-flex flex-row-reverse">

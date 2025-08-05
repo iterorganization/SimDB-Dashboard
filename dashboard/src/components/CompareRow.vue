@@ -1,6 +1,7 @@
 <!-- eslint-disable no-prototype-builtins -->
 <script setup lang="ts">
 import { to_i32_array, to_f32_array, to_f64_array } from '../common'
+import { truncateSummary } from '../utils/utils'
 
 type MetaData = {
   element: string
@@ -83,7 +84,7 @@ function isShortString(uuid: string, name: string) {
 
 <template>
   <tr v-if="!isArray(name)">
-    <td style="min-width: 20em">{{ name_label.toLabel() }}</td>
+    <td style="min-width: 20em">{{ truncateSummary(name_label) }}</td>
     <td v-for="uuid in uuids" v-bind:key="uuid">
       <v-container class="ml-0">
         <template v-if="isXML(uuid, name)">

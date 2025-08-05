@@ -31,9 +31,9 @@ let style = computed(() => {
 
 onMounted(() => {
   let layout: { [key: string]: any } = {
-    title: {
-      text: props.title
-    },
+    // title: {
+    //   text: props.title
+    // },
     xaxis: {
       title: {
         text: props.xlabel

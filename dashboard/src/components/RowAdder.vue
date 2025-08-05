@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { config } from '../config'
+import { truncateSummary } from '../utils/utils'
 
 const props = defineProps<{
   server: string | null
@@ -33,7 +34,7 @@ function setOptions() {
     .then((response) => response.json())
     .then((data) => {
       items.value = data.map((el: { name: string }) => {
-        return { value: el.name, title: el.name.toLabel() }
+        return { value: el.name, title: truncateSummary(el.name) }
       })
     })
     .catch(function (error) {
