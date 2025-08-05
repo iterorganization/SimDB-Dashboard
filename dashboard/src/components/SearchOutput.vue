@@ -103,24 +103,23 @@ function doQuery() {
     .filter((el) => params.value.getAll(el).join(''))
     .filter(onlyUnique)
     .filter((el) => !config.searchOutputColumns.includes(el))
+    .filter((el) => el !== 'alias') // Exclude 'alias' from additional columns
   let searchColumns: string[] = config.searchOutputColumns.concat(additionalColumns)
   headers.value = searchColumns.map((el: string) => {
-    let value = ''
-    if (el === 'alias/UUID') {
-      value = 'alias' // el
-    } else if (el === 'alias') {
-      return {}
-    } else if (el === 'uuid') {
-      value = 'uuid.hex'
-    } else if (el === 'Upload Date' ){
-      value = 'datetime'
-    } else {
-      value = 'metadata.' + el.replaceAll('.', '_dot_')
-    }
+      let value = ''
+      if (el === 'alias/UUID') {
+        value = 'alias' // el
+      } else if (el === 'uuid') {
+        value = 'uuid.hex'
+      } else if (el === 'Upload Date' ){
+        value = 'datetime'
+      } else {
+        value = 'metadata.' + el.replaceAll('.', '_dot_')
+      }
 
-    return { title: el.toLabel(), align: 'start', sortable: true, key: value }
-  })
-}
+      return { title: el.toLabel(), align: 'start', sortable: true, key: value }
+    })
+  }
 
 function doCompare() {
   window.location.href = 'compare/?uuid=' + selectedSimulations.value.join('&uuid=')
