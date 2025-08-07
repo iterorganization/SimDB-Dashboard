@@ -30,8 +30,8 @@ const searchFields = ref<SearchEntry[]>(
 const comparators = [
   {value:'eq',title:"Equal to"},
   {value:'ne',title:"Not equal to"},
-  {value:'in',title:"Contained in"},
-  {value:'ni',title:"Not contained in"},
+  {value:'in',title:"Contains"},
+  {value:'ni',title:"Does not contain"},
   {value:'gt',title:"Greater than"},
   {value:'ge',title:"Greater than or equal to"},
   {value:'lt',title:"Less than"},
@@ -61,8 +61,8 @@ const helpText = function (item: string) {
   const help: { [key: string]: string } = {
     eq: 'Equal to',
     ne: 'Not equal to',
-    in: 'Contained in',
-    ni: 'Not contained in',
+    in: 'Contains',
+    ni: 'Does not contain',
     gt: 'Greater than',
     ge: 'Greater than or equal to',
     lt: 'Less than',
