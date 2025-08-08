@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { version } from '../package.json'
 </script>
 
 <template>
@@ -7,7 +8,7 @@ import { RouterView } from 'vue-router'
     <v-system-bar app dark color="#002F55">
       ITER Simulation Database
       <v-spacer></v-spacer>
-      Version 0.5
+      Version {{ version }}
     </v-system-bar>
 
     <v-app-bar app shrink-on-scroll dark color="#002F55" height="80" dense>
