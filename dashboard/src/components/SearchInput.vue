@@ -18,7 +18,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.includes('alias') ? 'alias': el.includes('name') ? 'code name': el.includes('description') ? 'description' : el.includes('power_additional') ? 'power_additional' : el.includes('global_quantities.ip') ? 'ip': el.includes('global_quantities.b0') ? 'b0' :el.toLabel(),
+      display: el.includes('alias') ? 'alias': el.includes('uuid') ? 'uuid': el.includes('name') ? 'code name': el.includes('description') ? 'description' : el.includes('power_additional') ? 'power_additional' : el.includes('global_quantities.ip') ? 'ip': el.includes('global_quantities.b0') ? 'b0' :el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -78,6 +78,7 @@ const helpText = function (item: string) {
 const quantitiesName = function (item: string) {
   const name: { [key: string]: string } = {
     'alias': 'Simulation Alias',
+    'uuid': 'Simulation UUID',
     'code name': 'code.name',
     'description': 'description',
     'power_additional': 'heating_current_drive.power_additional',
