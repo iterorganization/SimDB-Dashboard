@@ -25,7 +25,7 @@ let style = computed(() => {
     props.height +
     ';margin-left: calc((100% - ' +
     props.width +
-    ') / 2)'
+    ') / 2 + 10px);'
   )
 })
 

@@ -18,7 +18,7 @@ const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
     return {
       name: el,
-      display: el.includes('alias') ? 'alias': el.includes('uuid') ? 'uuid': el.includes('name') ? 'code name': el.includes('description') ? 'description' : el.includes('power_additional') ? 'power_additional' : el.includes('global_quantities.ip') ? 'ip': el.includes('global_quantities.b0') ? 'b0' :el.toLabel(),
+      display: el.includes('alias') ? 'alias/uuid': el.includes('name') ? 'code name': el.includes('description') ? 'description' : el.includes('power_additional') ? 'power_additional' : el.includes('global_quantities.ip') ? 'ip': el.includes('global_quantities.b0') ? 'b0' :el.toLabel(),
       value: null,
       comparator: 'eq',
       hover: false,
@@ -40,6 +40,13 @@ const comparators = [
   {value:'alt',title:"Any less than"},
   {value:'agt',title:"Any greater than"},
   {value:'age',title:"Any greater than or equal to"},
+]
+
+const string_comparators = [
+  {value:'eq',title:"Equal to"},
+  {value:'ne',title:"Not equal to"},
+  {value:'in',title:"Contains"},
+  {value:'ni',title:"Does not contain"},
 ]
 
 const isLoading = ref<boolean>(true)
@@ -77,7 +84,7 @@ const helpText = function (item: string) {
 
 const quantitiesName = function (item: string) {
   const name: { [key: string]: string } = {
-    'alias': 'Simulation Alias',
+    'alias/uuid': 'Simulation Alias/UUID',
     'uuid': 'Simulation UUID',
     'code name': 'code.name',
     'description': 'description',
@@ -120,7 +127,7 @@ function setField(name: string, comp: string, value: string) {
   }
   let found = false;
   for (let i = 0; i < searchFields.value.length; i++) {
-    if (searchFields.value[i].name === name && !searchFields.value[i].value) {
+    if ((searchFields.value[i].name === name && !searchFields.value[i].value) || name === 'uuid') {
       searchFields.value[i].comparator = comp;
       searchFields.value[i].value = value;
       found = true;
@@ -168,17 +175,23 @@ function setItems() {
       itemsFor.value[name] = []
     }
     else{
-    fetch(url + '/metadata/' + name)
-      .then((response) => response.json())
-      .then((data) => {
-        itemsFor.value[name] = data
-      })
-      .catch(function (error) {
-        status.value.show = true
-        status.value.text = error
-        status.value.type = 'error'
-      })
+
+      if (name == 'alias'){
+        itemsFor.value[name] = []
+      }
+      else{
+        fetch(url + '/metadata/' + name)
+        .then((response) => response.json())
+        .then((data) => {
+          itemsFor.value[name] = data
+        })
+        .catch(function (error) {
+          status.value.show = true
+          status.value.text = error
+          status.value.type = 'error'
+        })
     }
+  }
   }
   fetch(url + '/metadata')
     .then((response) => response.json())
@@ -206,6 +219,15 @@ function getQueryPath() {
   )
 }
 
+// UUID helper functions at the top of your script
+function isValidUUID(value: string): boolean {
+  if (!value || typeof value !== 'string') return false
+
+  // Remove dashes and check if it's 32 hex characters
+  const cleanUUID = value.replace(/-/g, '').toLowerCase()
+  return cleanUUID.length === 32 && /^[0-9a-f]{32}$/i.test(cleanUUID)
+}
+
 function getQuery() {
   let args = []
   for (let i = 0; i < searchFields.value.length; i++) {
@@ -217,6 +239,16 @@ function getQuery() {
         displayError('Invalid search character ":" in ' + value)
         return ''
       }
+
+      if(name === 'alias'){
+        if (isValidUUID(value.toString())){
+          args.push('uuid' + '=' + comp + value)
+        }
+        else{
+          args.push(name + '=' + comp + value)
+        }
+      }
+      else
       if (value.trim) {
         args.push(name + '=' + comp + value.trim())
       } else {
@@ -314,7 +346,7 @@ function displayError(message: string) {
           dense
           filled
           hide-details
-          :items="comparators"
+          :items="item.display === 'alias/uuid' || item.display === 'code name' ? string_comparators : comparators"
           v-model="item.comparator"
           @mouseover="item.hover = true"
           @mouseleave="item.hover = false"
@@ -357,7 +389,7 @@ function displayError(message: string) {
           :items="items"
           dense
           filled
-          no-data-text="loading..."
+          no-data-text="No metadata available with given input"
           :loading="isLoading"
           @change="changed"
           hide-details

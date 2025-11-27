@@ -103,7 +103,7 @@ function doQuery() {
     .filter((el) => params.value.getAll(el).join(''))
     .filter(onlyUnique)
     .filter((el) => !config.searchOutputColumns.includes(el))
-    .filter((el) => el !== 'alias') // Exclude 'alias' from additional columns
+    .filter((el) => el !== 'alias' && el !== 'uuid') // Exclude 'alias' and 'uuid' from additional columns
   let searchColumns: string[] = config.searchOutputColumns.concat(additionalColumns)
   headers.value = searchColumns.map((el: string) => {
       let value = ''
@@ -161,6 +161,96 @@ function getToken() {
   return token.value
 }
 
+// Add these conversion functions
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  return bytes.buffer
+}
+
+function to_f64_array(base64Bytes: string): number[] {
+  const buffer = base64ToArrayBuffer(base64Bytes)
+  const float64Array = new Float64Array(buffer)
+
+  return Array.from(float64Array)
+}
+
+function to_f32_array(base64Bytes: string): number[] {
+  const buffer = base64ToArrayBuffer(base64Bytes)
+  const float32Array = new Float32Array(buffer)
+  return Array.from(float32Array)
+}
+
+function to_i32_array(base64Bytes: string): number[] {
+  const buffer = base64ToArrayBuffer(base64Bytes)
+  const int32Array = new Int32Array(buffer)
+  return Array.from(int32Array)
+}
+
+function formatNumberWithUnits(num: number): string {
+  const absNum = Math.abs(num)
+  if (absNum === 0) {
+    return '0'
+  } else if (absNum >= 1e9) {
+    return `${(num / 1e9).toFixed(2)}G`
+  } else if (absNum >= 1e6) {
+    return `${(num / 1e6).toFixed(2)}M`
+  } else if (absNum >= 1e3) {
+    return `${(num / 1e3).toFixed(2)}k`
+  } else if (absNum >= 1) {
+    return num.toFixed(2)
+  } else if (absNum >= 1e-3) {
+    return `${(num * 1e3).toFixed(2)}m`
+  } else if (absNum >= 1e-6) {
+    return `${(num * 1e6).toFixed(2)}μ`
+  } else if (absNum >= 1e-9) {
+    return `${(num * 1e9).toFixed(2)}n`
+  } else if (absNum >= 1e-12) {
+    return `${(num * 1e12).toFixed(2)}p`
+  } else {
+    return num.toExponential(2)
+  }
+}
+
+function convertNumpyValue(value: any): any {
+  if (value && typeof value === 'object' && value._type === 'numpy.ndarray') {
+    try {
+      let array: number[]
+      switch (value.dtype) {
+        case 'float64':
+          array = to_f64_array(value.bytes)
+          break
+        case 'float32':
+          array = to_f32_array(value.bytes)
+          break
+        case 'int32':
+          array = to_i32_array(value.bytes)
+          break
+        default:
+          return `[Array: ${value.dtype}]`
+      }
+
+      if (array.length === 1) {
+        return `${formatNumberWithUnits(array[0])}`
+      }
+      else{
+        const min = Math.min(...array)
+        const max = Math.max(...array)
+        const count = array.length
+        const range = max - min
+        return `${formatNumberWithUnits(min)} ↔ ${formatNumberWithUnits(max)} (Δ${formatNumberWithUnits(range)})`
+      }
+    } catch (error) {
+      console.error('Error converting numpy array:', error)
+      return `[Error converting ${value.dtype} array]`
+    }
+  }
+  return value
+}
+
 function fetchData(username: string, password: string) {
   dialog.value = false
   if (!params.value) {
@@ -211,7 +301,9 @@ function fetchData(username: string, password: string) {
       items.value = data.results.map((el: any) => {
         // Adding a version of the metadata so that the table can dynamically read
         el.metadata.forEach((m: any) => {
-          el.metadata[m.element.replaceAll('.', '_dot_')] = m.value
+          const convertedValue = convertNumpyValue(m.value)
+          el.metadata[m.element.replaceAll('.', '_dot_')] = convertedValue
+          // el.metadata[m.element.replaceAll('.', '_dot_')] = m.value
         })
         return el
       })
