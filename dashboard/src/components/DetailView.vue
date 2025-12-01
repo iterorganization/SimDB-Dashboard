@@ -117,6 +117,28 @@ function resetRows() {
   displayItems.value = showAllFields.value ? [] : [...config.displayFields]
 }
 
+// Add this computed property to extract unique metadata elements excluding displayed items
+const metadataElements = computed(() => {
+  if (!items.value || items.value.length === 0) {
+    return []
+  }
+
+  // Extract all metadata elements
+  const allElements = items.value
+    .map((item: Data) => item.element)
+    .filter((element: string) => element) // Remove any null/undefined elements
+
+  // Filter out already displayed items
+  const availableElements = allElements.filter(
+    (element: string) => !displayItems.value.includes(element)
+  )
+
+  // Remove duplicates and sort
+  const uniqueElements = [...new Set(availableElements)].sort()
+
+  return uniqueElements
+})
+
 function setItems(username: string, password: string) {
   status.value.show = false
   dialog.value = false
@@ -299,6 +321,8 @@ function sortOutputs(key: string) {
           <div v-if="!showAllFields">
             <RowAdder
               :server="selectedServer"
+              :metadata="metadataElements"
+              :displayedItems="displayItems"
               @add="addRow"
               @remove="removeRow"
               @reset="resetRows"

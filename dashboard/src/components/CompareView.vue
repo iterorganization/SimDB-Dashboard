@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { config } from '../config'
 
 import AuthDialog from './AuthDialog.vue'
 import RowAdder from './RowAdder.vue'
 import ComparePlot from './ComparePlot.vue'
 import CompareRow from './CompareRow.vue'
+import { Console } from 'console'
 
 type AlertType = 'error' | 'success' | 'warning' | 'info' | undefined
 type MetaData = {
@@ -35,6 +36,31 @@ const items = ref([])
 const uuids = ref<string[]>([])
 const simulations = ref<Simulation[]>([])
 const loaded = ref(false)
+
+// Computed property to get unique metadata elements from all simulations
+const metadataElements = computed(() => {
+  if (!simulations.value || simulations.value.length === 0) {
+    return []
+  }
+
+  // Collect all metadata elements from all simulations
+  const allElements = new Set<string>()
+
+  simulations.value.forEach((simulation) => {
+    console.log('Processing simulation:', simulation.uuid, 'items:', simulation.items?.length)
+    if (simulation.items && Array.isArray(simulation.items)) {
+      simulation.items.forEach((metadata: MetaData) => {
+        if (metadata.element) {
+          allElements.add(metadata.element)
+        }
+      })
+    }
+  })
+  const elements = Array.from(allElements).sort()
+  console.log('Total unique metadata elements:', elements.length, elements)
+  return elements
+})
+
 
 onMounted(() => {
   const params = new URLSearchParams(window.location.search)
@@ -133,6 +159,10 @@ function setItems(username: string, password: string) {
     return
   }
   const url = config.rootAPI(decodeURIComponent(server.value))
+
+  // Clear previous simulations before fetching new ones
+  simulations.value = []
+
   uuids.value.forEach(function (uuid) {
     fetch(url + '/simulation/' + uuid, args)
       .then((response) => response.json())
@@ -206,6 +236,8 @@ function setItems(username: string, password: string) {
             </ComparePlot>
             <RowAdder
               :server="server"
+              :metadata="metadataElements"
+              :displayedItems="displayItems"
               @add="addRow"
               @remove="removeRow"
               @reset="resetRows"
