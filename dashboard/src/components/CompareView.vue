@@ -6,7 +6,6 @@ import AuthDialog from './AuthDialog.vue'
 import RowAdder from './RowAdder.vue'
 import ComparePlot from './ComparePlot.vue'
 import CompareRow from './CompareRow.vue'
-import { Console } from 'console'
 
 type AlertType = 'error' | 'success' | 'warning' | 'info' | undefined
 type MetaData = {
