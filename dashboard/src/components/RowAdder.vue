@@ -16,7 +16,6 @@ const selectedItem = ref(null)
 const selectedServer = ref(props.server)
 
 const items = computed(() => {
-  console.log('Props metadata:', props.metadata)
   if (!props.metadata || !Array.isArray(props.metadata)) {
     return []
   }

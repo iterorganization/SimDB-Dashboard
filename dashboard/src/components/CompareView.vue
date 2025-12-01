@@ -47,7 +47,6 @@ const metadataElements = computed(() => {
   const allElements = new Set<string>()
 
   simulations.value.forEach((simulation) => {
-    console.log('Processing simulation:', simulation.uuid, 'items:', simulation.items?.length)
     if (simulation.items && Array.isArray(simulation.items)) {
       simulation.items.forEach((metadata: MetaData) => {
         if (metadata.element) {
@@ -57,7 +56,6 @@ const metadataElements = computed(() => {
     }
   })
   const elements = Array.from(allElements).sort()
-  console.log('Total unique metadata elements:', elements.length, elements)
   return elements
 })
 
