@@ -23,9 +23,7 @@ let style = computed(() => {
     props.width +
     ';height: ' +
     props.height +
-    ';margin-left: calc((100% - ' +
-    props.width +
-    ') / 2 + 10px);'
+    ';);'
   )
 })
 
