@@ -31,6 +31,8 @@ const props = defineProps<{
   loaded: boolean
 }>()
 
+const emit = defineEmits(['remove'])
+
 function getTraces(name: string): PlotData[] {
   return props.uuids.map((uuid) => {
     let simulation = props.simulations.find((sim) => sim.uuid === uuid)
@@ -100,6 +102,10 @@ function isArray(name: string) {
     .map((sim) => getValue(sim, name))
     .some((value) => value && value.hasOwnProperty('_type') && value._type === 'numpy.ndarray')
 }
+
+function handleRemove() {
+  emit('remove', props.index)
+}
 </script>
 
 <template>
@@ -118,6 +124,18 @@ function isArray(name: string) {
         >
         </PlotlyLoader>
       </v-container>
+    </td>
+    <td style="width: 1em; text-align: center;">
+      <v-btn
+        icon
+        size="x-small"
+        variant="text"
+        color="error"        
+        title="Remove metadata"
+        @click="handleRemove"
+      >      
+        <v-icon size="small">mdi-close</v-icon>
+      </v-btn>
     </td>
   </tr>
 </template>

@@ -20,6 +20,8 @@ const props = defineProps<{
   meta_name: string
 }>()
 
+const emit = defineEmits(['remove'])
+
 function getTraces(value: any): Trace[] {
   const trace: Trace = {
     name: props.name,
@@ -86,6 +88,10 @@ function isShortString() {
 function getHex(value: number | string | NumpyValue | UUIDValue | undefined): string {
   return (value && typeof value === 'object' && 'hex' in value) ? value.hex : '';
 }
+
+function handleRemove() {
+  emit('remove', props.index)
+}
 </script>
 
 <template>
@@ -125,6 +131,18 @@ function getHex(value: number | string | NumpyValue | UUIDValue | undefined): st
         </template>
         <template v-else> No data available. </template>
       </v-container>
+    </td>
+    <td style="width: 1em; text-align: center;">
+      <v-btn
+        icon
+        size="x-small"
+        variant="text"
+        color="error"        
+        title="Remove metadata"
+        @click="handleRemove"
+      >      
+        <v-icon size="small">mdi-close</v-icon>
+      </v-btn>
     </td>
   </tr>
 </template>

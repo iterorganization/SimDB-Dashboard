@@ -24,6 +24,8 @@ const props = defineProps<{
   name_label: string
 }>()
 
+const emit = defineEmits(['remove'])
+
 function getValue(simulation: Simulation, name: string) {
   let item = simulation == null ? null : simulation.items.find((el) => el.element === name)
   return item != null ? item.value : null
@@ -80,10 +82,14 @@ function isShortString(uuid: string, name: string) {
   let value = getValueForUUID(uuid, name)
   return value && value.toString && value.toString().length < 20
 }
+
+function handleRemove() {
+  emit('remove', props.index)
+}
 </script>
 
 <template>
-  <tr v-if="!isArray(name)">
+  <tr v-if="!isArray(name)">    
     <td style="min-width: 20em">{{ name_label }}</td>
     <td v-for="uuid in uuids" v-bind:key="uuid">
       <v-container class="ml-0">
@@ -105,6 +111,18 @@ function isShortString(uuid: string, name: string) {
           <span style="white-space: pre-wrap"> {{ processValue(uuid, name) }} </span>
         </template>
       </v-container>
+    </td>
+    <td style="width: 1em; text-align: center;">
+      <v-btn
+        icon
+        size="x-small"
+        variant="text"
+        color="error"        
+        title="Remove metadata"
+        @click="handleRemove"
+      >      
+        <v-icon size="small">mdi-close</v-icon>
+      </v-btn>
     </td>
   </tr>
 </template>

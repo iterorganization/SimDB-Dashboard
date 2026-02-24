@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { config } from '../config'
-
 import AuthDialog from './AuthDialog.vue'
 import RowAdder from './RowAdder.vue'
 import ComparePlot from './ComparePlot.vue'
@@ -101,8 +100,22 @@ function removeRow() {
   displayItems.value.pop()
 }
 
+function removeSelectedRow(index: number) {
+  if (index >= 0 && index < displayItems.value.length) {
+    displayItems.value.splice(index, 1)
+  }
+}
+
 function resetRows() {
   displayItems.value = [...config.displayFields]
+}
+
+function saveDisplayItemsToStorage() {
+  if (displayItems.value.length > 0) {
+    window.localStorage.setItem('simdb-display-items', JSON.stringify(displayItems.value))
+  } else {
+    window.localStorage.removeItem('simdb-display-items')
+  }
 }
 
 function requiresAuth() {
@@ -219,7 +232,8 @@ function setItems(username: string, password: string) {
               :uuids="uuids"
               :index="index"
               :name_label="name === 'code.name' ? 'Code Name': name === 'description' ? 'Description' : name === 'ids' ? 'IDSs' : name === 'ids_properties.creation_date' ? 'Creation Date' :name"
-            >
+              @remove="removeSelectedRow" 
+            >            
             </CompareRow>
             <ComparePlot
               v-for="(name, index) in displayItems"
@@ -229,6 +243,7 @@ function setItems(username: string, password: string) {
               :uuids="uuids"
               :index="index"
               :loaded="loaded"
+              @remove="removeSelectedRow"
             >
             </ComparePlot>
             <RowAdder
