@@ -110,14 +110,6 @@ function resetRows() {
   displayItems.value = [...config.displayFields]
 }
 
-function saveDisplayItemsToStorage() {
-  if (displayItems.value.length > 0) {
-    window.localStorage.setItem('simdb-display-items', JSON.stringify(displayItems.value))
-  } else {
-    window.localStorage.removeItem('simdb-display-items')
-  }
-}
-
 function requiresAuth() {
   if (server.value !== null && config.serverConfig && server.value in config.serverConfig) {
     return config.serverConfig[server.value].requiresAuth;
@@ -131,14 +123,6 @@ function getToken() {
 
 function getAlias(uuid: string) {
   return simulations.value.find((el) => el.uuid === uuid)?.alias
-  // const simulation = simulations.value.find((el) => el.uuid === uuid)
-  
-  // // Return UUID if alias is null, undefined, 'None', or empty string
-  // if (!simulation || !simulation.alias || simulation.alias === 'None' || simulation.alias === '') {
-  //   return uuid
-  // }
-  
-  // return simulation.alias
 }
 
 function getValue(name: string) {
