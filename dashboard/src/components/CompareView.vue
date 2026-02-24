@@ -251,7 +251,6 @@ function setItems(username: string, password: string) {
               :metadata="metadataElements"
               :displayedItems="displayItems"
               @add="addRow"
-              @remove="removeRow"
               @reset="resetRows"
             ></RowAdder>
           </tbody>

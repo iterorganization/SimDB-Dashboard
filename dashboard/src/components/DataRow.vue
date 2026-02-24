@@ -141,7 +141,7 @@ function handleRemove() {
         title="Remove metadata"
         @click="handleRemove"
       >      
-        <v-icon size="small">mdi-close</v-icon>
+        <v-icon size="large">mdi-minus-box</v-icon>
       </v-btn>
     </td>
   </tr>

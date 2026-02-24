@@ -331,7 +331,6 @@ function sortOutputs(key: string) {
               :metadata="metadataElements"
               :displayedItems="displayItems"
               @add="addRow"
-              @remove="removeRow"
               @reset="resetRows"
               @error="showError"
             ></RowAdder>

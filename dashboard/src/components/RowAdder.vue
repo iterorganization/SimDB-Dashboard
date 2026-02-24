@@ -51,7 +51,6 @@ const items = computed(() => {
       >
         Add Row
       </v-btn>
-      <v-btn class="mr-1" @click="$emit('remove', selectedItem)"> Remove Last Row </v-btn>
       <v-btn class="mr-1" @click="$emit('reset')"> Reset </v-btn>
     </v-row>
   </v-container>
