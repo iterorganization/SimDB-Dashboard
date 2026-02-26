@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+
+// Version is registered as a global property in main.ts
+declare const __APP_VERSION__: string
 </script>
 
 <template>
