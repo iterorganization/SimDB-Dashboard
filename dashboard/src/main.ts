@@ -29,4 +29,7 @@ const vuetify = createVuetify({
 
 const app = createApp(App)
 
+// Make __APP_VERSION__ available globally in templates
+app.config.globalProperties.__APP_VERSION__ = __APP_VERSION__
+
 app.use(router).use(vuetify).mount('#app')
