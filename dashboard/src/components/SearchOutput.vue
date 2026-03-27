@@ -420,6 +420,7 @@ function getMetadata(item: any) : any[] {
                   :data="getMetadata(item)"
                   :server="selectedServer"        
                   :meta_name="field.element"          
+                  :showRemoveButton="false"
                 >
                 </DataRow>
               </tbody>

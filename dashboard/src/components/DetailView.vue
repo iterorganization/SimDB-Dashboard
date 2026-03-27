@@ -321,6 +321,7 @@ function sortOutputs(key: string) {
               :data="items"
               :server="selectedServer"
               :meta_name="name"
+              :showRemoveButton="true"
               @remove="removeSelectedRow"
             >
             </DataRow>
