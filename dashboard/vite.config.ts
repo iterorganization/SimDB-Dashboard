@@ -7,6 +7,15 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import viteCompression from 'vite-plugin-compression'
 
+// Import config for IBEX backend settings
+const config = {
+  ibexBackend: {
+    host: 'localhost',
+    port: 6060,
+    protocol: 'http'
+  }
+}
+
 // Get version from git
 function getVersionFromGit() {
   try {
@@ -46,6 +55,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  server: {
+    proxy: {
+      '/api/ibex': {
+        target: `${config.ibexBackend.protocol}://${config.ibexBackend.host}:${config.ibexBackend.port}`,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/ibex/, '')
+      }
     }
   },
   base: '/dashboard',
