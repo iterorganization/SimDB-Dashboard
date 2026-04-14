@@ -319,7 +319,8 @@ function navigateToIDS(uri: string) {
 }
 
 function isIMASUri(uri: string): boolean {
-  return uri.startsWith('imas:')
+  // Check if URI starts with IMAS protocol and IBEX is enabled
+  return uri.startsWith('imas:') && config.ibexEnabled === true
 }
 
 </script>

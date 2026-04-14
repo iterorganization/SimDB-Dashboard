@@ -11,6 +11,8 @@ const config: Readonly<{ [key: string]: any }> = {
     //'https://simdb.iter.org/itpa/api': { 'requiresAuth': false },
   },
   defaultServer: 'https://simdb.iter.org/scenarios/api',
+  // IBEX Integration Configuration - Enable/Disable IBEX feature
+  ibexEnabled: false,
   searchFields: ['alias', 'code.name', 'global_quantities.ip.value', 'global_quantities.b0.value', 'heating_current_drive.power_additional.value', 'description'],
   searchOutputFields: [
     'code.name',
