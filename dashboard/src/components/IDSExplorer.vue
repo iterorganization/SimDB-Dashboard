@@ -426,16 +426,6 @@ const breadcrumbs = computed(() => {
     items.push({ title: parsedUri.value.database, disabled: false })
   }
   
-  // Only add shot if it's a valid number (> 0)
-  if (parsedUri.value.shot && parsedUri.value.shot > 0) {
-    items.push({ title: `Shot ${parsedUri.value.shot}`, disabled: false })
-  }
-  
-  // Only add run if it's a valid number (> 0)
-  if (parsedUri.value.run && parsedUri.value.run > 0) {
-    items.push({ title: `Run ${parsedUri.value.run}`, disabled: false })
-  }
-  
   // Always add the current IDS
   items.push({ title: 'Available IDSes', disabled: true })
   

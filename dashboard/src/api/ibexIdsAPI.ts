@@ -1,18 +1,6 @@
 import axios from 'axios'
 import type { AxiosInstance } from 'axios'
 
-export interface IMASUri {
-  protocol: string
-  path: string
-  database: string
-  shot: number
-  run: number
-  occurrence: number
-  ids: string
-  node_path: string
-  original: string
-}
-
 export interface IDSNode {
   path: string
   name: string
@@ -60,49 +48,6 @@ export class IBEXIdsAPI {
         'Content-Type': 'application/json'
       }
     })
-  }
-
-  parseUri(uri: string): IMASUri {
-    console.log('Parsing URI:', uri)
-    let match = uri.match(/^imas:([^?]+)\?path=([^#]+)#([^:]+):(\d+)\/(.+)$/)
-    if (match) {
-      const [, protocol, path, ids, occurrence, nodePath] = match
-      const pathParts = path.split('/')
-      const database = pathParts[pathParts.length - 5] || 'unknown'
-      const shot = parseInt(pathParts[pathParts.length - 4]) || 0
-      const run = parseInt(pathParts[pathParts.length - 3]) || 0
-      return {
-        protocol: `imas:${protocol}`,
-        path,
-        database,
-        shot,
-        run,
-        occurrence: parseInt(occurrence),
-        ids,
-        node_path: nodePath,
-        original: uri
-      }
-    }
-    match = uri.match(/^imas:([^?]+)\?path=(.+)$/)
-    if (match) {
-      const [, backend, path] = match
-      const pathParts = path.split('/')
-      const database = pathParts[pathParts.length - 5] || 'unknown'
-      const shot = parseInt(pathParts[pathParts.length - 4]) || 0
-      const run = parseInt(pathParts[pathParts.length - 3]) || 0
-      return {
-        protocol: `imas:${backend}`,
-        path,
-        database,
-        shot,
-        run,
-        occurrence: 0,
-        ids: '',
-        node_path: '',
-        original: uri
-      }
-    }
-    throw new Error(`Unable to parse URI: ${uri}`)
   }
 
   async listNodes(baseUri: string): Promise<IDSNode[]> {
