@@ -59,8 +59,9 @@ async function loadNodes() {
       loading: false,
       cached: false
     }))
-    
+  } catch (err: any) {
     console.error('Error loading nodes:', err)
+    error.value = err.message || 'Failed to load nodes'
   } finally {
     isLoading.value = false
   }

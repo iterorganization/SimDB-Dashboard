@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { TimeSeriesData, IDSNode } from '../api/ibexIdsAPI'
+import type { TimeSeriesData, IDSNode } from '../api/ibexIdsAPI'
 import PlotlyLoader from './PlotlyLoader.vue'
 
 interface PlotTrace {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { IDSNode } from '../api/ibexIdsAPI'
+import type { IDSNode } from '../api/ibexIdsAPI'
 import { formatNodePath } from '../utils/uriHelper'
 
 const props = defineProps<{
@@ -36,11 +36,12 @@ const groupedNodes = computed(() => {
   return groups
 })
 
-function toggleGroup(parent: string) {
-  if (expandedGroups.value.has(parent)) {
-    expandedGroups.value.delete(parent)
+function toggleGroup(parent: string | number) {
+  const parentStr = String(parent)
+  if (expandedGroups.value.has(parentStr)) {
+    expandedGroups.value.delete(parentStr)
   } else {
-    expandedGroups.value.add(parent)
+    expandedGroups.value.add(parentStr)
   }
 }
 
@@ -76,16 +77,16 @@ onMounted(() => {
         <!-- Group Header -->
         <div class="group-header" @click="toggleGroup(parent)">
           <v-icon size="small" class="mr-2">
-            {{ expandedGroups.has(parent) ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
+            {{ expandedGroups.has(String(parent)) ? 'mdi-chevron-down' : 'mdi-chevron-right' }}
           </v-icon>
-          <span class="font-weight-bold">{{ formatNodePath(parent) }}</span>
+          <span class="font-weight-bold">{{ formatNodePath(String(parent)) }}</span>
           <v-chip size="small" variant="outlined" class="ml-auto">
             {{ nodeList.length }}
           </v-chip>
         </div>
 
         <!-- Nodes in Group -->
-        <transition-group v-if="expandedGroups.has(parent)" name="list" tag="div">
+        <transition-group v-if="expandedGroups.has(String(parent))" name="list" tag="div">
           <div
             v-for="node in nodeList"
             :key="node.path"
