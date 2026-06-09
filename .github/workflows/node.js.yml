@@ -46,7 +46,7 @@ jobs:
         npm run type-check        
         
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@v7
       with:
         directory: ./dashboard/coverage
 
