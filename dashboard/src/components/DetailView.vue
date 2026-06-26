@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { config } from '../config'
 import DataRow from './DataRow.vue'
 import AuthDialog from './AuthDialog.vue'
 import RowAdder from './RowAdder.vue'
+import { formatUri } from '../utils/uriHelper'
+
+const router = useRouter()
 
 const _showAllFields =
   typeof config.displayFields === 'string' && new String(config.displayFields).toLowerCase() === 'all'
@@ -282,6 +286,43 @@ function sortOutputs(key: string) {
     outputSort.value.asc = true
   }
 }
+
+function navigateToIDS(uri: string) {
+  // Convert old format: imas://uda.iter.org/uda?path=/path&backend=hdf5
+  // to new format: imas:backend?path=/path
+  let normalizedUri = uri
+
+  // Check if it's old format with backend parameter
+  const oldFormatMatch = uri.match(/^imas:\/\/([^/]+)\/([^?]+)\?path=([^&]+)&backend=([^&]+)/)
+  if (oldFormatMatch) {
+    const [, , , path, backend] = oldFormatMatch
+    normalizedUri = `imas:${backend}?path=${path}`
+  }
+  // If URI doesn't have backend type and matches new format, default to hdf5
+  else if (uri.match(/^imas:\w+\?path=/) === null && uri.match(/^imas:\?path=/)) {
+    // Missing backend, default to hdf5
+    normalizedUri = uri.replace(/^imas:/, 'imas:hdf5')
+  }
+  // If it's already in new format but missing backend, add hdf5
+  else if (uri.match(/^imas:\?path=/)) {
+    normalizedUri = uri.replace(/^imas:/, 'imas:hdf5')
+  }
+
+  // Open in new tab with normalized URI
+  window.open(
+    router.resolve({
+      path: '/ids-explorer',
+      query: { uri: normalizedUri }
+    }).href,
+    '_blank'
+  )
+}
+
+function isIMASUri(uri: string): boolean {
+  // Check if URI starts with IMAS protocol and IBEX is enabled
+  return uri.startsWith('imas:') && config.ibexEnabled === true
+}
+
 </script>
 
 <template>
@@ -368,7 +409,23 @@ function sortOutputs(key: string) {
           </thead>
           <tbody>
             <tr v-for="input in sortedInputs" :key="input.uuid.hex">
-              <td>{{ input.uri }}</td>
+              <td class="pl-1">
+                <!-- Clickable IMAS URI -->
+                <div
+                  v-if="isIMASUri(input.uri)"
+                  class="uri-cell"
+                  @click="navigateToIDS(input.uri)"
+                  :title="input.uri"
+                >
+                  <v-icon size="small" class="mr-2">mdi-link-variant</v-icon>
+                  {{ input.uri }}
+                  <v-icon size="x-small" class="ml-2">mdi-open-in-new</v-icon>
+                </div>
+                <!-- Non-clickable other URIs -->
+                <div v-else class="text-truncate" :title="input.uri">
+                  {{ input.uri }}
+                </div>
+              </td>
             </tr>
             <tr v-if="inputs.length === 0">
               <td>No input data</td>
@@ -407,7 +464,23 @@ function sortOutputs(key: string) {
           </thead>
           <tbody>
             <tr v-for="output in sortedOutputs" :key="output.uuid.hex">
-              <td>{{ output.uri }}</td>
+              <td class="pl-1">
+                <!-- Clickable IMAS URI -->
+                <div 
+                  v-if="isIMASUri(output.uri)"
+                  class="uri-cell"
+                  @click="navigateToIDS(output.uri)"
+                  :title="output.uri"
+                >
+                  <v-icon size="small" class="mr-2">mdi-link-variant</v-icon>
+                  {{ output.uri }}
+                  <v-icon size="x-small" class="ml-2">mdi-open-in-new</v-icon>
+                </div>
+                <!-- Non-clickable other URIs -->
+                <div v-else class="text-truncate" :title="output.uri">
+                  {{ output.uri }}
+                </div>
+              </td>
             </tr>
             <tr v-if="outputs.length === 0">
               <td>No output data</td>
@@ -511,3 +584,25 @@ function sortOutputs(key: string) {
     </v-row>
   </v-container>
 </template>
+
+<style scoped>
+.uri-cell {
+  cursor: pointer;
+  color: var(--v-primary-base);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.uri-cell:hover {
+  background: rgba(33, 150, 243, 0.1);
+  text-decoration: underline;
+}
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 12px;
+}
+</style>
