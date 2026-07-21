@@ -73,7 +73,7 @@ async function fetchData() {
   fetchedValue.value = null
   try {
     const ddVersion = encodeURIComponent(getMetadataDdVersion())
-    const url = `${props.server}/v${config.api_version}/simulation/${props.simId}/data?path=${encodeURIComponent(toDataPath(props.meta_name))}&dd_version=${ddVersion}`
+    const url = `${props.server}/v${config.data_api_version}/simulation/${props.simId}/data?path=${encodeURIComponent(toDataPath(props.meta_name))}&dd_version=${ddVersion}`
     const resp = await fetch(url, { signal })
     if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`)
     fetchedValue.value = await resp.json()
