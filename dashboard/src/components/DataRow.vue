@@ -57,9 +57,7 @@ function toDataPath(metaName: string): string {
 
 function getMetadataDdVersion(): string {
   const version = props.data.find((item) => item.element === 'metadata_dd_version')?.value
-  if (typeof version !== 'string') return '4.1.0'
-
-  const trimmedVersion = version.trim()
+  const trimmedVersion = typeof version === 'string' ? version.trim() : ''
   return trimmedVersion || '4.1.0'
 }
 
