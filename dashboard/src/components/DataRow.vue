@@ -57,7 +57,10 @@ function toDataPath(metaName: string): string {
 
 function getMetadataDdVersion(): string {
   const version = props.data.find((item) => item.element === 'metadata_dd_version')?.value
-  return typeof version === 'string' && version.trim() ? version.trim() : '4.1.0'
+  if (typeof version !== 'string') return '4.1.0'
+
+  const trimmedVersion = version.trim()
+  return trimmedVersion || '4.1.0'
 }
 
 async function fetchData() {
@@ -73,7 +76,7 @@ async function fetchData() {
   fetchedValue.value = null
   try {
     const ddVersion = encodeURIComponent(getMetadataDdVersion())
-    const url = `${props.server}/v${config.data_api_version}/simulation/${props.simId}/data?path=${encodeURIComponent(toDataPath(props.meta_name))}&dd_version=${ddVersion}`
+    const url = `${props.server}/v${config.api_version}/simulation/${props.simId}/data?path=${encodeURIComponent(toDataPath(props.meta_name))}&dd_version=${ddVersion}`
     const resp = await fetch(url, { signal })
     if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`)
     fetchedValue.value = await resp.json()
