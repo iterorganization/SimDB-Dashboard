@@ -33,7 +33,7 @@ const serverConfig = runtimeConfig.serverConfig
 const defaultServer = runtimeConfig.defaultServer
 
 const config: Readonly<{ [key: string]: any }> = {
-  api_version: '1.2',
+  api_version: '1.3',
   servers,
   serverConfig,
   defaultServer,
