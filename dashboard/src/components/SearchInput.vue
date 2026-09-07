@@ -472,7 +472,7 @@ function displayError(message: string) {
       <div class="d-flex align-center" style="padding-top: 20px;">
         <span class="text-body-1">        
           <a 
-            href="https://simdb.readthedocs.io/en/latest/user_guide.html" 
+            href="https://simdb.readthedocs.io/en/stable/user_guide.html"
             target="_blank" 
             rel="noopener noreferrer"
             class="text-decoration-none"
@@ -485,7 +485,7 @@ function displayError(message: string) {
       <div class="d-flex align-center">
         <span class="text-body-1">        
           <a 
-            href="https://simdb.readthedocs.io/en/latest/cli.html" 
+            href="https://simdb.readthedocs.io/en/stable/cli.html"
             target="_blank" 
             rel="noopener noreferrer"
             class="text-decoration-none"
