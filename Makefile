@@ -257,7 +257,7 @@ systemd-install: systemd-installdirs
 		scripts/simdb-dashboard.service \
 		$(DESTDIR)/$(systemd_unitdir)/simdb-dashboard.service
 
-systemd-uninstall:
+systemd-uninstall: systemd-disable
 	-rm -f --interactive $(DESTDIR)/$(systemd_unitdir)/simdb-dashboard.service
 	-rm -rf --interactive $(DESTDIR)/$(package_etcdir)
 	-rm -rf --interactive $(DESTDIR)/$(package_optdir)
