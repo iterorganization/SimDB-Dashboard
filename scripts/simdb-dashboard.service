@@ -1,53 +1,6 @@
-# SimDB Dashboard — systemd service unit
-#
-# Runs the SimDB Dashboard via docker compose under systemd.
-#
-# ## Quick start (HTTP)
-#
-#   sudo make systemd-install                # Copy all files to /opt/simdb-dashboard
-#   sudo make systemd-enable                 # systemctl daemon-reload && enable
-#   sudo make systemd-start                  # systemctl start simdb-dashboard
-#
-#   # systemd-install automatically creates /etc/simdb-dashboard/simdb-dashboard.env
-#   # from simdb-dashboard.env.example (if it didn't already exist). Edit that file
-#   # for any environment overrides:
-#   sudo tee -a /etc/simdb-dashboard/simdb-dashboard.env <<EOF
-#   API_HOST=host.docker.internal
-#   SIMDB_SERVER_URL=/scenarios/api
-#   EOF
-#   sudo systemctl restart simdb-dashboard
-#
-# ## Quick start (HTTPS)
-#
-#   USE_HTTPS=1 sudo make systemd-install    # Also copies the HTTPS compose override and certs
-#   sudo make systemd-enable
-#   sudo make systemd-start
-#
-#   # Edit the env file to use the HTTPS compose stack:
-#   sudo tee -a /etc/simdb-dashboard/simdb-dashboard.env <<EOF
-#   COMPOSE_FILE=docker-compose.yml:docker-compose.https.yml:docker-compose.systemd.yml
-#   EOF
-#
-# ## Environment reference
-#
-# Variables in /etc/simdb-dashboard/simdb-dashboard.env are passed through
-# to docker compose and override defaults in the compose files.
-#
-#   Variable             Default                        Description
-#   ─────────────────────────────────────────────────────────────────
-#   COMPOSE_FILE         (required)                     Compose file stack (see quick-start above)
-#   SIMDB_DASHBOARD_TAG  0.9.0-68-g8819049              GHCR image tag (from docker-compose.systemd.yml)
-#   SIMDB_DASHBOARD_IMAGE                               Overrides SIMDB_DASHBOARD_TAG with a full image ref
-#   DASHBOARD_PORT       80                             Published host port for HTTP
-#   DASHBOARD_HTTPS_PORT 443                            Published host port for HTTPS
-#   API_HOST             host.docker.internal           SimDB backend hostname
-#   API_PORT             5000                           SimDB backend port
-#   SIMDB_SERVER_URL     /scenarios/api                 Browser-side API base path
-#
-# ## See also
-#
-#   docs/installation.md                  — full build and deployment guide
-#   scripts/certs/Makefile                — generates test TLS certificates
+# SimDB Dashboard systemd service unit.
+# Canonical systemd operator workflow, quick start, and env reference:
+# docs/installation.md#systemd-deployment-profile-published-image
 
 [Unit]
 Description=SimDB Dashboard — Web frontend for the SimDB simulation management tool

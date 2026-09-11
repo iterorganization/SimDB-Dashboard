@@ -103,7 +103,7 @@ help:
 	@echo "  make distclean       Remove local artifacts and compose runtime state"
 	@echo "  make deploy          Deploy project (placeholder)"
 	@echo ""
-	@echo "Systemd integration (run with sudo):"
+	@echo "Systemd integration (run with sudo; see docs/installation.md):"
 	@echo "  sudo make systemd-install           Copy files to $(package_optdir) and $(package_etcdir)"
 	@echo "  sudo make systemd-enable            systemctl daemon-reload && systemctl enable simdb-dashboard"
 	@echo "  sudo make systemd-start             systemctl start  simdb-dashboard"
@@ -111,7 +111,7 @@ help:
 	@echo "  sudo make systemd-stop              systemctl stop   simdb-dashboard"
 	@echo "  sudo make systemd-disable           systemctl stop && systemctl disable simdb-dashboard"
 	@echo "  sudo make systemd-uninstall         Remove files installed by systemd-install"
-	@echo "  USE_HTTPS=1 sudo make systemd-install          Include HTTPS compose override and TLS setup"
+	@echo "  HTTPS with systemd: uncomment COMPOSE_FILE=docker-compose.yml:docker-compose.https.yml:docker-compose.systemd.yml in /etc/simdb-dashboard/simdb-dashboard.env"
 	@echo ""
 	@echo "Environment variable examples:"
 	@echo "  Start simdb-dashboard at alternative DASHBOARD_PORT, with simdb server at API_PORT:"
@@ -211,7 +211,8 @@ distclean:
 	$(DOCKER_CMD) volume rm -f simdb_dashboard_node_modules >/dev/null 2>&1 || true
 	rm -rf dist
 
-# Systemd integration (run with sudo)
+# Systemd integration (run with sudo).
+# This deployment workflow is documented in: docs/installation.md#systemd-deployment-profile-published-image
 systemd-installdirs:
 	mkdir -p \
 		$(DESTDIR)/$(package_etcdir) \

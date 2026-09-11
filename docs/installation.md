@@ -24,7 +24,73 @@ To see all available commands:
 make help
 ```
 
-## Main installation workflow (Docker image + Compose)
+## Systemd deployment profile (published image)
+
+For host-level service management, use the systemd-oriented compose override.
+
+### Quick start (HTTP)
+
+```sh
+sudo make systemd-install
+sudo make systemd-enable
+sudo make systemd-start
+sudo make systemd-status
+```
+
+`systemd-install` copies files to `/opt/simdb-dashboard` and `/etc/simdb-dashboard`, installs the unit file to `/etc/systemd/system/simdb-dashboard.service`, and creates `/etc/simdb-dashboard/simdb-dashboard.env` from `.env.example` if it does not exist yet.
+
+Note that there is no need to build the docker image. See the `SIMDB_DASHBOARD_IMAGE` in `simdb-dashboard.env`.
+
+If needed, removing the service is accordingly:
+
+```sh
+sudo make systemd-stop
+sudo make systemd-disable
+sudo make systemd-uninstall  # will prompt before deletion
+```
+
+Note that the `make systemd-*` targets are all effectively `systemctl` commands, except for the `make systemd-install` and `-uninstall` targets.
+
+### Quick start (HTTPS)
+
+First provide TLS certificates in `docker/nginx/tls/server.pem` and `docker/nginx/tls/server.key`, or generate them with `make -C scripts/certs install`. 
+
+Then install as above (HTTP).
+
+Then modify the compose chain in `/etc/simdb-dashboard/simdb-dashboard.env` to include the
+https compose overlay:
+
+```sh
+COMPOSE_FILE=docker-compose.yml:docker-compose.https.yml:docker-compose.systemd.yml
+```
+
+Finally enable/start as usual:
+
+```sh
+sudo make systemd-enable
+sudo make systemd-start
+```
+
+### Environment reference
+
+`/etc/simdb-dashboard/simdb-dashboard.env` values are passed to docker compose.
+
+- `COMPOSE_FILE`: default systemd stack is `docker-compose.yml:docker-compose.systemd.yml`.
+- `SIMDB_DASHBOARD_IMAGE`: optional image repository override (default `ghcr.io/iterorganization/simdb-dashboard`).
+- `SIMDB_DASHBOARD_TAG`: optional image tag (default `latest` in `docker-compose.systemd.yml`).
+- `DASHBOARD_CONTAINER_NAME`: optional docker container name override.
+- `DASHBOARD_PORT`: host HTTP port (default `80`).
+- `DASHBOARD_HTTPS_PORT`: host HTTPS port (default `443`).
+- `API_HOST`: SimDB backend host (default `host.docker.internal`).
+- `API_PORT`: SimDB backend port (default `5000`).
+- `SIMDB_SERVER_URL`: browser-side API base path (default `/scenarios/api`).
+
+See `scripts/simdb-dashboard.env.example` and `scripts/simdb-dashboard.service`
+for the same defaults and where they are consumed.
+
+## Local container building and installation workflow (Docker image + Compose)
+
+For building and running docker containers directly (without need for systemd or root), also for development or tweaking.
 
 From the repository root:
 
@@ -99,9 +165,11 @@ Notes:
 - You can start multiple dashboards if you change the host port with `DASHBOARD_PORT`.
 - The HTTPS compose override also publishes `DASHBOARD_HTTPS_PORT` (default `443`) and switches `SERVER_CONF` to `server-https.conf`.
 - `docker-compose.https.yml` reuses the base `docker-compose.yml`; environment variables from the base file are inherited, and override entries only add new variables or replace matching keys such as `SERVER_CONF`.
-- Set `USE_HTTPS=1` to switch shared Make targets such as `up`, `down`, `logs-f`, and `shell` to the HTTPS compose chain.
+- For non-systemd operations, set `USE_HTTPS=1` to switch shared Make targets such as `up`, `down`, `logs-f`, and `shell` to the HTTPS compose chain.
 - The `USE_HTTPS=1` flag expects **TLS certificate files** at `docker/nginx/tls/server.pem` and `docker/nginx/tls/server.key`. If you do not have certificate files yet, a CA-signed key pair can be generated with the provided Makefile at `certs` (see the [HTTPS installation workflow](#https-installation-workflow-docker-image--compose-override) section for details).
-- Use `PUBLIC_SIMDB_URL` or edit `docker\nginx\templates\snippets\runtime-config-template.js` for adjusting the simdb server:
+- The SimDB proxy location sets `client_max_body_size 2M;` and `client_body_buffer_size 2M;` to avoid request-body failures (HTTP 413) for
+    larger payloads. If your traffic requires larger uploads, increase both values in `docker/nginx/templates/snippets/location-simdb_proxy.conf.template`.
+- Use `PUBLIC_SIMDB_URL` or edit `docker/nginx/templates/snippets/runtime-config-template.js` for adjusting the simdb server:
 
 ```sh
 DASHBOARD_PORT=8080 make up
