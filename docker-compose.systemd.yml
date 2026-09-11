@@ -1,0 +1,19 @@
+# Systemd override for docker-compose.yml.
+#
+# Uses the GHCR-published image instead of a local build.
+#
+# Set SIMDB_DASHBOARD_TAG in the environment file to pin a specific
+# version. The default is the latest tag at the time of writing.
+#
+# Enable this override by including it in COMPOSE_FILE,
+# after the original, e.g.
+#   COMPOSE_FILE="docker-compose.yml:docker-compose.https.yml"
+#   COMPOSE_FILE="docker-compose.yml:docker-compose.https.yml:docker-compose.systemd.yml"
+#
+services:
+  dashboard:
+    image: ${SIMDB_DASHBOARD_IMAGE:-ghcr.io/iterorganization/simdb-dashboard}:${SIMDB_DASHBOARD_TAG:-latest}
+    logging:
+      driver: journald
+      options:
+        tag: simdb-dashboard

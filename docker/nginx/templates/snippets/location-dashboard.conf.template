@@ -1,0 +1,29 @@
+# dashboard app expects request url path to start with /dashboard/
+location = /            { return 302 /dashboard/; }
+location = /dashboard   { return 302 /dashboard/; }
+
+location /dashboard/assets/ {
+    # Assets have hashes in filenames (index-<hash>.js): OK to cache forever
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+    # Vite pre-compresses assets (vite-plugin-compression). Serve those.
+    gzip_static on;
+}
+
+location /dashboard/ {
+    try_files $uri $uri/ /dashboard/index.html;
+}
+
+# dashboard is a simdb client;
+# runtime-config.js defines the simdb remote url to use.
+location = /dashboard/runtime-config.js {
+    default_type application/javascript;
+    add_header Cache-Control "no-cache, no-store, must-revalidate";
+    alias /etc/nginx/templates/snippets/runtime-config-template.js;
+    sub_filter_once off;
+    sub_filter_types application/javascript;
+    # Optional tokens to replace in template:
+    sub_filter 'SIMDB_SERVER_URL' '${SIMDB_SERVER_URL}';
+    sub_filter 'API_HOST' '${API_HOST}';
+    sub_filter 'API_PORT' '${API_PORT}';
+}

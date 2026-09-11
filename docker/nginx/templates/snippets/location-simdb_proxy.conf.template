@@ -1,0 +1,52 @@
+# This snippet is included in the server block (http or https), additional
+# server directives related to the simdb proxy location can be set here.
+
+# Underscores in HTTP headers are not standard, and should not be needed. 
+# However, F5 at iter uses custom User-Agent header "it_script_basic"
+# (containing underscores) to allow HTTP Basic Auth instead of browser cookies.
+# SimDB clients use it to authenticate with F5. Neither SimDB server nor
+# dashboard care about these headers and are dropped.
+# Enable underscores_in_headers if SimDB needs these. 
+#underscores_in_headers on;
+
+# Detect accepted prefixes: scenarios/api, scenarios, api, swaggerui.
+location ~ "^/(?:scenarios/api|scenarios|api|swaggerui).*$" {
+
+    # Strip prefixes, except swaggerui
+    rewrite ^/(?:scenarios/api|scenarios|api)?/?(.*) /$1 break;
+
+    # Typical proxy params
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Inform simdb backend to add this prefix in their responses
+    proxy_set_header X-Forwarded-Prefix /scenarios/api;
+
+    # Noteworthy parameters that are good by default
+    # forward incoming client headers to proxy? (default on)
+    #proxy_pass_request_headers on;
+    # Maximum time establishing a connection with a proxied server (60 s). Can
+    # be good to reduce this (5s) as simdb is always expected to be near on the
+    # local network, and connection failures are thus reported much earlier.
+    #proxy_connect_timeout 60;
+    # Maximum time for response between reads proxied server (60 s).
+    #proxy_read_timeout 60;
+
+    # Tweaks necessary for simdb application
+    
+    # Maxmimum allowed client request body size. Larger than 1M (default) request
+    # payloads are expected. Set this to at least 2M to avoid HTTP 413 (Request
+    # Entity Too Large) errors.
+    client_max_body_size 2M;
+
+    # Maximum size of request payload that can remain in RAM before buffering into
+    # temporary files on disk (performance hit). Recommend to set to a value equal
+    # to than client_max_body_size if memory permits. 
+    client_body_buffer_size 2M;
+
+    # Simdb servers are a group of hosts defined via the 'upstream simdb_backend'
+    # directive (see default.conf).
+    proxy_pass http://simdb_backend;
+}

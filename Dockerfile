@@ -24,17 +24,21 @@ ARG APP_VERSION=0.0.0-unknown
 ENV SIMDB_SERVER_URL=/scenarios/api \
     API_HOST=host.docker.internal \
     API_PORT=5000 \
-    DASHBOARD_PORT=80
+    SERVER_CONF=server-http.conf
 LABEL org.opencontainers.image.title="SimDB Dashboard" \
       org.opencontainers.image.description="Web frontend for the SimDB simulation management tool" \
       org.opencontainers.image.source="https://github.com/iterorganization/SimDB-Dashboard" \
       org.opencontainers.image.licenses="LGPL-3.0-only" \
       org.opencontainers.image.version="${APP_VERSION}" \
       io.simdb.component="dashboard"
-COPY docker/dashboard.nginx /etc/nginx/templates/default.conf.template
-COPY docker/runtime-config-template.js /usr/share/nginx/html/runtime-config-template.js
+COPY docker/nginx/templates/ /etc/nginx/templates/
+COPY docker/nginx/entrypoint/ /docker-entrypoint.d/
+COPY docker/nginx/tls/ /etc/nginx/tls/
+RUN chmod +x /docker-entrypoint.d/*.sh
 # App expects itself at urlpath /dashboard
 COPY --from=build /app/dist /usr/share/nginx/html/dashboard
 # NOTE: nginx base image already exposes port 80:
 EXPOSE 80
+# HTTPS service at port 443 (only utilized when SERVER_CONF=server-https.conf)
+EXPOSE 443
 CMD ["nginx", "-g", "daemon off;"]

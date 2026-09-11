@@ -1,0 +1,18 @@
+# Relies on official nginx image default behavior: /etc/nginx/templates/*.template
+# are envsubst-processed into /etc/nginx/conf.d at container startup.
+# See: https://github.com/docker-library/docs/tree/master/nginx
+
+# FYI: the official nginx image already has /var/log/nginx/access.log symlinked to /dev/stdout,
+# and the default /etc/nginx/nginx.conf reads:
+#
+#    access_log  /var/log/nginx/access.log  main;
+
+# Hostnames inside upstream blocks are resolved at config-load time using the
+# system resolver, which does read /etc/hosts.
+upstream simdb_backend {
+    server ${API_HOST}:${API_PORT};
+}
+
+# Server block include is selected at startup by /docker-entrypoint.d/25-select-server-conf.sh
+# using SERVER_CONF (default: server-http.conf).
+include /etc/nginx/conf.d/snippets/server.conf;

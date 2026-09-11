@@ -1,0 +1,10 @@
+server {
+    listen 80;
+    # listen [::]:80;
+    server_name _;
+    root /usr/share/nginx/html;
+    absolute_redirect off;
+
+    include /etc/nginx/conf.d/snippets/location-dashboard.conf;
+    include /etc/nginx/conf.d/snippets/location-simdb_proxy.conf;
+}

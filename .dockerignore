@@ -1,7 +1,14 @@
 .git
 .github
-docs
-scripts
-node_modules
-dashboard/node_modules
+.vscode
 dashboard/dist
+dashboard/node_modules
+dashboard/.vite
+# Generated TLS assets (*.pem, *.key, san.cnf, ...).
+docker/nginx/tls/*
+!docker/nginx/tls/.gitkeep
+docs
+.env
+.env.*
+node_modules
+scripts
