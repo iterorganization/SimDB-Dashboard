@@ -3,7 +3,13 @@
 # Uses the GHCR-published image instead of a local build.
 #
 # Set SIMDB_DASHBOARD_TAG in the environment file to pin a specific
-# version. The default is the latest tag at the time of writing.
+# version. The default is the latest tag.
+#
+# Published tags (ghcr.io/iterorganization/simdb-dashboard):
+#   <version>  immutable per-commit build, pin for reproducibility (e.g. 0.9.0)
+#   latest     most recently pushed tag (default; moves after any tag push)
+#   develop    tip of develop, for (pre-production) testing only
+# See docs/installation.md#published-image-tags-ghcr.
 #
 # Enable this override by including it in COMPOSE_FILE,
 # after the original, e.g.

@@ -1,25 +1,36 @@
 name: CI/CD Pipeline
 
+# Triggers and action summary:
+# pull-request -> build and verify.
+# push develop -> build, verify, and push image tagged :<version> and :develop.
+# push main    -> build, verify, and push image tagged :latest.
+# push tag     -> build, verify, and push image tagged :<version>.
+
 env:
   CACHE_FROM: type=gha,scope=simdb-dashboard
   CACHE_TO: type=gha,mode=max,scope=simdb-dashboard
 
 on:
-  # Triggers on pushes to develop, on pushed tags, and on pull requests targeting develop.
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "main" ]
     tags: [ "*" ]
   pull_request:
     branches: [ "develop" ]
 
+# Serialize runs per ref, so that two merges in quick succession can't race to
+# move the "develop" image tag backward. Superseded runs are not cancelled, so
+# every merged commit still gets a versioned image.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
-    name: Build, verify, and package
+    name: Build and verify
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.value }}
     permissions:
-      contents: read
+      contents: write
+      packages: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v7
@@ -98,76 +109,56 @@ jobs:
         path: ${{ runner.temp }}/dist/
         retention-days: 7
 
-    - name: Export service image tar
-      run: docker save -o "${{ runner.temp }}/simdb-dashboard-service.tar" simdb-dashboard:service
-
-    - name: Upload service image artifact
-      uses: actions/upload-artifact@v7
-      with:
-        name: simdb-dashboard-service
-        path: ${{ runner.temp }}/simdb-dashboard-service.tar
-        retention-days: 7
-
-  publish:
-    name: Publish service image
-    # Runs only for push events (branch/tag pushes), and is skipped for pull_request events.
-    if: ${{ github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      contents: write
-      packages: write
-    steps:
+    # Everything below publishes; it is skipped entirely for pull requests.
     - name: Lowercase repo-owner
+      if: ${{ github.event_name == 'push' }}
       id: repo_owner
       run: echo "value=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
 
-    - name: Download service image artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: simdb-dashboard-service
-        path: ${{ runner.temp }}
-
-    - name: Download dist artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: simdb-dashboard-dist
-        path: ${{ runner.temp }}/dist
-
-    - name: Load service image
-      run: docker load -i "${{ runner.temp }}/simdb-dashboard-service.tar"
-
     - name: Login to GitHub Container Registry
+      if: ${{ github.event_name == 'push' }}
       uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: ${{ steps.repo_owner.outputs.value }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    # Run on branch pushes (except main, it'll follow develop) and _any_ tag pushes.
     - name: Tag and push service image with version tag
+      if: ${{ github.event_name == 'push' && github.ref_name != 'main' }}
       run: |
         docker tag \
           simdb-dashboard:service \
-          ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:${{ needs.build.outputs.version }}
-        docker push ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:${{ needs.build.outputs.version }}
+          ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:${{ steps.version.outputs.value }}
+        docker push ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:${{ steps.version.outputs.value }}
 
-    # These steps run on tagged commits only — `:latest` tag and GitHub Release.
-    - name: Tag and push latest
-      if: ${{ github.ref_type == 'tag' }}
+    # Run on develop pushes only
+    - name: Tag image :develop and publish
+      if: ${{ github.event_name == 'push' && github.ref_name == 'develop' }}
+      run: |
+        docker tag \
+          simdb-dashboard:service \
+          ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:develop
+        docker push ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:develop
+
+    # Run on main pushes only
+    - name: Tag image :latest and publish
+      if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
       run: |
         docker tag \
           simdb-dashboard:service \
           ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:latest
         docker push ghcr.io/${{ steps.repo_owner.outputs.value }}/simdb-dashboard:latest
 
+    # This step runs on tag pushes only
     - name: Package and upload release tarball
-      if: ${{ github.ref_type == 'tag' }}
+      if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
       env:
         GH_TOKEN: ${{ github.token }}
         GH_REPO: ${{ github.repository }}
       run: |
         tar -czf "${{ runner.temp }}/simdb-dashboard-dist.tar.gz" \
           -C "${{ runner.temp }}/dist" .
-        gh release create "${{ needs.build.outputs.version }}" \
+        gh release create "${{ steps.version.outputs.value }}" \
           "${{ runner.temp }}/simdb-dashboard-dist.tar.gz" \
           --generate-notes

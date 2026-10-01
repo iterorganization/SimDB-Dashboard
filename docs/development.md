@@ -48,3 +48,10 @@ make type-check
 ```
 
 At the moment, the project does not include test files, so `make test` will exit with no tests found.
+
+## Releases and image tags
+
+Pushing a tag makes CI publish a versioned image and a GitHub Release, and moves
+`latest`; pushes to `develop` move `develop`. The version comes from
+`git describe --tags`, so tag releases as plain versions (`0.9.0`) and don't leave
+stray tags around. See [Published image tags](installation.md#published-image-tags-ghcr).
