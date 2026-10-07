@@ -289,7 +289,7 @@ watch(
           :xlabel="getCoordinateLabel()"
         ></PlotlyLoader>
         <!-- show fetch error -->
-        <span v-if="fetchError" class="text-error text-caption ml-1 fetch-error" :title="fetchError">{{ fetchError.replace(/\s+/g, ' ') }}</span>
+        <span v-if="fetchError" class="text-error text-caption ml-1" :title="fetchError">{{ fetchError }}</span>
         <v-progress-circular
           v-if="isFetching"
           class="ml-2"
@@ -313,14 +313,3 @@ watch(
     </td>
   </tr>
 </template>
-
-<style scoped>
-.fetch-error {
-  display: inline-block;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: bottom;
-}
-</style>
