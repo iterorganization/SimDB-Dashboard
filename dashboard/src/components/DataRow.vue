@@ -77,7 +77,15 @@ async function fetchData() {
     const ddVersion = encodeURIComponent(getMetadataDdVersion())
     const url = `${props.server}/v${config.api_version}/simulation/${props.simId}/data?path=${encodeURIComponent(toDataPath(props.meta_name))}&dd_version=${ddVersion}`
     const resp = await fetch(url, { signal })
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`)
+    if (!resp.ok) {
+      // Prefer the server's own error message, e.g. {"error": "..."}
+      let detail = resp.statusText
+      try {
+        const body = await resp.json()
+        if (body?.error) detail = String(body.error)
+      } catch { /* non-JSON body: keep statusText */ }
+      throw new Error(`HTTP ${resp.status}: ${detail}`)
+    }
     fetchedValue.value = await resp.json()
   } catch (err: any) {
     if (err?.name === 'AbortError') return 
@@ -281,7 +289,7 @@ watch(
           :xlabel="getCoordinateLabel()"
         ></PlotlyLoader>
         <!-- show fetch error -->
-        <span v-if="fetchError" class="text-error text-caption ml-1" :title="fetchError">data is unavailable</span>
+        <span v-if="fetchError" class="text-error text-caption ml-1" :title="fetchError">{{ fetchError }}</span>
         <v-progress-circular
           v-if="isFetching"
           class="ml-2"
