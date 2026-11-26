@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { config } from '../config'
+import { fetchJson } from '../utils/utils'
 import type { VDataTable } from 'vuetify/components'
 
 import AuthDialog from './AuthDialog.vue'
@@ -293,10 +294,7 @@ function fetchData(username: string, password: string) {
   }
   const url = config.rootAPI(decodeURIComponent(selectedServer.value))
   status.value.show = false
-  fetch(url + '/simulations?' + query, args)
-    .then((response) => {
-      return response.json()
-    })
+  fetchJson(url + '/simulations?' + query, args)
     .then((data: any) => {
       items.value = data.results.map((el: any) => {
         // Adding a version of the metadata so that the table can dynamically read

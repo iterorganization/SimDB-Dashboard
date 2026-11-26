@@ -2,6 +2,8 @@ export { config }
 
 type ServerConfig = {
   requiresAuth: boolean
+  /** Display name in the UI; defaults to the server URL. */
+  label?: string
 }
 
 type RuntimeConfig = {
@@ -61,6 +63,9 @@ const config: Readonly<{ [key: string]: any }> = {
   searchOutputColumns: ['alias/UUID', 'status', 'Upload Date'],
   rootURL: function (server: string) {
     return server + '/'
+  },
+  serverLabel: function (server: string): string {
+    return serverConfig[server]?.label || server
   },
   rootAPI: function (server: string) {
     return server + '/v' + config.api_version

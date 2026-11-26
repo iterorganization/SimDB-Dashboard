@@ -87,7 +87,7 @@ function requiresAuth() {
 
 function getValue(name: string) {
   if (name === 'server') {
-    return selectedServer.value
+    return config.serverLabel(selectedServer.value)
   } else if (name === 'alias') {
     return alias.value
   } else if (name === 'uuid') {

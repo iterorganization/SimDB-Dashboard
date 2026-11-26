@@ -37,6 +37,7 @@ SERVICE_IMAGE := simdb-dashboard:service
 	builder \
 	certs \
 	dev \
+	dev-node \
 	dist \
 	distclean \
 	down \
@@ -91,7 +92,9 @@ help:
 	@echo "  make lint            Run lint checks against the build image (make build first)"
 	@echo "  make type-check      Run TypeScript type checks against the build image (make build first)"
 	@echo "  make test            Run unit tests against the build image (make build first)"
-	@echo "  make dev             Run Vite dev server from Docker dev stage with live local changes"
+	@echo "  make dev             Run Vite dev server with live reload (Docker, or local Node.js if no Docker)"
+	@echo "  make dev-node        Run Vite dev server with the local Node.js install"
+	@echo "                      SimDB servers: dashboard/dev-servers.json, see docs/development.md"
 	@echo "  make version         Show git-derived application version"
 	@echo ""
 	@echo "Artifacts and maintenance:"
@@ -163,12 +166,24 @@ type-check:
 test:
 	$(DOCKER_CMD) run $(BUILD_IMAGE) npm run test:unit -- --run
 
+# SimDB servers for the dev server
 dev:
+ifneq ($(shell command -v $(DOCKER_CMD) 2>/dev/null),)
 	$(DOCKER_BUILD) --target dev -t $(DEV_IMAGE) .
-	$(DOCKER_CMD) run --rm -p 5173:5173 \
+	$(DOCKER_CMD) run --rm -p 127.0.0.1:5173:5173 \
+		-e SIMDB_DEV_SERVER -e SIMDB_DEV_F5_PASSWORD \
+		-e SIMDB_DEV_F5_USERNAME="$${SIMDB_DEV_F5_USERNAME:-$$USER}" \
 		-v "$(PWD)/dashboard":/app \
 		-v simdb_dashboard_node_modules:/app/node_modules \
 		-w /app $(DEV_IMAGE)
+else
+	@echo "'$(DOCKER_CMD)' not found: running the dev server with local Node.js"
+	$(MAKE) dev-node
+endif
+
+# Vite dev server with the local Node.js install
+dev-node:
+	cd dashboard && { [ -x node_modules/.bin/vite ] || npm ci; } && npm run dev
 
 version:
 	@echo $(VERSION)
