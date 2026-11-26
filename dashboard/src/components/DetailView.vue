@@ -97,7 +97,7 @@ function getValue(name: string) {
     return uploadInfo.value + ', ' + new Date(uploadDate.value).toUTCString()
   } else {
     let found: any = items.value
-      ? items.value.find((el: any) => el.element.toLowerCase() === name)
+      ? items.value.find((el: any) => el.element.toLowerCase() === name.toLowerCase())
       : false
     return found ? found.value : null
   }

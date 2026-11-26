@@ -45,6 +45,8 @@ type ApiResult = {
 const fetchedValue = ref<ApiResult | null>(null)
 const isFetching = ref(false)
 const fetchError = ref<string | null>(null)
+// e.g. no IMAS output files to plot from: information, not an error
+const fetchInfo = ref<string | null>(null)
 let currentAbortController: AbortController | null = null
 
 /** metadata keys are stored in the database as dot-separated strings, 
@@ -72,6 +74,7 @@ async function fetchData() {
 
   isFetching.value = true
   fetchError.value = null
+  fetchInfo.value = null
   fetchedValue.value = null
   try {
     const ddVersion = encodeURIComponent(getMetadataDdVersion())
@@ -84,6 +87,11 @@ async function fetchData() {
         const body = await resp.json()
         if (body?.error) detail = String(body.error)
       } catch { /* non-JSON body: keep statusText */ }
+      // No files ingested for this simulation (common on ITPA): not an error
+      if (resp.status === 404 && /has no IMAS output files/i.test(detail)) {
+        fetchInfo.value = 'No plot: no IMAS output files for this simulation'
+        return
+      }
       throw new Error(`HTTP ${resp.status}: ${detail}`)
     }
     fetchedValue.value = await resp.json()
@@ -151,7 +159,11 @@ function processValue(value: any) {
     return 'No data available.'
   }
   
+  // lists as plain text
+  if (Array.isArray(value)) return value.join(', ')
+
   if (value && typeof value === 'object' && 'min' in value && 'max' in value) {
+    if (value.min === value.max) return `${value.min}`
     return `Range: [${value.min}, ${value.max}]`
   }
   
@@ -185,6 +197,11 @@ function isRangeValue(): boolean {
     'min' in props.value &&
     'max' in props.value
   )
+}
+
+/** Range with min == max: one value, nothing to plot */
+function isSingleValueRange(): boolean {
+  return isRangeValue() && (props.value as RangeValue).min === (props.value as RangeValue).max
 }
 
 function isXML() {
@@ -243,7 +260,9 @@ watch(
   [() => props.value, () => props.simId, () => props.server, () => props.meta_name],
   () => {
     fetchedValue.value = null
-    if (isArray()) fetchData()
+    fetchError.value = null
+    fetchInfo.value = null
+    if (isArray() && !isSingleValueRange()) fetchData()
   },
   { immediate: true }
 )
@@ -290,6 +309,7 @@ watch(
         ></PlotlyLoader>
         <!-- show fetch error -->
         <span v-if="fetchError" class="text-error text-caption ml-1" :title="fetchError">{{ fetchError }}</span>
+        <span v-if="fetchInfo" class="text-medium-emphasis text-caption ml-1" :title="fetchInfo">{{ fetchInfo }}</span>
         <v-progress-circular
           v-if="isFetching"
           class="ml-2"
