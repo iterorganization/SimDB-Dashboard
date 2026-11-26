@@ -186,6 +186,7 @@ Notes:
 - The `USE_HTTPS=1` flag expects **TLS certificate files** at `docker/nginx/tls/server.pem` and `docker/nginx/tls/server.key`. If you do not have certificate files yet, a CA-signed key pair can be generated with the provided Makefile at `certs` (see the [HTTPS installation workflow](#https-installation-workflow-docker-image--compose-override) section for details).
 - The SimDB proxy location sets `client_max_body_size 2M;` and `client_body_buffer_size 2M;` to avoid request-body failures (HTTP 413) for
     larger payloads. If your traffic requires larger uploads, increase both values in `docker/nginx/templates/snippets/location-simdb_proxy.conf.template`.
+- Metadata shown by default on a simulation page: set `displayFields` (list of metadata keys, e.g. `'global_quantities.ip.value'`, or `'all'`) in `docker/nginx/templates/snippets/runtime-config-template.js`.
 - Use `PUBLIC_SIMDB_URL` or edit `docker/nginx/templates/snippets/runtime-config-template.js` for adjusting the simdb server:
 
 ```sh

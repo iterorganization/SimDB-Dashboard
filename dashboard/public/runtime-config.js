@@ -9,5 +9,8 @@ window.__SIMDB_RUNTIME_CONFIG__ = {
   defaultServer: dashboard_internal,
   serverConfig: {
     [dashboard_internal]: { requiresAuth: false },
-  }
+  },
+  // Optional: metadata keys shown by default on a simulation page, or 'all'.
+  // Omit to use the built-in list (src/config.ts).
+  // displayFields: ['description', 'global_quantities.ip.value', 'global_quantities.b0.value'],
 };

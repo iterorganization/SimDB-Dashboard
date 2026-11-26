@@ -97,7 +97,7 @@ function getValue(name: string) {
     return uploadInfo.value + ', ' + new Date(uploadDate.value).toUTCString()
   } else {
     let found: any = items.value
-      ? items.value.find((el: any) => el.element.toLowerCase() === name)
+      ? items.value.find((el: any) => el.element.toLowerCase() === name.toLowerCase())
       : false
     return found ? found.value : null
   }
@@ -113,10 +113,8 @@ function removeRow() {
   displayItems.value.pop()
 }
 
-function removeSelectedRow(index: number) {
-  if (index >= 0 && index < displayItems.value.length) {
-    displayItems.value.splice(index, 1)
-  }
+function removeItem(name: string) {
+  displayItems.value = displayItems.value.filter((el: string) => el !== name)
 }
 
 function resetRows() {
@@ -314,8 +312,8 @@ function sortOutputs(key: string) {
           <tbody>
             <DataRow
               v-for="(name, index) in displayItems"
-              :key="index"
-              :name="name === 'code.name' ? 'code name': name === 'description' ? 'description' : name === 'ids_properties.creation_date' ? 'creation date' : name === 'uploaded_by' ? 'uploaded by' : name"
+              :key="name"
+              :name="name"
               :value="getValue(name)"
               :index="index"
               :data="items"
@@ -323,7 +321,7 @@ function sortOutputs(key: string) {
               :meta_name="name"
               :simId="uuid?.hex"
               :showRemoveButton="true"
-              @remove="removeSelectedRow"
+              @remove="removeItem(name)"
             >
             </DataRow>
           </tbody>
