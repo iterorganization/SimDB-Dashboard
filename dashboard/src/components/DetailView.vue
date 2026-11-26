@@ -461,7 +461,7 @@ function sortOutputs(key: string) {
               </v-tooltip>
               <v-list v-if="showParents">
                 <v-list-item v-for="parent in parents" :key="parent.uuid.hex">
-                  <a :href="parent.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
+                  <a :href="parent.uuid.hex + '?server=' + encodeURIComponent(selectedServer)" @click.stop="">{{
                     parent.alias
                   }}</a>
                 </v-list-item>
@@ -496,7 +496,7 @@ function sortOutputs(key: string) {
               </v-tooltip>
               <v-list v-if="showChildren">
                 <v-list-item v-for="child in children" :key="child.uuid.hex">
-                  <a :href="child.uuid.hex + '?server=' + selectedServer" @click.stop="">{{
+                  <a :href="child.uuid.hex + '?server=' + encodeURIComponent(selectedServer)" @click.stop="">{{
                     child.alias
                   }}</a>
                 </v-list-item>

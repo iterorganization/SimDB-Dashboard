@@ -171,8 +171,8 @@ dev:
 ifneq ($(shell command -v $(DOCKER_CMD) 2>/dev/null),)
 	$(DOCKER_BUILD) --target dev -t $(DEV_IMAGE) .
 	$(DOCKER_CMD) run --rm -p 127.0.0.1:5173:5173 \
-		-e SIMDB_DEV_SERVER -e SIMDB_DEV_F5_PASSWORD \
-		-e SIMDB_DEV_F5_USERNAME="$${SIMDB_DEV_F5_USERNAME:-$$USER}" \
+		-e SIMDB_DEV_SERVER -e SIMDB_DEV_FIREWALL_PASSWORD -e SIMDB_DEV_F5_PASSWORD \
+		-e SIMDB_DEV_FIREWALL_USERNAME="$${SIMDB_DEV_FIREWALL_USERNAME:-$${SIMDB_DEV_F5_USERNAME:-$$USER}}" \
 		-v "$(PWD)/dashboard":/app \
 		-v simdb_dashboard_node_modules:/app/node_modules \
 		-w /app $(DEV_IMAGE)

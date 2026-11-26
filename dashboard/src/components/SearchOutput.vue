@@ -123,7 +123,11 @@ function doQuery() {
   }
 
 function doCompare() {
-  window.location.href = 'compare/?uuid=' + selectedSimulations.value.join('&uuid=')
+  window.location.href =
+    'compare/?uuid=' +
+    selectedSimulations.value.join('&uuid=') +
+    '&server=' +
+    encodeURIComponent(selectedServer.value ?? '')
 }
 
 function getLabel(item: any) {
@@ -391,7 +395,7 @@ function getMetadata(item: any) : any[] {
         </v-card>
       </template>
       <template #[`item.alias`]="{ item }">
-        <a :href="'uuid/' + getHex(item)" @click.stop="">{{
+        <a :href="'uuid/' + getHex(item) + '?server=' + encodeURIComponent(selectedServer ?? '')" @click.stop="">{{
           getAlias(item)
         }}</a>
       </template>

@@ -1,20 +1,9 @@
 /**
- * Dev-only SimDB server setup for the Vite dev server (`npm run dev`, `make dev`).
- *
- * - Reads dev-servers.json, merged with the gitignored dev-servers.local.json.
- * - Proxies each server at /simdb/<name>, so the browser only talks to the dev
- *   server and the SimDB servers do not need CORS headers.
- * - Serves a generated runtime-config.js listing these servers, instead of
- *   public/runtime-config.js (which targets the nginx proxy in production).
- * - For servers with "firewall": "F5", logs in to F5 server-side the way
- *   F5 clientless mode expects (Basic auth with User-Agent "it_script_basic"),
- *   and adds the session cookie to proxied requests. The password is taken
- *   from SIMDB_DEV_F5_PASSWORD only, never from a file.
- *
- * Because other users of a shared host can reach localhost too, F5-backed routes
- * require a random per-run token, given in the URL printed at startup.
- *
- * Not used by `vite build`: production behaviour is unchanged.
+ * Vite dev server only (`make dev`): SimDB servers from dev-servers.json
+ * (+ dev-servers.local.json), proxied at /simdb/<name>, with a generated
+ * runtime-config.js. Servers behind a firewall: login with
+ * SIMDB_DEV_FIREWALL_PASSWORD, and requests need the per-run token from the
+ * startup URL.
  */
 import { randomBytes } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
@@ -23,15 +12,22 @@ import { userInfo } from 'node:os'
 import { resolve } from 'node:path'
 import type { Plugin, ProxyOptions } from 'vite'
 
+/** Login at a firewall / reverse proxy in front of the SimDB server. */
+export type Firewall = {
+  /** "basic": HTTP Basic login on the server URL, then reuse the session cookie. */
+  type: 'basic'
+  /** User-Agent sent to the firewall, if it needs one (ITER F5: "it_script_basic"). */
+  userAgent?: string
+  /** Defaults to SIMDB_DEV_FIREWALL_USERNAME, then the login name. */
+  username?: string
+}
+
 export type DevServer = {
   url: string
   /** Name shown in the dashboard's server selector. */
   label?: string
   description?: string
-  /** Only "F5" is supported. */
-  firewall?: 'F5'
-  /** F5 username; defaults to SIMDB_DEV_F5_USERNAME, then the login name. */
-  username?: string
+  firewall?: Firewall
   /** SimDB server-side authentication (dashboard login dialog). */
   requiresAuth?: boolean
   /** Set to false to hide the server from the dashboard. */
@@ -52,7 +48,11 @@ const PROXY_PREFIX = '/simdb'
 const CONFIG_FILE = 'dev-servers.json'
 const LOCAL_CONFIG_FILE = 'dev-servers.local.json'
 const TOKEN_PARAM = 'simdb_dev_token'
-const F5_USER_AGENT = 'it_script_basic'
+
+/** SIMDB_DEV_FIREWALL_<name>, or the older SIMDB_DEV_F5_<name>. */
+function firewallEnv(name: 'USERNAME' | 'PASSWORD'): string | undefined {
+  return process.env[`SIMDB_DEV_FIREWALL_${name}`] || process.env[`SIMDB_DEV_F5_${name}`]
+}
 
 function readJson(path: string): DevServersFile | null {
   if (!existsSync(path)) return null
@@ -97,8 +97,9 @@ export function loadDevServers(root: string): ResolvedDevServers {
     if (typeof server.url !== 'string' || !/^https?:\/\//.test(server.url)) {
       throw new Error(`Dev server "${name}" needs an http(s) "url".`)
     }
-    if (server.firewall !== undefined && server.firewall !== 'F5') {
-      throw new Error(`Dev server "${name}": unknown firewall "${server.firewall}" (only "F5").`)
+    const fw = server.firewall
+    if (fw !== undefined && (typeof fw !== 'object' || fw === null || fw.type !== 'basic')) {
+      throw new Error(`Dev server "${name}": "firewall" must be {"type": "basic", ...}.`)
     }
     servers[name] = { ...server, url: server.url.replace(/\/+$/, '') } as DevServer
   }
@@ -141,7 +142,7 @@ export function runtimeConfigScript({ servers, defaultName }: ResolvedDevServers
   )
 }
 
-// --- F5 session handling ---------------------------------------------------
+// --- Firewall session handling ---------------------------------------------
 
 function setCookies(headers: Headers): string[] {
   const h = headers as Headers & { getSetCookie?: () => string[] }
@@ -151,13 +152,19 @@ function setCookies(headers: Headers): string[] {
 }
 
 /**
- * Log in to F5 with "Clientless Authentication": with User-Agent it_script_basic,
- * F5 answers 401 + Basic challenge on the protected URL itself (a POST to
- * /my.policy without an existing session is rejected with errorcode=19).
- * Returns the session as a Cookie header, or null if F5 set no cookie (then
- * Basic auth is sent on every request).
+ * HTTP Basic login at the firewall: request the server URL with Basic auth
+ * (and the configured User-Agent) and keep the session cookies it sets.
+ * ITER F5 example: User-Agent "it_script_basic" selects F5 "Clientless
+ * Authentication" (a 401 Basic challenge on the URL itself).
+ * Returns a Cookie header, or null if no cookie was set (then Basic auth is
+ * sent on every request).
  */
-async function f5Login(loginUrl: string, username: string, password: string): Promise<string | null> {
+async function firewallLogin(
+  loginUrl: string,
+  username: string,
+  password: string,
+  userAgent?: string
+): Promise<string | null> {
   const origin = new URL(loginUrl).origin
   const jar = new Map<string, string>()
   const cookieHeader = () => [...jar].map(([k, v]) => `${k}=${v}`).join('; ')
@@ -165,7 +172,8 @@ async function f5Login(loginUrl: string, username: string, password: string): Pr
 
   let url = loginUrl
   for (let hop = 0; hop < 10; hop++) {
-    const headers: Record<string, string> = { 'User-Agent': F5_USER_AGENT }
+    const headers: Record<string, string> = {}
+    if (userAgent) headers['User-Agent'] = userAgent
     if (new URL(url).origin === origin) headers.Authorization = authorization
     if (jar.size) headers.Cookie = cookieHeader()
 
@@ -174,7 +182,7 @@ async function f5Login(loginUrl: string, username: string, password: string): Pr
       resp = await fetch(url, { headers, redirect: 'manual' })
     } catch (err) {
       const cause = (err as Error & { cause?: Error }).cause
-      throw new Error(`Cannot reach F5 login at ${url}: ${cause?.message ?? (err as Error).message}`)
+      throw new Error(`Cannot reach firewall login at ${url}: ${cause?.message ?? (err as Error).message}`)
     }
     for (const cookie of setCookies(resp.headers)) {
       const pair = cookie.split(';', 1)[0]
@@ -190,50 +198,52 @@ async function f5Login(loginUrl: string, username: string, password: string): Pr
 
     const location = resp.headers.get('location')
     if (resp.status >= 300 && resp.status < 400 && location) {
-      if (/my\.logout|errorcode=/i.test(location)) {
-        throw new Error(`F5 rejected the login for user "${username}" (redirected to ${location}).`)
+      // F5 sends failed logins to /my.logout.php3?errorcode=...
+      if (/logout|errorcode=/i.test(location)) {
+        throw new Error(`Firewall rejected the login for user "${username}" (redirected to ${location}).`)
       }
       url = new URL(location, url).toString()
       continue
     }
     if (resp.status === 401) {
-      throw new Error(`F5 rejected the credentials for user "${username}" (HTTP 401).`)
+      throw new Error(`Firewall rejected the credentials for user "${username}" (HTTP 401).`)
     }
-    if (!resp.ok) throw new Error(`F5 login failed: HTTP ${resp.status} ${resp.statusText}`)
+    if (!resp.ok) throw new Error(`Firewall login failed: HTTP ${resp.status} ${resp.statusText}`)
     return jar.size ? cookieHeader() : null
   }
-  throw new Error(`F5 login: too many redirects from ${loginUrl}`)
+  throw new Error(`Firewall login: too many redirects from ${loginUrl}`)
 }
 
-type F5Headers = { cookie: string } | { authorization: string }
+type FirewallHeaders = { cookie: string } | { authorization: string }
 
-class F5Session {
-  private headers: F5Headers | null = null
-  private pending: Promise<F5Headers> | null = null
+class FirewallSession {
+  private headers: FirewallHeaders | null = null
+  private pending: Promise<FirewallHeaders> | null = null
 
   constructor(
     readonly name: string,
     private readonly loginUrl: string,
-    private readonly username: string
+    private readonly username: string,
+    readonly userAgent?: string
   ) {}
 
   /** Headers to add to proxied requests (session cookie, or Basic auth). */
-  async getHeaders(): Promise<F5Headers> {
+  async getHeaders(): Promise<FirewallHeaders> {
     if (this.headers) return this.headers
-    const password = process.env.SIMDB_DEV_F5_PASSWORD
+    const password = firewallEnv('PASSWORD')
     if (!password) {
       throw new Error(
-        `Server "${this.name}" is behind F5: set SIMDB_DEV_F5_PASSWORD ` +
-          `(and SIMDB_DEV_F5_USERNAME if not "${this.username}") before starting the dev server.`
+        `Server "${this.name}" is behind a firewall: set SIMDB_DEV_FIREWALL_PASSWORD ` +
+          `(and SIMDB_DEV_FIREWALL_USERNAME if not "${this.username}") before starting the dev server.`
       )
     }
     if (!this.pending) {
-      this.pending = f5Login(this.loginUrl, this.username, password)
+      this.pending = firewallLogin(this.loginUrl, this.username, password, this.userAgent)
         .then((cookie) => {
           this.headers = cookie
             ? { cookie }
             : { authorization: 'Basic ' + Buffer.from(`${this.username}:${password}`).toString('base64') }
-          console.info(`[simdb-dev] F5 login to ${this.name} as ${this.username}: OK`)
+          console.info(`[simdb-dev] Firewall login to ${this.name} as ${this.username}: OK`)
           return this.headers
         })
         .finally(() => {
@@ -244,7 +254,7 @@ class F5Session {
   }
 
   invalidate(): void {
-    if (this.headers) console.info(`[simdb-dev] F5 session for ${this.name} expired, will log in again`)
+    if (this.headers) console.info(`[simdb-dev] Firewall session for ${this.name} expired, will log in again`)
     this.headers = null
   }
 }
@@ -276,30 +286,30 @@ function stripTokenCookie(req: IncomingMessage): void {
 type DevState = {
   resolved: ResolvedDevServers
   token: string
-  f5Sessions: Map<string, F5Session>
+  sessions: Map<string, FirewallSession>
 }
 
 function createState(root: string): DevState {
   const resolved = loadDevServers(root)
-  const f5Sessions = new Map<string, F5Session>()
+  const sessions = new Map<string, FirewallSession>()
   for (const [name, server] of Object.entries(resolved.servers)) {
-    if (server.firewall === 'F5') {
-      const username =
-        process.env.SIMDB_DEV_F5_USERNAME || server.username || process.env.USER || userInfo().username
-      f5Sessions.set(name, new F5Session(name, `${server.url}/`, username))
+    const fw = server.firewall
+    if (fw) {
+      const username = firewallEnv('USERNAME') || fw.username || process.env.USER || userInfo().username
+      sessions.set(name, new FirewallSession(name, `${server.url}/`, username, fw.userAgent))
     }
   }
   // Kept in the process environment so it survives Vite restarts (config or
   // plugin changes): the browser cookie stays valid until the process exits.
   process.env.SIMDB_DEV_TOKEN ||= randomBytes(16).toString('hex')
-  return { resolved, token: process.env.SIMDB_DEV_TOKEN, f5Sessions }
+  return { resolved, token: process.env.SIMDB_DEV_TOKEN, sessions }
 }
 
-function createProxy({ resolved, f5Sessions }: DevState): Record<string, ProxyOptions> {
+function createProxy({ resolved, sessions }: DevState): Record<string, ProxyOptions> {
   const proxy: Record<string, ProxyOptions> = {}
   for (const [name, server] of Object.entries(resolved.servers)) {
     const prefix = proxyPath(name)
-    const session = f5Sessions.get(name)
+    const session = sessions.get(name)
     proxy[`^${prefix}(/|$)`] = {
       target: server.url,
       changeOrigin: true,
@@ -312,11 +322,12 @@ function createProxy({ resolved, f5Sessions }: DevState): Record<string, ProxyOp
         })
         if (!session) return
         proxyServer.on('proxyRes', (proxyRes) => {
+          // 401, or a redirect to a login page: the session has expired.
           const location = String(proxyRes.headers.location ?? '')
-          if (proxyRes.statusCode === 401 || /my\.policy|my\.logout/i.test(location)) {
+          if (proxyRes.statusCode === 401 || /login|logon|logout|policy|auth/i.test(location)) {
             session.invalidate()
           }
-          // F5 cookies belong to the server-side session, not to the browser.
+          // Firewall cookies belong to the server-side session, not to the browser.
           delete proxyRes.headers['set-cookie']
         })
       }
@@ -340,7 +351,7 @@ export function simdbDevServers(root: string): Plugin {
     },
 
     configureServer(server) {
-      const { resolved, token, f5Sessions } = state
+      const { resolved, token, sessions } = state
       // Added directly (not returned), so it runs before Vite's own middlewares,
       // including the proxy and the public/ static files.
       server.middlewares.use(async (req, res, next) => {
@@ -368,7 +379,7 @@ export function simdbDevServers(root: string): Plugin {
 
         const match = /^\/simdb\/([^/]+)(\/|$)/.exec(url.pathname)
         if (!match) return next()
-        const session = f5Sessions.get(match[1])
+        const session = sessions.get(match[1])
         const tokenOk = hasToken(req, token)
         // Never forward the dev token cookie to SimDB servers.
         stripTokenCookie(req)
@@ -378,13 +389,13 @@ export function simdbDevServers(root: string): Plugin {
           return sendJsonError(
             res,
             403,
-            `Server "${session.name}" is behind F5: open the dashboard with the ` +
+            `Server "${session.name}" is behind a firewall: open the dashboard with the ` +
               `?${TOKEN_PARAM}=... URL printed by the dev server.`
           )
         }
         try {
           Object.assign(req.headers, await session.getHeaders())
-          req.headers['user-agent'] = F5_USER_AGENT
+          if (session.userAgent) req.headers['user-agent'] = session.userAgent
           next()
         } catch (err) {
           sendJsonError(res, 502, (err as Error).message)
@@ -398,16 +409,16 @@ export function simdbDevServers(root: string): Plugin {
         info('\n  SimDB dev servers (dev-servers.json, dev-servers.local.json, SIMDB_DEV_SERVER):')
         for (const [name, s] of Object.entries(resolved.servers)) {
           const mark = name === resolved.defaultName ? '*' : ' '
-          const f5 = s.firewall === 'F5' ? '  [F5]' : ''
-          info(`  ${mark} ${proxyPath(name).padEnd(20)} -> ${s.url}${f5}`)
+          const fw = s.firewall ? '  [firewall]' : ''
+          info(`  ${mark} ${proxyPath(name).padEnd(20)} -> ${s.url}${fw}`)
         }
-        if (f5Sessions.size > 0) {
+        if (sessions.size > 0) {
           const { port } = server.config.server
           const local = (
             server.resolvedUrls?.local[0] ?? `http://localhost:${port}${server.config.base}`
           ).replace(/\/?$/, '/')
-          const pwNote = process.env.SIMDB_DEV_F5_PASSWORD ? '' : ' (SIMDB_DEV_F5_PASSWORD not set)'
-          info(`\n  For F5 servers${pwNote}, open: ${local}?${TOKEN_PARAM}=${token}\n`)
+          const pwNote = firewallEnv('PASSWORD') ? '' : ' (SIMDB_DEV_FIREWALL_PASSWORD not set)'
+          info(`\n  For firewall servers${pwNote}, open: ${local}?${TOKEN_PARAM}=${token}\n`)
         }
       }
     }

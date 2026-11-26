@@ -5,8 +5,11 @@
     "simdb-pp": {
       "url": "https://simdb-pp.iter.org/scenarios/api",
       "label": "ITER pre-production (F5)",
-      "description": "ITER pre-production, behind F5: needs SIMDB_DEV_F5_PASSWORD",
-      "firewall": "F5"
+      "description": "ITER pre-production, behind F5: needs SIMDB_DEV_FIREWALL_PASSWORD",
+      "firewall": {
+        "type": "basic",
+        "userAgent": "it_script_basic"
+      }
     },
     "local": {
       "url": "http://localhost:5000",
@@ -22,8 +25,11 @@
     "iter": {
       "url": "https://simdb.iter.org/scenarios/api",
       "label": "ITER production (F5)",
-      "description": "ITER production, behind F5: needs SIMDB_DEV_F5_PASSWORD",
-      "firewall": "F5"
+      "description": "ITER production, behind F5: needs SIMDB_DEV_FIREWALL_PASSWORD",
+      "firewall": {
+        "type": "basic",
+        "userAgent": "it_script_basic"
+      }
     }
   }
 }

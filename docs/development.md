@@ -14,7 +14,7 @@ cd SimDB-Dashboard
 2. Start the development server with hot reload:
 
 ```bash
-read -rsp "ITER password: " SIMDB_DEV_F5_PASSWORD && export SIMDB_DEV_F5_PASSWORD
+read -rsp "Password: " SIMDB_DEV_FIREWALL_PASSWORD && export SIMDB_DEV_FIREWALL_PASSWORD
 module load nodejs
 make dev
 ```
@@ -25,7 +25,9 @@ make dev
 
 ## SimDB servers
 
-Defined in [`dashboard/dev-servers.json`](../dashboard/dev-servers.json) (default: `simdb-pp`, F5). Local overrides: `dashboard/dev-servers.local.json`.
+Defined in [`dashboard/dev-servers.json`](../dashboard/dev-servers.json) (default: `simdb-pp`). Local overrides: `dashboard/dev-servers.local.json`.
+
+Servers behind a firewall with HTTP Basic login (ITER: F5) use `"firewall": {"type": "basic", "userAgent": "..."}`; set `SIMDB_DEV_FIREWALL_PASSWORD` (and `SIMDB_DEV_FIREWALL_USERNAME` if not `$USER`).
 
 ```bash
 SIMDB_DEV_SERVER=itpa make dev       # other server (name or URL)
