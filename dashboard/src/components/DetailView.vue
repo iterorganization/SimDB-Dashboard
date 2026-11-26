@@ -314,7 +314,7 @@ function sortOutputs(key: string) {
           <tbody>
             <DataRow
               v-for="(name, index) in displayItems"
-              :key="index"
+              :key="name"
               :name="name === 'code.name' ? 'code name': name === 'description' ? 'description' : name === 'ids_properties.creation_date' ? 'creation date' : name === 'uploaded_by' ? 'uploaded by' : name"
               :value="getValue(name)"
               :index="index"

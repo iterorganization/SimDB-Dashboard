@@ -209,7 +209,7 @@ function setItems(username: string, password: string) {
           <tbody>
             <CompareRow
               v-for="(name, index) in displayItems"
-              :key="index"
+              :key="name"
               :name="name"
               :value="getValue(name)"
               :simulations="simulations"
@@ -221,7 +221,7 @@ function setItems(username: string, password: string) {
             </CompareRow>
             <ComparePlot
               v-for="(name, index) in displayItems"
-              :key="'plot' + index"
+              :key="'plot-' + name"
               :name="name"
               :simulations="simulations"
               :uuids="uuids"
