@@ -28,7 +28,9 @@ const status = ref<{ show: boolean; text: string | null; type: AlertType }>({
   type: undefined
 })
 const authentication = ref<string | null>(null)
-const displayItems = ref([...config.displayFields])
+// displayFields 'all': rows are filled from the loaded metadata
+const showAllFields = config.displayFields === 'all'
+const displayItems = ref<string[]>(showAllFields ? [] : [...config.displayFields])
 const token = ref<string | null>(null)
 const items = ref([])
 const uuids = ref<string[]>([])
@@ -100,14 +102,12 @@ function removeRow() {
   displayItems.value.pop()
 }
 
-function removeSelectedRow(index: number) {
-  if (index >= 0 && index < displayItems.value.length) {
-    displayItems.value.splice(index, 1)
-  }
+function removeItem(name: string) {
+  displayItems.value = displayItems.value.filter((el: string) => el !== name)
 }
 
 function resetRows() {
-  displayItems.value = [...config.displayFields]
+  displayItems.value = showAllFields ? [...metadataElements.value] : [...config.displayFields]
 }
 
 function requiresAuth() {
@@ -169,6 +169,7 @@ function setItems(username: string, password: string) {
           inputs: data.inputs
         }
         simulations.value.push(simulation)
+        if (showAllFields) displayItems.value = [...metadataElements.value]
         loaded.value = true;
       })
       .catch(function (error) {
@@ -209,25 +210,25 @@ function setItems(username: string, password: string) {
           <tbody>
             <CompareRow
               v-for="(name, index) in displayItems"
-              :key="index"
+              :key="name"
               :name="name"
               :value="getValue(name)"
               :simulations="simulations"
               :uuids="uuids"
               :index="index"
-              :name_label="name === 'code.name' ? 'Code Name': name === 'description' ? 'Description' : name === 'ids' ? 'IDSs' : name === 'ids_properties.creation_date' ? 'Creation Date' :name"
-              @remove="removeSelectedRow" 
+              :name_label="name"
+              @remove="removeItem(name)"
             >            
             </CompareRow>
             <ComparePlot
               v-for="(name, index) in displayItems"
-              :key="'plot' + index"
+              :key="'plot-' + name"
               :name="name"
               :simulations="simulations"
               :uuids="uuids"
               :index="index"
               :loaded="loaded"
-              @remove="removeSelectedRow"
+              @remove="removeItem(name)"
             >
             </ComparePlot>
             <RowAdder
