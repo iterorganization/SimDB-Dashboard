@@ -14,16 +14,24 @@ cd SimDB-Dashboard
 2. Start the development server with hot reload:
 
 ```bash
+read -rsp "Password: " SIMDB_DEV_FIREWALL_PASSWORD && export SIMDB_DEV_FIREWALL_PASSWORD
+module load nodejs
 make dev
 ```
 
-3. Open the app in your browser:
+3. Open the `http://localhost:5173/dashboard/?simdb_dev_token=...` link printed by `make dev`.
 
-```text
-http://localhost:5173/dashboard/
+`make dev` uses Docker if available, otherwise the local Node.js.
+
+## SimDB servers
+
+Defined in [`dashboard/dev-servers.json`](../dashboard/dev-servers.json) (default: `simdb-pp`). Local overrides: `dashboard/dev-servers.local.json`.
+
+Servers behind a firewall with HTTP Basic login (ITER: F5) use `"firewall": {"type": "basic", "userAgent": "..."}`; set `SIMDB_DEV_FIREWALL_PASSWORD` (and `SIMDB_DEV_FIREWALL_USERNAME` if not `$USER`).
+
+```bash
+SIMDB_DEV_SERVER=itpa make dev       # other server (name or URL)
 ```
-
-The `make dev` target runs the Docker `dev` stage and starts Vite with live reload enabled. Source changes under `dashboard/` are mounted into the container and reflected immediately.
 
 ## Other useful commands
 

@@ -127,7 +127,7 @@ function getAlias(uuid: string) {
 
 function getValue(name: string) {
   if (name === 'server') {
-    return server.value
+    return config.serverLabel(server.value)
   } else {
     let found: any = items.value
       ? items.value.find((el: any) => el.element === name)
@@ -186,7 +186,7 @@ function setItems(username: string, password: string) {
   <v-container fluid>
     <v-row dense style="min-height: 1em">
       <v-col cols="2" class="text-h7">Server</v-col>
-      <v-col cols="10" class="text-h7">{{ server }}</v-col>
+      <v-col cols="10" class="text-h7">{{ config.serverLabel(server) }}</v-col>
     </v-row>
     <v-row>
       <v-divider></v-divider>
@@ -198,7 +198,7 @@ function setItems(username: string, password: string) {
             <tr>
               <th class="pl-1">UUID</th>
               <th class="pl-2" v-for="id in uuids" v-bind:key="id">
-                <a :href="'../uuid/' + id" > {{ id }} </a>
+                <a :href="'../uuid/' + id + '?server=' + encodeURIComponent(server)" > {{ id }} </a>
               </th>
             </tr>
             <tr>
@@ -213,6 +213,7 @@ function setItems(username: string, password: string) {
               :name="name"
               :value="getValue(name)"
               :simulations="simulations"
+              :server="server"
               :uuids="uuids"
               :index="index"
               :name_label="name === 'code.name' ? 'Code Name': name === 'description' ? 'Description' : name === 'ids' ? 'IDSs' : name === 'ids_properties.creation_date' ? 'Creation Date' :name"

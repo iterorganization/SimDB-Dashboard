@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { config } from '../config'
-import { truncateSummary } from '../utils/utils'
+import { fetchJson, truncateSummary } from '../utils/utils'
 
 type SearchEntry = {
   name: string
@@ -13,6 +13,7 @@ type SearchEntry = {
 }
 
 const servers = config.servers
+const serverItems = servers.map((s: string) => ({ title: config.serverLabel(s), value: s }))
 
 const searchFields = ref<SearchEntry[]>(
   config.searchFields.map((el: any) => {
@@ -180,21 +181,19 @@ function setItems() {
         itemsFor.value[name] = []
       }
       else{
-        fetch(url + '/metadata/' + name)
-        .then((response) => response.json())
+        fetchJson(url + '/metadata/' + name)
         .then((data) => {
           itemsFor.value[name] = data
         })
         .catch(function (error) {
           status.value.show = true
-          status.value.text = error
+          status.value.text = error.message
           status.value.type = 'error'
         })
     }
   }
   }
-  fetch(url + '/metadata')
-    .then((response) => response.json())
+  fetchJson(url + '/metadata')
     .then((data) => {
       items.value = data.map((el: any) => {
         return { value: el.name, text: el.name }
@@ -203,7 +202,7 @@ function setItems() {
     })
     .catch(function (error) {
       status.value.show = true
-      status.value.text = error
+      status.value.text = error.message
       status.value.type = 'error'
     })
 }
@@ -316,7 +315,7 @@ function displayError(message: string) {
       <v-col cols="12" v-if="shouldShow">
         <v-select
           filled
-          :items="servers"
+          :items="serverItems"
           v-model="selectedServer"
           label="SimDB Server"
           hide-details

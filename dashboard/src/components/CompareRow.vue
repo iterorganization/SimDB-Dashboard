@@ -22,6 +22,7 @@ const props = defineProps<{
   uuids: string[]
   index: number
   name_label: string
+  server?: string
 }>()
 
 const emit = defineEmits(['remove'])
@@ -100,7 +101,7 @@ function handleRemove() {
         </template>
         <template v-else-if="isUUID(uuid, name)">
           <a
-            :href="'../uuid/' + getValueForUUID(uuid, name).hex"
+            :href="'../uuid/' + getValueForUUID(uuid, name).hex + '?server=' + encodeURIComponent(server ?? '')"
             :title="getValueForUUID(uuid, name).hex"
           >
             {{ getValueForUUID(uuid, name).hex }}

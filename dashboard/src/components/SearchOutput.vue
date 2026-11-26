@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { config } from '../config'
+import { fetchJson } from '../utils/utils'
 import type { VDataTable } from 'vuetify/components'
 
 import AuthDialog from './AuthDialog.vue'
@@ -122,7 +123,11 @@ function doQuery() {
   }
 
 function doCompare() {
-  window.location.href = 'compare/?uuid=' + selectedSimulations.value.join('&uuid=')
+  window.location.href =
+    'compare/?uuid=' +
+    selectedSimulations.value.join('&uuid=') +
+    '&server=' +
+    encodeURIComponent(selectedServer.value ?? '')
 }
 
 function getLabel(item: any) {
@@ -293,10 +298,7 @@ function fetchData(username: string, password: string) {
   }
   const url = config.rootAPI(decodeURIComponent(selectedServer.value))
   status.value.show = false
-  fetch(url + '/simulations?' + query, args)
-    .then((response) => {
-      return response.json()
-    })
+  fetchJson(url + '/simulations?' + query, args)
     .then((data: any) => {
       items.value = data.results.map((el: any) => {
         // Adding a version of the metadata so that the table can dynamically read
@@ -393,7 +395,7 @@ function getMetadata(item: any) : any[] {
         </v-card>
       </template>
       <template #[`item.alias`]="{ item }">
-        <a :href="'uuid/' + getHex(item)" @click.stop="">{{
+        <a :href="'uuid/' + getHex(item) + '?server=' + encodeURIComponent(selectedServer ?? '')" @click.stop="">{{
           getAlias(item)
         }}</a>
       </template>

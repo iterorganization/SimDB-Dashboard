@@ -7,6 +7,7 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import viteCompression from 'vite-plugin-compression'
+import { simdbDevServers } from './dev/simdbDevServers'
 
 // Get version from git
 function getVersionFromGit() {
@@ -56,6 +57,8 @@ export default defineConfig({
       include: ['buffer', 'stream']
     }),
     viteCompression(),
+    // Dev server only (apply: 'serve'): SimDB server list + proxy, see dev-servers.json.
+    simdbDevServers(fileURLToPath(new URL('.', import.meta.url))),
   ],
   define: {
     __APP_VERSION__: JSON.stringify(version),

@@ -57,7 +57,7 @@ function storeToken(_evt: any) {
     <v-card>
       <v-card-title class="text-h5"> Authentication Credentials </v-card-title>
       <v-card-text>
-        Please enter your credentials for server {{ server }}.
+        Please enter your credentials for server {{ server ? config.serverLabel(decodeURIComponent(server)) : '' }}.
         <v-container>
           <v-row>
             <v-col cols="12" sm="6" md="6">

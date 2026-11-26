@@ -268,7 +268,7 @@ watch(
           <span v-if="isRangeValue()" style="white-space: pre-wrap">{{ processValue(value) }}</span>
         </template>
         <template v-else-if="isUUID()">
-          <a :href="'/' + config.prefix + '/uuid/' + getHex(value)" :title="getHex(value)">{{ getHex(value) }}</a>
+          <a :href="'/' + config.prefix + '/uuid/' + getHex(value) + '?server=' + encodeURIComponent(server ?? '')" :title="getHex(value)">{{ getHex(value) }}</a>
         </template>
         <template v-else-if="isShortString()">
           <a :href="'/' + config.prefix + '/?__server=' + server + '&' + meta_name + '=eq:' + value">{{
