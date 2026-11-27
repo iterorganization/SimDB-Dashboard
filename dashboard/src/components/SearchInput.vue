@@ -40,6 +40,7 @@ const comparators = [
   {value:'alt',title:"Any less than"},
   {value:'agt',title:"Any greater than"},
   {value:'age',title:"Any greater than or equal to"},
+  {value:'exist',title:"Exists (any value)"},
 ]
 
 const string_comparators = [
@@ -47,6 +48,7 @@ const string_comparators = [
   {value:'ne',title:"Not equal to"},
   {value:'in',title:"Contains"},
   {value:'ni',title:"Does not contain"},
+  {value:'exist',title:"Exists (any value)"},
 ]
 
 const isLoading = ref<boolean>(true)
@@ -78,6 +80,7 @@ const helpText = function (item: string) {
     alt:'Any less than',
     agt:'Any greater than',
     age:'Any greater than or equal to',
+    exist:'Has this metadata key, whatever its value',
   }
   return help[item]
 }
@@ -122,7 +125,7 @@ onMounted(() => {
 })
 
 function setField(name: string, comp: string, value: string) {
-  if (!value) {
+  if (!value && comp !== 'exist') {
     return;
   }
   let found = false;
@@ -234,6 +237,10 @@ function getQuery() {
     const name = searchFields.value[i].name
     const comp = searchFields.value[i].comparator + ':'
     const value = searchFields.value[i].value
+    if (comp === 'exist:') {
+      args.push(name + '=exist:')
+      continue
+    }
     if (value !== null) {
       if (value.toString().indexOf(':') >= 0){
         displayError('Invalid search character ":" in ' + value)
@@ -260,6 +267,10 @@ function getQuery() {
     const name = wildSearch.value[i].name
     const comp = wildSearch.value[i].comparator + ':'
     const value = wildSearch.value[i].value
+    if (name && comp === 'exist:') {
+      args.push(name + '=exist:')
+      continue
+    }
     if (name && value) {
       if (value.toString().indexOf(':') >= 0){
         displayError('Invalid search character ":" in ' + value)
@@ -298,6 +309,11 @@ function changed() {
         status.value.type = 'error'
       })
   }
+}
+
+// "exist" takes no value: clear the value box
+function onComparator(item: SearchEntry) {
+  if (item.comparator === 'exist') item.value = null
 }
 
 function displayError(message: string) {
@@ -348,6 +364,7 @@ function displayError(message: string) {
           hide-details
           :items="item.display === 'alias/uuid' || item.display === 'code name' ? string_comparators : comparators"
           v-model="item.comparator"
+          @update:model-value="onComparator(item)"
           @mouseover="item.hover = true"
           @mouseleave="item.hover = false"
           item-title="title"
@@ -374,7 +391,8 @@ function displayError(message: string) {
           dense
           filled
           hide-details
-          :loading="!itemsFor[item.name]"
+          :disabled="item.comparator === 'exist'"
+          :loading="!itemsFor[item.name] && item.comparator !== 'exist'"
         ></v-combobox>
       </v-col>
     </v-row>
@@ -408,6 +426,7 @@ function displayError(message: string) {
           item-value="value"
           :items="comparators"
           v-model="item.comparator"
+          @update:model-value="onComparator(item)"
           style="font-size: 0.7em"
         >
         <template v-slot:selection="{ item }">
@@ -430,6 +449,7 @@ function displayError(message: string) {
           dense
           filled
           hide-details
+          :disabled="item.comparator === 'exist'"
         ></v-combobox>
       </v-col>
       <v-col cols="1">
