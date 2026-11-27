@@ -27,6 +27,10 @@ const uploadDate = ref('')
 const uploadInfo = ref('')
 const token = ref('')
 const authentication = ref('')
+const deprecated = ref(false)
+const replacedBy = ref<string | null>(null)
+const replacementAlias = ref<string | null>(null)
+let fetchArgs: { headers: { [key: string]: any } } = { headers: {} }
 
 onMounted(() => {
   const tokens = window.location.pathname.split('/')
@@ -158,6 +162,7 @@ function setItems(username: string, password: string) {
       }
     }
   }
+  fetchArgs = args
   const url = config.rootAPI(decodeURIComponent(selectedServer.value))
   let sim_id = uuid.value ? uuid.value.hex : alias.value
   fetch(url + '/simulation/' + sim_id, args)
@@ -174,6 +179,7 @@ function setItems(username: string, password: string) {
       if (showAllFields.value) {
         displayItems.value = data.metadata.map((el: any) => el.element)
       }
+      loadReplacement(data.metadata ?? [])
     })
     .catch(function (error) {
       status.value.show = true
@@ -181,6 +187,32 @@ function setItems(username: string, password: string) {
       status.value.type = 'error'
     })
 }
+
+// A deprecated simulation links to its replacement. On upload with
+// "replaces: <id>", the SimDB server marks the old simulation "deprecated"
+// and sets "replaced_by: <new uuid>" on it.
+async function loadReplacement(metadata: Data[]) {
+  const meta = (key: string) => metadata.find((m) => m.element === key)?.value ?? null
+  const status = meta('status')
+  deprecated.value = String(status?.value ?? status ?? '').toLowerCase() === 'deprecated'
+  replacedBy.value = null
+  replacementAlias.value = null
+  const value = meta('replaced_by')
+  if (!deprecated.value || !value) return
+  // "0ffb586e-de92-…", "0ffb586ede92…" or {hex: "…"}
+  replacedBy.value = String(value?.hex ?? value).replace(/-/g, '')
+  try {
+    const url = config.rootAPI(decodeURIComponent(selectedServer.value))
+    const resp = await fetch(url + '/simulation/' + encodeURIComponent(replacedBy.value), fetchArgs)
+    if (resp.ok) replacementAlias.value = (await resp.json())?.alias ?? null
+  } catch {
+    // keep the uuid as label
+  }
+}
+
+const replacementHref = computed(
+  () => '/' + config.prefix + '/uuid/' + replacedBy.value + '?server=' + encodeURIComponent(selectedServer.value)
+)
 
 function updateAuth() {
   status.value.show = false
@@ -293,6 +325,12 @@ function sortOutputs(key: string) {
   ></AuthDialog>
 
   <v-container fluid class="pa-5">
+    <v-alert v-if="deprecated" type="warning" variant="tonal" density="compact" class="mb-3">
+      This simulation is deprecated.
+      <template v-if="replacedBy">
+        Replaced by <a :href="replacementHref">{{ replacementAlias || replacedBy }}</a>.
+      </template>
+    </v-alert>
     <v-row v-for="item in displayHeaders" :key="item.label" dense>
       <v-col cols="2" class="text-h7">{{ item.label }}</v-col>
       <v-col cols="10" class="text-h7">{{ getValue(item.value) }}</v-col>
