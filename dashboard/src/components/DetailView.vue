@@ -4,12 +4,6 @@ import { config } from '../config'
 import DataRow from './DataRow.vue'
 import AuthDialog from './AuthDialog.vue'
 import RowAdder from './RowAdder.vue'
-import {
-  findNewerVersions,
-  isDeprecated,
-  type SimulationData,
-  type Version
-} from '../utils/versions'
 
 const _showAllFields =
   typeof config.displayFields === 'string' && new String(config.displayFields).toLowerCase() === 'all'
@@ -34,8 +28,8 @@ const uploadInfo = ref('')
 const token = ref('')
 const authentication = ref('')
 const deprecated = ref(false)
-const newerVersions = ref<Version[]>([])
-const versionsLoading = ref(false)
+const replacedBy = ref<string | null>(null)
+const replacementAlias = ref<string | null>(null)
 let fetchArgs: { headers: { [key: string]: any } } = { headers: {} }
 
 onMounted(() => {
@@ -185,7 +179,7 @@ function setItems(username: string, password: string) {
       if (showAllFields.value) {
         displayItems.value = data.metadata.map((el: any) => el.element)
       }
-      loadVersions(data)
+      loadReplacement(data.metadata ?? [])
     })
     .catch(function (error) {
       status.value.show = true
@@ -194,59 +188,31 @@ function setItems(username: string, password: string) {
     })
 }
 
-/** Simulation from the selected server, or null if not found */
-async function fetchSimulation(id: string): Promise<SimulationData | null> {
-  const url = config.rootAPI(decodeURIComponent(selectedServer.value))
+// A deprecated simulation links to its replacement. On upload with
+// "replaces: <id>", the SimDB server marks the old simulation "deprecated"
+// and sets "replaced_by: <new uuid>" on it.
+async function loadReplacement(metadata: Data[]) {
+  const meta = (key: string) => metadata.find((m) => m.element === key)?.value ?? null
+  const status = meta('status')
+  deprecated.value = String(status?.value ?? status ?? '').toLowerCase() === 'deprecated'
+  replacedBy.value = null
+  replacementAlias.value = null
+  const value = meta('replaced_by')
+  if (!deprecated.value || !value) return
+  // "0ffb586e-de92-…", "0ffb586ede92…" or {hex: "…"}
+  replacedBy.value = String(value?.hex ?? value).replace(/-/g, '')
   try {
-    const resp = await fetch(url + '/simulation/' + encodeURIComponent(id), fetchArgs)
-    if (!resp.ok) return null
-    const data = await resp.json()
-    return data && !data.error ? data : null
+    const url = config.rootAPI(decodeURIComponent(selectedServer.value))
+    const resp = await fetch(url + '/simulation/' + encodeURIComponent(replacedBy.value), fetchArgs)
+    if (resp.ok) replacementAlias.value = (await resp.json())?.alias ?? null
   } catch {
-    return null
+    // keep the uuid as label
   }
 }
 
-/** Simulations whose "replaces" metadata is ref */
-async function findReplacing(ref: string): Promise<SimulationData[]> {
-  const url = config.rootAPI(decodeURIComponent(selectedServer.value))
-  try {
-    const resp = await fetch(url + '/simulations?replaces=eq:' + encodeURIComponent(ref), fetchArgs)
-    if (!resp.ok) return []
-    const data = await resp.json()
-    return Array.isArray(data?.results) ? data.results : []
-  } catch {
-    return []
-  }
-}
-
-async function loadVersions(sim: SimulationData) {
-  deprecated.value = isDeprecated(sim.metadata)
-  newerVersions.value = []
-  // Only a deprecated simulation shows its replacement
-  if (!deprecated.value) return
-  versionsLoading.value = true
-  try {
-    newerVersions.value = await findNewerVersions(sim, fetchSimulation, findReplacing)
-  } finally {
-    versionsLoading.value = false
-  }
-}
-
-// Replacement of a deprecated simulation, and the newest version found
-const replacement = computed(() => newerVersions.value[0])
-const latestVersion = computed(() => {
-  const found = newerVersions.value.filter((v) => v.found)
-  return found.length > 0 ? found[found.length - 1] : undefined
-})
-
-function versionHref(version: Version) {
-  return '/' + config.prefix + '/uuid/' + (version.uuid ?? version.id) + '?server=' + encodeURIComponent(selectedServer.value)
-}
-
-function versionLabel(version: Version) {
-  return version.alias || version.uuid || version.id
-}
+const replacementHref = computed(
+  () => '/' + config.prefix + '/uuid/' + replacedBy.value + '?server=' + encodeURIComponent(selectedServer.value)
+)
 
 function updateAuth() {
   status.value.show = false
@@ -359,27 +325,11 @@ function sortOutputs(key: string) {
   ></AuthDialog>
 
   <v-container fluid class="pa-5">
-    <v-alert
-      v-if="deprecated"
-      type="warning"
-      variant="tonal"
-      density="compact"
-      class="mb-3"
-      data-test="deprecated-banner"
-    >
+    <v-alert v-if="deprecated" type="warning" variant="tonal" density="compact" class="mb-3">
       This simulation is deprecated.
-      <template v-if="replacement">
-        Replaced by
-        <a v-if="replacement.found" :href="versionHref(replacement)">{{ versionLabel(replacement) }}</a>
-        <span v-else>{{ versionLabel(replacement) }} (not found on this server)</span>.
-        <template v-if="latestVersion && latestVersion !== replacement">
-          Latest version:
-          <a :href="versionHref(latestVersion)">{{ versionLabel(latestVersion) }}</a>
-          <span v-if="latestVersion.status"> ({{ latestVersion.status }})</span>.
-        </template>
-        <div v-if="replacement.reason">Reason: {{ replacement.reason }}</div>
+      <template v-if="replacedBy">
+        Replaced by <a :href="replacementHref">{{ replacementAlias || replacedBy }}</a>.
       </template>
-      <template v-else-if="!versionsLoading">No replacement is recorded.</template>
     </v-alert>
     <v-row v-for="item in displayHeaders" :key="item.label" dense>
       <v-col cols="2" class="text-h7">{{ item.label }}</v-col>
